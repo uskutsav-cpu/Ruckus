@@ -8,6 +8,9 @@ export default function AppLayout() {
       <Stack.Screen name="groups" />
       <Stack.Screen name="group/[id]" />
       <Stack.Screen name="group/[id]/chat" />
+      <Stack.Screen name="group/[id]/host-check-in" />
+      <Stack.Screen name="check-in/[groupId]" />
+      <Stack.Screen name="check-in/result" />
       <Stack.Screen
         name="activity/[id]"
         options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
