@@ -139,7 +139,11 @@ export default function GroupChatScreen() {
                   : () =>
                       router.push({
                         pathname: '/report',
-                        params: { messageId: item.id, groupId }
+                        params: {
+                          messageId: item.id,
+                          groupId,
+                          ...(item.senderId ? { userId: item.senderId } : {})
+                        }
                       })
               }
               style={[styles.messageRow, mine ? styles.mineRow : styles.theirRow]}

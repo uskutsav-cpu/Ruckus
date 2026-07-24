@@ -18,6 +18,7 @@ function RootNavigator() {
     profile.safety_acknowledged_at &&
     profile.onboarding_completed_at
   );
+  const deletionPending = Boolean(profile?.deletion_requested_at);
 
   return (
     <>
@@ -34,10 +35,16 @@ function RootNavigator() {
         <Stack.Protected guard={!user}>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack.Protected>
-        <Stack.Protected guard={Boolean(user && !onboardingComplete)}>
+        <Stack.Protected guard={Boolean(user && !deletionPending && !onboardingComplete)}>
           <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         </Stack.Protected>
-        <Stack.Protected guard={Boolean(user && onboardingComplete)}>
+        <Stack.Protected guard={Boolean(user && deletionPending)}>
+          <Stack.Screen
+            name="account-pending-deletion"
+            options={{ headerShown: false }}
+          />
+        </Stack.Protected>
+        <Stack.Protected guard={Boolean(user && !deletionPending && onboardingComplete)}>
           <Stack.Screen name="(app)" options={{ headerShown: false }} />
         </Stack.Protected>
       </Stack>

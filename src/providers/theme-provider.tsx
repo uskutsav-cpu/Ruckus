@@ -2,11 +2,16 @@ import {
   createContext,
   type PropsWithChildren,
   useContext,
+  useEffect,
   useMemo,
   useState
 } from 'react';
 import { Appearance, useColorScheme } from 'react-native';
 
+import {
+  readThemePreference,
+  saveThemePreference
+} from '@/features/settings/preferences';
 import { darkTheme, lightTheme, type AppTheme } from '@/theme/tokens';
 
 type ThemePreference = 'system' | 'light' | 'dark';
@@ -23,6 +28,15 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: PropsWithChildren) {
   const systemScheme = useColorScheme();
   const [preference, setPreference] = useState<ThemePreference>('system');
+  useEffect(() => {
+    let active = true;
+    void readThemePreference().then((stored) => {
+      if (active) setPreference(stored);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const isDark =
     preference === 'system' ? systemScheme === 'dark' : preference === 'dark';
 
@@ -32,6 +46,7 @@ export function ThemeProvider({ children }: PropsWithChildren) {
       preference,
       setPreference: (next) => {
         setPreference(next);
+        void saveThemePreference(next);
         if (next !== 'system') Appearance.setColorScheme(next);
       },
       theme: isDark ? darkTheme : lightTheme

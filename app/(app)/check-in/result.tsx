@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/components/ui/app-screen';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { useGroupLobby } from '@/features/groups/use-groups';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -16,6 +17,7 @@ export default function CheckinResultScreen() {
   const already = params.already === 'true';
   const xp = Number(params.xp ?? '0');
   const { theme } = useTheme();
+  const lobby = useGroupLobby(groupId ?? '');
 
   return (
     <AppScreen scroll={false}>
@@ -44,6 +46,19 @@ export default function CheckinResultScreen() {
           }
           style={styles.button}
         />
+        {lobby.data?.activitySessionId ? (
+          <PrimaryButton
+            label="Rate this activity · +10 XP"
+            variant="secondary"
+            onPress={() =>
+              router.push({
+                pathname: '/rate/[sessionId]',
+                params: { sessionId: lobby.data.activitySessionId }
+              })
+            }
+            style={styles.ratingButton}
+          />
+        ) : null}
       </View>
     </AppScreen>
   );
@@ -81,5 +96,6 @@ const styles = StyleSheet.create({
   },
   xp: { fontSize: 36, fontWeight: '900' },
   xpLabel: { marginTop: 3, fontSize: 12, fontWeight: '800' },
-  button: { minWidth: 220, marginTop: tokens.space.xl }
+  button: { minWidth: 220, marginTop: tokens.space.xl },
+  ratingButton: { minWidth: 220, marginTop: tokens.space.sm }
 });

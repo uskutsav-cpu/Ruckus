@@ -132,8 +132,22 @@ export default function GroupLobbyScreen() {
       </Text>
       <View style={styles.memberGrid}>
         {group.members.map((member) => (
-          <View
+          <Pressable
             key={member.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${member.displayName}${member.isHost ? ', host' : ''}`}
+            accessibilityHint={
+              member.id === user?.id ? undefined : 'Long-press to report or block'
+            }
+            onLongPress={
+              member.id === user?.id
+                ? undefined
+                : () =>
+                    router.push({
+                      pathname: '/report',
+                      params: { userId: member.id, groupId: group.id }
+                    })
+            }
             style={[
               styles.member,
               { backgroundColor: theme.surface, borderColor: theme.border }
@@ -163,7 +177,7 @@ export default function GroupLobbyScreen() {
                 {member.confirmation === 'confirmed' ? '✓ Attending' : 'Awaiting reply'}
               </Text>
             </View>
-          </View>
+          </Pressable>
         ))}
       </View>
 
@@ -227,6 +241,13 @@ export default function GroupLobbyScreen() {
           variant="ghost"
           loading={leave.isPending}
           onPress={confirmLeave}
+        />
+        <PrimaryButton
+          label="Report a group safety concern"
+          variant="ghost"
+          onPress={() =>
+            router.push({ pathname: '/report', params: { groupId: group.id } })
+          }
         />
       </View>
     </AppScreen>
