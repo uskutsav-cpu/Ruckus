@@ -153,6 +153,12 @@ export default function SettingsScreen() {
           • Long-press a member or message to report privately.
         </Text>
       </View>
+      <PrimaryButton
+        label="Open safety center"
+        variant="secondary"
+        onPress={() => router.push('/safety')}
+        style={styles.safetyButton}
+      />
 
       <Text style={[styles.sectionTitle, { color: theme.text }]}>Account</Text>
       <PrimaryButton
@@ -264,6 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.md,
     padding: tokens.space.lg
   },
+  safetyButton: { marginTop: tokens.space.sm },
   rule: { fontSize: 13, lineHeight: 19 },
   danger: { marginTop: tokens.space.md },
   deletionNote: { marginTop: tokens.space.sm, fontSize: 11, lineHeight: 16 }

@@ -79,3 +79,6 @@ verify_jwt = false
 
 [functions.purge-deleted-accounts]
 verify_jwt = false
+
+[functions.process-push-receipts]
+verify_jwt = false

@@ -10,6 +10,9 @@ export default function AppLayout() {
       <Stack.Screen name="profile/edit" />
       <Stack.Screen name="leaderboard" />
       <Stack.Screen name="settings" />
+      <Stack.Screen name="safety/index" />
+      <Stack.Screen name="safety/emergency" />
+      <Stack.Screen name="safety/guidelines" />
       <Stack.Screen name="report" />
       <Stack.Screen name="report-result" />
       <Stack.Screen name="rate/[sessionId]" />

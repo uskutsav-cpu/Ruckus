@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npx expo export --platform all --output-dir dist
+
+  database:
+    name: Database policies and concurrency
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+      - run: npm ci
+      - name: Start local Supabase
+        run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor
+      - run: npm run db:reset
+      - run: npm run test:db
+      - name: Verify concurrent matching
+        shell: bash
+        run: |
+          publishable_key="$(npx supabase status -o env | awk -F= '/^(ANON_KEY|PUBLISHABLE_KEY)=/{gsub(/"/,"",$2); print $2; exit}')"
+          SUPABASE_PUBLISHABLE_KEY="$publishable_key" npm run test:matching
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup

@@ -19,3 +19,13 @@ npm run test:db
 
 Keep TypeScript strict, use generated database types, and put all authorization
 assumptions in database policies or trusted server functions rather than UI code.
+
+For release-facing work, also export all platform bundles and run the smoke checklist:
+
+```sh
+npx expo export --platform all --output-dir dist
+```
+
+See `docs/E2E_SMOKE.md`. Never weaken RLS to unblock client code. Add a pgTAP denial
+case for every new exposed table or privileged mutation, keep Edge Functions free of
+PII and token logging, and use a descriptive commit after a green milestone.

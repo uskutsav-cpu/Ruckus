@@ -12,6 +12,7 @@ describe('safeNotificationRoute', () => {
     );
     expect(safeNotificationRoute(`/check-in/${groupId}`)).toBe(`/check-in/${groupId}`);
     expect(safeNotificationRoute('/groups')).toBe('/groups');
+    expect(safeNotificationRoute('/profile')).toBe('/profile');
   });
 
   it('rejects external, malformed, and parameterized destinations', () => {

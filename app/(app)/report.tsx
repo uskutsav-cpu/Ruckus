@@ -45,7 +45,6 @@ export default function ReportScreen() {
     try {
       await submitReport(
         {
-          reporterId: user.id,
           messageId,
           userId,
           groupId: messageId || userId ? undefined : groupId,

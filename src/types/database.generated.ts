@@ -237,6 +237,16 @@ export type NotificationDispatchRow = {
   dispatched_at: string;
 };
 
+export type PushReceiptRow = {
+  id: string;
+  ticket_id: string;
+  push_token_id: string;
+  status: 'pending' | 'delivered' | 'error';
+  error_code: string | null;
+  created_at: string;
+  checked_at: string | null;
+};
+
 export type XpLedgerRow = {
   id: string;
   profile_id: string;
@@ -423,6 +433,10 @@ export type Database = {
         NotificationDispatchRow,
         'id' | 'dispatched_at'
       >;
+      push_receipts: TableDefinition<
+        PushReceiptRow,
+        'id' | 'status' | 'error_code' | 'created_at' | 'checked_at'
+      >;
       xp_ledger: TableDefinition<XpLedgerRow, 'id' | 'note' | 'created_at'>;
       blocks: TableDefinition<BlockRow, 'id' | 'created_at' | 'updated_at'>;
       reports: TableDefinition<
@@ -534,6 +548,22 @@ export type Database = {
       report_message: {
         Args: {
           target_message_id: string;
+          report_reason: string;
+          report_details?: string;
+        };
+        Returns: string;
+      };
+      report_user: {
+        Args: {
+          target_profile_id: string;
+          report_reason: string;
+          report_details?: string;
+        };
+        Returns: string;
+      };
+      report_group: {
+        Args: {
+          target_group_id: string;
           report_reason: string;
           report_details?: string;
         };

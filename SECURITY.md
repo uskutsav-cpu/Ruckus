@@ -25,6 +25,9 @@ This document evolves with the implementation. The baseline rules are:
 | Check-in tokens | None                     | None                   | Host/admin Edge Function |
 | Check-ins       | Own rows                 | None                   | Redemption transaction   |
 | XP ledger       | Own rows                 | None                   | Trusted functions only   |
+| Push prefs      | Own row                  | RPC only               | Notification workers     |
+| Dispatch marks  | None                     | None                   | Cron Edge Function       |
+| Push receipts   | None                     | None                   | Receipt Edge Function    |
 | Blocks          | Own outgoing blocks      | RPC/delete             | Moderation               |
 | Reports         | Admin only               | Insert only            | Admin review             |
 | Admin actions   | Admin only               | None                   | Moderation functions     |
@@ -52,6 +55,15 @@ timestamps.
   and avatar access also filter blocked relationships.
 - **Credential leakage:** only the publishable key is accepted in mobile configuration.
   Secret keys and the check-in pepper are Edge Function secrets.
+- **Notification route injection:** push payload routes are length-limited and matched
+  against known local route patterns; URLs, query strings, and unknown screens fail
+  closed.
+- **Cron invocation:** scheduled functions disable gateway JWT verification only
+  because they require an independent 32+ character secret checked without
+  early-exit string comparison.
+- **Deletion incompleteness:** deletion requests immediately disable social
+  participation and tokens; the scheduled purge removes avatar objects and hard-deletes
+  Auth after seven days so profile-owned rows cascade and retained messages anonymize.
 
 ## Verification
 
@@ -60,6 +72,9 @@ authenticated student, including forged XP, arbitrary check-ins, role escalation
 venue/token reads, nonmember chat, and moderation access.
 
 `supabase/tests/02_matching.test.sql` verifies minimum-size formation, idempotent
-duplicates, block exclusion, and overlap rejection. `npm run test:matching` sends four
-parallel authenticated requests against the local stack and asserts a single group and
-single assignment per user.
+duplicates, block exclusion, and overlap rejection.
+`supabase/tests/03_checkin.test.sql` verifies a valid redemption, duplicate idempotency,
+one XP award, and nonmember rejection. `supabase/tests/04_reports.test.sql` verifies
+member-scoped user, group, and message reports plus arbitrary-target rejection.
+`npm run test:matching` sends four parallel authenticated requests against the local
+stack and asserts a single group and single assignment per user.

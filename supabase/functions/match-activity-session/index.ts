@@ -56,7 +56,7 @@ export default {
       await sendPushToProfiles(context.supabaseAdmin, {
         profileIds: result.memberIds,
         category: 'transactional',
-        title: 'Crew assembled ⚡',
+        title: 'Crew assembled — confirm now ⚡',
         body: 'Your group formed. Confirm now before the countdown ends.',
         url: `/group/${result.groupId}`,
         event: 'group_formed',

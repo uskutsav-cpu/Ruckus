@@ -13,6 +13,7 @@ import {
   fetchGroups,
   fetchMessagePage,
   fetchPendingMatches,
+  finalizeGroup,
   hasNextMessagePage,
   leaveGroup,
   sendMessage
@@ -77,6 +78,24 @@ export function useLeaveGroup(groupId: string) {
         queryClient.invalidateQueries({
           queryKey: ['group-lobby', groupId, isDemo]
         })
+      ]);
+    }
+  });
+}
+
+export function useFinalizeGroup(groupId: string) {
+  const { isDemo, user } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => finalizeGroup(groupId, isDemo),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ['group-lobby', groupId, isDemo]
+        }),
+        queryClient.invalidateQueries({ queryKey: ['groups', user?.id, isDemo] }),
+        queryClient.invalidateQueries({ queryKey: ['profile-dashboard'] }),
+        queryClient.invalidateQueries({ queryKey: ['leaderboard'] })
       ]);
     }
   });

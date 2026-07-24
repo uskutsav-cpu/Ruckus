@@ -1,7 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
 type ReportInput = {
-  reporterId: string;
   messageId?: string;
   userId?: string;
   groupId?: string;
@@ -20,22 +19,22 @@ export async function submitReport(input: ReportInput, isDemo: boolean): Promise
       ...(input.details.trim() ? { report_details: input.details.trim() } : {})
     });
     if (error) throw error;
-  } else {
-    const targetType = input.userId ? 'user' : 'group';
-    const { error } = await supabase.from('reports').insert({
-      reporter_id: input.reporterId,
-      target_type: targetType,
-      target_user_id: input.userId ?? null,
-      target_message_id: null,
-      target_group_id: input.groupId ?? null,
-      reason: input.reason,
-      details: input.details.trim() || null,
-      status: 'submitted',
-      reviewed_by: null,
-      reviewed_at: null,
-      resolution_notes: null
+  } else if (input.userId) {
+    const { error } = await supabase.rpc('report_user', {
+      target_profile_id: input.userId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
     });
     if (error) throw error;
+  } else if (input.groupId) {
+    const { error } = await supabase.rpc('report_group', {
+      target_group_id: input.groupId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
+    });
+    if (error) throw error;
+  } else {
+    throw new Error('A report target is required.');
   }
 
   if (input.blockUser && input.userId) {

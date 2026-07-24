@@ -7,7 +7,8 @@ import { sendPushToProfiles } from '../_shared/push.ts';
 
 type Candidate = {
   groupId: string;
-  eventType: 'confirmation_deadline' | 'checkin_available' | 'event_starting';
+  eventType:
+    'confirmation_deadline' | 'checkin_available' | 'event_starting' | 'venue_revealed';
   title: string;
   body: string;
   url: string;
@@ -38,7 +39,7 @@ export default {
 
     const { data: groups, error: groupError } = await context.supabaseAdmin
       .from('groups')
-      .select('id, status, confirmation_deadline, activity_session_id')
+      .select('id, status, confirmation_deadline, venue_revealed_at, activity_session_id')
       .in('status', ['pending_confirmation', 'confirmed'])
       .limit(500);
     if (groupError) {
@@ -100,6 +101,18 @@ export default {
             url: `/group/${group.id}`
           });
         }
+        const revealedMs = group.venue_revealed_at
+          ? new Date(group.venue_revealed_at).getTime()
+          : 0;
+        if (revealedMs <= now && revealedMs > now - 6 * 60_000) {
+          candidates.push({
+            groupId: group.id,
+            eventType: 'venue_revealed',
+            title: 'Your meeting spot is unlocked',
+            body: 'The crew confirmed. Open the lobby for the approved public venue.',
+            url: `/group/${group.id}`
+          });
+        }
       }
     }
 
@@ -123,6 +136,36 @@ export default {
       dispatched += 1;
     }
 
-    return Response.json({ considered: candidates.length, dispatched });
+    const { data: xpEntries, error: xpError } = await context.supabaseAdmin
+      .from('xp_ledger')
+      .select('id, profile_id, amount, reason')
+      .gte('created_at', new Date(now - 6 * 60_000).toISOString())
+      .limit(500);
+    if (xpError) {
+      return jsonError('XP notification sweep failed.', 500, 'SWEEP_FAILED');
+    }
+    for (const entry of xpEntries ?? []) {
+      const claimed = await context.supabaseAdmin
+        .from('notification_dispatches')
+        .insert({ event_type: 'xp_awarded', source_id: entry.id })
+        .select('id')
+        .maybeSingle();
+      if (claimed.error?.code === '23505' || !claimed.data) continue;
+      if (claimed.error) throw claimed.error;
+      await sendPushToProfiles(context.supabaseAdmin, {
+        profileIds: [entry.profile_id],
+        category: 'transactional',
+        title: entry.amount >= 0 ? `+${entry.amount} XP awarded` : `${entry.amount} XP`,
+        body: `Your participation ledger was updated: ${entry.reason.replaceAll('_', ' ')}.`,
+        url: '/profile',
+        event: 'xp_awarded'
+      });
+      dispatched += 1;
+    }
+
+    return Response.json({
+      considered: candidates.length + (xpEntries?.length ?? 0),
+      dispatched
+    });
   })
 };

@@ -237,7 +237,7 @@ values
     'Catch golden hour on an easy social loop through the riverside trail.',
     'Outdoor',
     90,
-    'seed/sunset-trail.webp',
+    null,
     '#F97316',
     '#7C3AED'
   ),
@@ -248,7 +248,7 @@ values
     'Sample the student district taco spots and crown a campus champion.',
     'Food',
     120,
-    'seed/taco-taste-off.webp',
+    null,
     '#EF4444',
     '#FBBF24'
   ),
@@ -259,7 +259,7 @@ values
     'Neon lanes, team challenges, and absolutely no skill requirement.',
     'Games',
     120,
-    'seed/glow-bowling.webp',
+    null,
     '#0EA5E9',
     '#EC4899'
   ),
@@ -270,7 +270,7 @@ values
     'Make a mini canvas while the crew builds the night’s shared playlist.',
     'Arts',
     90,
-    'seed/paint-playlist.webp',
+    null,
     '#8B5CF6',
     '#22D3EE'
   ),
@@ -281,7 +281,7 @@ values
     'Low-stakes beach volleyball with rotating teams and a sunset final.',
     'Fitness',
     90,
-    'seed/sand-volleyball.webp',
+    null,
     '#14B8A6',
     '#F59E0B'
   ),
@@ -292,7 +292,7 @@ values
     'Cheer on campus performers and complete a playful venue scavenger list.',
     'Music',
     120,
-    'seed/open-mic.webp',
+    null,
     '#DB2777',
     '#4F46E5'
   )

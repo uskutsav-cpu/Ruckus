@@ -7,6 +7,7 @@ type PushTokenRow = {
 
 type ExpoPushTicket = {
   status: 'ok' | 'error';
+  id?: string;
   message?: string;
   details?: { error?: string };
 };
@@ -121,6 +122,25 @@ export async function sendPushToProfiles(
         : undefined
     )
     .filter((id): id is string => Boolean(id));
+  const receipts = (payload.data ?? []).flatMap((ticket, index) => {
+    const pushTokenId = tokens[index]?.id;
+    if (ticket.status !== 'ok' || !ticket.id || !pushTokenId) return [];
+    return [{ ticket_id: ticket.id, push_token_id: pushTokenId }];
+  });
+  if (receipts.length > 0) {
+    const { error: receiptError } = await admin
+      .from('push_receipts')
+      .upsert(receipts, { onConflict: 'ticket_id', ignoreDuplicates: true });
+    if (receiptError) {
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          event: 'push.receipt_queue_failed',
+          count: receipts.length
+        })
+      );
+    }
+  }
 
   if (invalidIds.length > 0) {
     const { error: invalidationError } = await admin

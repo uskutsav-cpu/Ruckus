@@ -55,3 +55,23 @@ one transaction. Duplicate scans return the existing check-in and zero new XP.
 Persisted messages use Postgres Changes with message-table RLS. Broadcast and Presence
 use private `group:<uuid>` channels authorized by policies on `realtime.messages`.
 Only active group members can subscribe or publish.
+
+### Notifications
+
+The client stores only Expo push tokens through `register_push_token`, keyed by a
+random device ID in Secure Store. Notification categories are server-synced. Edge
+Functions resolve eligible recipients, filter preferences, send through Expo, and
+invalidate immediate `DeviceNotRegistered` tickets. Accepted ticket IDs enter a
+service-only receipt queue; a scheduled worker processes delayed receipts and
+invalidates stale devices. A cron-secret-authenticated sweep claims
+unique dispatch markers before deadline, venue, check-in, event-start, and XP pushes.
+Mobile notification routes pass an explicit local-route allowlist before navigation.
+
+### Reporting, blocking, and deletion
+
+Reports are inserted under RLS or the message-report RPC and are readable only by
+admins. `block_user` withdraws waitlists and shared active participation; lobby,
+matching, avatar, and leaderboard reads repeat the block check. Account deletion first
+disables participation and push delivery. A daily internal Edge Function removes
+avatar objects and hard-deletes the Auth user after seven days, letting foreign keys
+delete owned rows and anonymize retained group messages.

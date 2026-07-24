@@ -117,6 +117,30 @@ export async function leaveGroup(groupId: string, isDemo: boolean): Promise<void
   if (error) throw error;
 }
 
+export async function finalizeGroup(
+  groupId: string,
+  isDemo: boolean
+): Promise<{ checkedInCount: number; noShowCount: number }> {
+  if (isDemo) return { checkedInCount: 4, noShowCount: 0 };
+  const { data, error } = await supabase.rpc('finalize_group_attendance', {
+    target_group_id: groupId
+  });
+  if (error) throw error;
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    Array.isArray(data) ||
+    typeof data.checkedInCount !== 'number' ||
+    typeof data.noShowCount !== 'number'
+  ) {
+    throw new Error('The attendance finalization response was invalid.');
+  }
+  return {
+    checkedInCount: data.checkedInCount,
+    noShowCount: data.noShowCount
+  };
+}
+
 function toChatMessage(row: MessageRow): ChatMessage {
   return {
     id: row.id,

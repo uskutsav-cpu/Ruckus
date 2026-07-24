@@ -3,7 +3,13 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(14);
+select plan(20);
+
+insert into public.notification_preferences (profile_id)
+values ('10000000-0000-4000-8000-000000000002');
+
+insert into public.notification_dispatches (event_type, source_id)
+values ('event_starting', '50000000-0000-4000-8000-000000000001');
 
 insert into public.groups (
   id,
@@ -37,6 +43,19 @@ values (
   '50000000-0000-4000-8000-000000000001',
   '10000000-0000-4000-8000-000000000002',
   'Only group members should see this.'
+);
+
+insert into public.reports (
+  reporter_id,
+  target_type,
+  target_user_id,
+  reason
+)
+values (
+  '10000000-0000-4000-8000-000000000002',
+  'user',
+  '10000000-0000-4000-8000-000000000001',
+  'Safety concern'
 );
 
 insert into public.swipes (profile_id, activity_session_id, decision)
@@ -161,6 +180,17 @@ select ok(
 select ok(
   pg_temp.operation_fails(
     $sql$
+      update public.profiles
+      set onboarding_completed_at = now()
+      where id = '10000000-0000-4000-8000-000000000001'
+    $sql$
+  ),
+  'a student cannot bypass the trusted onboarding transition'
+);
+
+select ok(
+  pg_temp.operation_fails(
+    $sql$
       select public_venue_name from public.activity_sessions limit 1
     $sql$
   ),
@@ -189,17 +219,24 @@ select ok(
   'blocks must use the trusted RPC so matching and groups are updated'
 );
 
-insert into public.reports (
-  reporter_id,
-  target_type,
-  target_user_id,
-  reason
-)
-values (
-  '10000000-0000-4000-8000-000000000001',
-  'user',
-  '10000000-0000-4000-8000-000000000002',
-  'Safety concern'
+select ok(
+  pg_temp.operation_fails(
+    $sql$
+      insert into public.reports (
+        reporter_id,
+        target_type,
+        target_user_id,
+        reason
+      )
+      values (
+        '10000000-0000-4000-8000-000000000001',
+        'user',
+        '10000000-0000-4000-8000-000000000002',
+        'Bypass trusted report validation'
+      )
+    $sql$
+  ),
+  'reports must use a target-validating trusted RPC'
 );
 
 select is(
@@ -224,6 +261,40 @@ select ok(
     $sql$
   ),
   'students cannot delete check-in records'
+);
+
+select is(
+  (select count(*) from public.notification_preferences),
+  0::bigint,
+  'a student cannot read another user notification preferences'
+);
+
+select ok(
+  pg_temp.operation_fails(
+    $sql$
+      insert into public.notification_preferences (profile_id)
+      values ('10000000-0000-4000-8000-000000000001')
+    $sql$
+  ),
+  'notification preferences must use the trusted RPC'
+);
+
+select ok(
+  pg_temp.operation_fails(
+    $sql$
+      select * from public.notification_dispatches
+    $sql$
+  ),
+  'scheduled notification dispatch markers are service-role-only'
+);
+
+select ok(
+  pg_temp.operation_fails(
+    $sql$
+      select * from public.push_receipts
+    $sql$
+  ),
+  'Expo push receipts are service-role-only'
 );
 
 select * from finish();

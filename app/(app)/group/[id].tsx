@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatePanel } from '@/components/ui/state-panel';
 import {
   useConfirmAttendance,
+  useFinalizeGroup,
   useGroupLobby,
   useLeaveGroup
 } from '@/features/groups/use-groups';
@@ -38,7 +39,13 @@ export default function GroupLobbyScreen() {
   const lobby = useGroupLobby(groupId ?? '');
   const confirm = useConfirmAttendance(groupId ?? '');
   const leave = useLeaveGroup(groupId ?? '');
+  const finalize = useFinalizeGroup(groupId ?? '');
   const countdown = useCountdown(lobby.data?.confirmationDeadline);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
   const currentMember = useMemo(
     () => lobby.data?.members.find((member) => member.id === user?.id),
     [lobby.data?.members, user?.id]
@@ -62,6 +69,10 @@ export default function GroupLobbyScreen() {
   const group = lobby.data;
   const isPending = group.status === 'pending_confirmation';
   const canConfirm = isPending && currentMember?.confirmation !== 'confirmed';
+  const canFinalize =
+    group.status === 'confirmed' &&
+    currentMember?.isHost === true &&
+    new Date(group.endsAt).getTime() < currentTime;
 
   const confirmLeave = () => {
     Alert.alert(
@@ -233,6 +244,22 @@ export default function GroupLobbyScreen() {
                     pathname: '/check-in/[groupId]',
                     params: { groupId: group.id }
                   })
+            }
+          />
+        ) : null}
+        {canFinalize ? (
+          <PrimaryButton
+            label="Finalize attendance"
+            variant="secondary"
+            loading={finalize.isPending}
+            onPress={() =>
+              finalize.mutate(undefined, {
+                onSuccess: (result) =>
+                  Alert.alert(
+                    'Attendance finalized',
+                    `${result.checkedInCount} verified check-ins · ${result.noShowCount} no-show ledger entries. Host completion XP is awarded once when the minimum attended.`
+                  )
+              })
             }
           />
         ) : null}
