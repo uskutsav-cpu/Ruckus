@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -19,13 +20,11 @@ export function LoadingSkeleton({ style }: LoadingSkeletonProps) {
   const reduceMotion = useReducedMotion();
   const opacity = useSharedValue(reduceMotion ? 0.68 : 0.45);
 
-  if (!reduceMotion) {
-    opacity.value = withRepeat(
-      withTiming(0.88, { duration: tokens.motion.slow * 2 }),
-      -1,
-      true
-    );
-  }
+  useEffect(() => {
+    opacity.value = reduceMotion
+      ? 0.68
+      : withRepeat(withTiming(0.88, { duration: tokens.motion.slow * 2 }), -1, true);
+  }, [opacity, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 

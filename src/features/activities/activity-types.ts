@@ -15,6 +15,8 @@ export type Activity = {
   gradientEnd: string;
   imagePath: string | null;
   imageSource: ImageSource | number;
+  campusArea?: string;
+  interestedCount?: number;
 };
 
 export type SwipeDirection = 'left' | 'right';

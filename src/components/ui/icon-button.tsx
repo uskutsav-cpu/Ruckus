@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, Text, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  type StyleProp,
+  type ViewStyle
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 import { useTheme } from '@/providers/theme-provider';
@@ -9,7 +15,7 @@ type IconButtonProps = {
   accessibilityLabel: string;
   onPress: () => void;
   tone?: 'default' | 'light' | 'dark';
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function IconButton({

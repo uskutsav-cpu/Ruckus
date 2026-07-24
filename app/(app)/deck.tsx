@@ -1,97 +1,122 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
 import { AppScreen } from '@/components/ui/app-screen';
-import { LoadingScreen } from '@/components/ui/loading-screen';
-import { StatePanel } from '@/components/ui/state-panel';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { IconButton } from '@/components/ui/icon-button';
+import { InlineNotice } from '@/components/ui/inline-notice';
+import { ActivityCardSkeleton } from '@/components/ui/loading-skeleton';
+import { PrimaryButton } from '@/components/ui/primary-button';
+import { ScreenHeader } from '@/components/ui/screen-header';
+import { SecondaryButton } from '@/components/ui/secondary-button';
 import { ActivityCard } from '@/features/activities/activity-card';
+import type { SwipeDirection } from '@/features/activities/activity-types';
 import { MatchCelebration } from '@/features/activities/match-celebration';
 import { SwipeCard } from '@/features/activities/swipe-card';
-import type { SwipeDirection } from '@/features/activities/activity-types';
 import { useActivities, useSwipeActivity } from '@/features/activities/use-activities';
-import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
+type Celebration = {
+  activityTitle: string;
+  memberCount: number | undefined;
+  confirmationDeadline: string | undefined;
+};
+
 export default function DeckScreen() {
-  const { theme } = useTheme();
+  const { height } = useWindowDimensions();
   const network = useNetInfo();
   const activities = useActivities();
   const swipe = useSwipeActivity();
-  const [celebrating, setCelebrating] = useState(false);
+  const [celebration, setCelebration] = useState<Celebration | null>(null);
   const cards = activities.data ?? [];
   const current = cards[0];
+  const compact = height < tokens.layout.compactPhoneHeight;
+  const deckMinHeight = height < 620 ? 250 : compact ? 350 : 430;
 
   const handleSwipe = async (direction: SwipeDirection) => {
     if (!current || swipe.isPending) return;
+    const swipedActivity = current;
+
     await Haptics.notificationAsync(
       direction === 'right'
         ? Haptics.NotificationFeedbackType.Success
         : Haptics.NotificationFeedbackType.Warning
     );
     swipe.mutate(
-      { activity: current, direction },
+      { activity: swipedActivity, direction },
       {
         onSuccess: (result) => {
           if (result.state === 'matched') {
             void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setCelebrating(true);
+            setCelebration({
+              activityTitle: swipedActivity.title,
+              memberCount: result.memberCount,
+              confirmationDeadline: result.confirmationDeadline
+            });
           }
         }
       }
     );
   };
 
-  if (activities.isLoading) return <LoadingScreen label="Dealing today’s activities…" />;
-
   return (
-    <AppScreen scroll={false}>
-      <View style={styles.header}>
-        <View>
-          <Text style={[styles.logo, { color: theme.text }]}>Campus Clash</Text>
-          <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-            Swipe on plans you’d actually attend
-          </Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open profile"
-          onPress={() => router.push('/profile')}
-          style={[styles.avatar, { backgroundColor: theme.surfaceMuted }]}
-        >
-          <Text style={styles.avatarText}>⚡</Text>
-        </Pressable>
-      </View>
+    <AppScreen scroll={false} contentStyle={styles.screen}>
+      <ScreenHeader
+        compact={compact}
+        eyebrow="Tonight on campus"
+        title="Pick your next move."
+        subtitle={
+          activities.isLoading
+            ? 'Finding fresh plans…'
+            : `${cards.length} ${cards.length === 1 ? 'activity' : 'activities'} waiting`
+        }
+        action={
+          <IconButton
+            icon="⚡"
+            accessibilityLabel="Open profile"
+            onPress={() => router.push('/profile')}
+          />
+        }
+      />
 
       {network.isConnected === false ? (
-        <View style={styles.offline} accessibilityRole="alert">
-          <Text style={styles.offlineText}>
-            Offline · your choice will send when you reconnect
-          </Text>
-        </View>
+        <InlineNotice
+          tone="offline"
+          icon="↯"
+          message="Offline — your choice will send when you reconnect."
+        />
       ) : null}
 
-      {activities.isError ? (
-        <StatePanel
-          icon="📡"
-          title="The deck didn’t load"
-          message="Check your connection. Your previous swipes are still safe."
+      {activities.isLoading ? (
+        <ActivityCardSkeleton />
+      ) : activities.isError ? (
+        <ErrorState
+          icon="↻"
+          title="The deck took a timeout"
+          message="Check your connection. Your previous choices are still safe."
           actionLabel="Try again"
           onAction={() => void activities.refetch()}
         />
       ) : cards.length === 0 ? (
-        <StatePanel
-          icon="🛹"
+        <EmptyState
+          icon="✓"
           title="You cleared the deck"
-          message="Fresh activities drop regularly. Check pending matches while the next round gets ready."
-          actionLabel="View pending matches"
+          message="Fresh activities drop regularly. Check your pending picks while the next round gets ready."
+          actionLabel="View pending picks"
           onAction={() => router.push('/pending')}
         />
       ) : (
         <>
-          <View style={styles.deck}>
+          <View
+            style={[
+              styles.deck,
+              { minHeight: deckMinHeight, marginBottom: compact ? 10 : 16 }
+            ]}
+          >
             {cards
               .slice(1, 3)
               .reverse()
@@ -108,7 +133,7 @@ export default function DeckScreen() {
                           { translateY: depth * 9 },
                           { scale: 1 - depth * 0.025 }
                         ],
-                        opacity: 1 - depth * 0.12
+                        opacity: 1 - depth * 0.14
                       }
                     ]}
                   >
@@ -116,70 +141,59 @@ export default function DeckScreen() {
                   </View>
                 );
               })}
-            {current ? (
-              <SwipeCard
-                key={current.id}
-                activity={current}
-                disabled={swipe.isPending}
-                onDetails={() =>
-                  router.push({ pathname: '/activity/[id]', params: { id: current.id } })
-                }
-                onSwipe={(direction) => void handleSwipe(direction)}
-              />
-            ) : null}
+            <SwipeCard
+              key={current!.id}
+              activity={current!}
+              disabled={swipe.isPending}
+              onDetails={() =>
+                router.push({
+                  pathname: '/activity/[id]',
+                  params: { id: current!.id }
+                })
+              }
+              onSwipe={(direction) => void handleSwipe(direction)}
+            />
           </View>
 
           <View style={styles.actions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Pass on ${current?.title ?? 'activity'}`}
+            <SecondaryButton
+              label="Pass"
+              leadingIcon="×"
+              accessibilityLabel={`Pass on ${current!.title}`}
               disabled={swipe.isPending}
+              haptic={false}
               onPress={() => void handleSwipe('left')}
-              style={({ pressed }) => [
-                styles.actionButton,
-                {
-                  backgroundColor: theme.surface,
-                  borderColor: tokens.color.coral,
-                  opacity: pressed || swipe.isPending ? 0.55 : 1
-                }
-              ]}
-            >
-              <Text style={styles.passIcon}>✕</Text>
-              <Text style={[styles.actionLabel, { color: theme.text }]}>Pass</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Join waitlist for ${current?.title ?? 'activity'}`}
-              disabled={swipe.isPending}
+              style={styles.passButton}
+            />
+            <PrimaryButton
+              label="I’m in"
+              leadingIcon="↗"
+              accessibilityLabel={`Join waitlist for ${current!.title}`}
+              loading={swipe.isPending}
+              haptic={false}
               onPress={() => void handleSwipe('right')}
-              style={({ pressed }) => [
-                styles.actionButton,
-                styles.interestedButton,
-                {
-                  backgroundColor: theme.primary,
-                  borderColor: theme.primary,
-                  opacity: pressed || swipe.isPending ? 0.65 : 1
-                }
-              ]}
-            >
-              <Text style={styles.interestedIcon}>⚡</Text>
-              <Text style={[styles.actionLabel, { color: '#FFFFFF' }]}>I’m in</Text>
-            </Pressable>
+              style={styles.joinButton}
+            />
           </View>
           {swipe.isError ? (
-            <Text
-              accessibilityRole="alert"
-              style={[styles.error, { color: theme.danger }]}
-            >
-              Couldn’t save that swipe. The card is back—please try again.
-            </Text>
+            <View style={styles.error}>
+              <InlineNotice
+                tone="error"
+                icon="!"
+                message="That choice didn’t save. The card is back — try again."
+              />
+            </View>
           ) : null}
         </>
       )}
+
       <MatchCelebration
-        visible={celebrating}
+        visible={celebration !== null}
+        activityTitle={celebration?.activityTitle}
+        memberCount={celebration?.memberCount}
+        confirmationDeadline={celebration?.confirmationDeadline}
         onClose={() => {
-          setCelebrating(false);
+          setCelebration(null);
           router.push('/groups');
         }}
       />
@@ -188,56 +202,11 @@ export default function DeckScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: tokens.space.md
-  },
-  logo: { fontSize: 25, fontWeight: '900', letterSpacing: -0.7 },
-  subtitle: { marginTop: 2, fontSize: 12, fontWeight: '700' },
-  avatar: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 16
-  },
-  avatarText: { fontSize: 23 },
-  offline: {
-    borderRadius: tokens.radius.sm,
-    backgroundColor: '#78350F',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: tokens.space.sm
-  },
-  offlineText: { color: '#FEF3C7', fontSize: 12, fontWeight: '800' },
-  deck: { flex: 1, minHeight: 440, marginBottom: tokens.space.md },
+  screen: { paddingBottom: tokens.space.md },
+  deck: { flex: 1 },
   nextCard: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
-  actions: {
-    minHeight: 66,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: tokens.space.md
-  },
-  actionButton: {
-    minWidth: 124,
-    minHeight: 58,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderRadius: tokens.radius.pill,
-    paddingHorizontal: tokens.space.lg
-  },
-  interestedButton: { minWidth: 150 },
-  passIcon: {
-    marginRight: 8,
-    color: tokens.color.coral,
-    fontSize: 23,
-    fontWeight: '900'
-  },
-  interestedIcon: { marginRight: 8, fontSize: 21 },
-  actionLabel: { fontSize: 16, fontWeight: '900' },
-  error: { marginTop: 4, fontSize: 12, textAlign: 'center' }
+  actions: { flexDirection: 'row', gap: tokens.space.sm },
+  passButton: { flex: 0.8 },
+  joinButton: { flex: 1.2 },
+  error: { marginTop: tokens.space.sm }
 });
