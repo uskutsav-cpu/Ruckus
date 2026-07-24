@@ -6,9 +6,12 @@ import { createClient, processLock, type SupabaseClient } from '@supabase/supaba
 import { createClientForEnvironment } from '@/lib/backend-client';
 import { env } from '@/lib/env';
 import { secureStorage } from '@/lib/secure-storage';
+import { shouldInstallNativeUrlPolyfill } from '@/lib/url-runtime';
 import type { Database } from '@/types/database.generated';
 
-setupURLPolyfill();
+if (shouldInstallNativeUrlPolyfill(Platform.OS)) {
+  setupURLPolyfill();
+}
 
 type RuckusSupabaseClient = SupabaseClient<Database>;
 
