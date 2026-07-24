@@ -38,6 +38,17 @@ values (
   '10000000-0000-4000-8000-000000000002'
 );
 
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"10000000-0000-4000-8000-000000000002","role":"authenticated"}',
+  true
+);
+select set_config(
+  'request.jwt.claim.sub',
+  '10000000-0000-4000-8000-000000000002',
+  true
+);
+
 insert into public.messages (group_id, sender_id, body)
 values (
   '50000000-0000-4000-8000-000000000001',
