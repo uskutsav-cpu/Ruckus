@@ -10,6 +10,7 @@ export type XpEntry = {
 export type ProfileDashboard = {
   xpTotal: number;
   avatarUrl: string | null;
+  campusName: string;
   xpEntries: XpEntry[];
   selectedInterestIds: string[];
 };

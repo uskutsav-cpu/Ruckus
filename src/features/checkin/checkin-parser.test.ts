@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseCheckinPayload } from '@/features/checkin/checkin-parser';
+import { CheckinScanError, parseCheckinPayload } from '@/features/checkin/checkin-parser';
 
 const groupId = '50000000-0000-4000-8000-000000000001';
 const token = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
@@ -18,12 +18,24 @@ describe('parseCheckinPayload', () => {
         `campusclash://check-in/50000000-0000-4000-8000-000000000002?token=${token}`,
         groupId
       )
-    ).toThrow('not valid for your crew');
+    ).toThrow('different crew');
   });
 
-  it('rejects non-Campus-Clash URLs and short tokens', () => {
+  it('classifies QR codes for another crew', () => {
+    try {
+      parseCheckinPayload(
+        `campusclash://check-in/50000000-0000-4000-8000-000000000002?token=${token}`,
+        groupId
+      );
+    } catch (error) {
+      expect(error).toBeInstanceOf(CheckinScanError);
+      expect((error as CheckinScanError).issue).toBe('wrong-group');
+    }
+  });
+
+  it('rejects non-Ruckus URLs and short tokens', () => {
     expect(() =>
       parseCheckinPayload(`https://example.com/check-in/${groupId}?token=short`, groupId)
-    ).toThrow('not valid for your crew');
+    ).toThrow('not a valid Ruckus check-in code');
   });
 });

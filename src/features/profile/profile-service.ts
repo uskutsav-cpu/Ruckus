@@ -42,6 +42,7 @@ const demoLeaderboard: LeaderboardEntry[] = [
 
 export async function fetchProfileDashboard(
   userId: string,
+  campusId: string,
   avatarPath: string | null,
   isDemo: boolean
 ): Promise<ProfileDashboard> {
@@ -49,6 +50,7 @@ export async function fetchProfileDashboard(
     return {
       xpTotal: 260,
       avatarUrl: null,
+      campusName: 'Riverside University',
       selectedInterestIds: [],
       xpEntries: [
         {
@@ -71,7 +73,8 @@ export async function fetchProfileDashboard(
   const [
     { data: xpTotal, error: totalError },
     { data: ledger, error: ledgerError },
-    { data: interests, error: interestError }
+    { data: interests, error: interestError },
+    { data: campus, error: campusError }
   ] = await Promise.all([
     supabase.rpc('get_xp_total'),
     supabase
@@ -79,11 +82,13 @@ export async function fetchProfileDashboard(
       .select('id, amount, reason, created_at')
       .order('created_at', { ascending: false })
       .limit(20),
-    supabase.from('profile_interests').select('interest_id').eq('profile_id', userId)
+    supabase.from('profile_interests').select('interest_id').eq('profile_id', userId),
+    supabase.from('campuses').select('name').eq('id', campusId).single()
   ]);
   if (totalError) throw totalError;
   if (ledgerError) throw ledgerError;
   if (interestError) throw interestError;
+  if (campusError) throw campusError;
 
   let avatarUrl: string | null = null;
   if (avatarPath) {
@@ -96,6 +101,7 @@ export async function fetchProfileDashboard(
   return {
     xpTotal: Number(xpTotal ?? 0),
     avatarUrl,
+    campusName: campus.name,
     selectedInterestIds: (interests ?? []).map((row) => row.interest_id),
     xpEntries: (ledger ?? []).map((entry) => ({
       id: entry.id,
