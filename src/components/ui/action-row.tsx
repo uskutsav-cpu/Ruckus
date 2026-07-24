@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -47,14 +48,13 @@ export function ActionRow({
       style={({ pressed }) => [
         styles.row,
         {
-          backgroundColor: theme.surfaceElevated,
           borderColor: theme.border,
           opacity: disabled ? 0.48 : pressed ? 0.72 : 1
         }
       ]}
     >
       <View style={[styles.mark, { backgroundColor: markBackground }]}>
-        <Text style={[styles.markText, { color: markColor }]}>{mark}</Text>
+        <AppIcon color={markColor} name={mark} size={20} />
       </View>
       <View style={styles.copy}>
         <View style={styles.titleRow}>
@@ -81,9 +81,8 @@ const styles = StyleSheet.create({
     minHeight: 84,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.space.md
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: tokens.space.md
   },
   mark: {
     width: 46,
@@ -92,25 +91,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  markText: { fontSize: 19, fontWeight: tokens.weight.black },
   copy: { flex: 1, marginLeft: tokens.space.md },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
   },
-  title: { flex: 1, fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  title: { flex: 1, fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   status: {
     marginLeft: tokens.space.sm,
-    fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.heavy,
-    textTransform: 'uppercase'
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
   },
   description: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   chevron: {
     marginLeft: tokens.space.sm,

@@ -35,7 +35,7 @@ export function AppScreen({
   const content = (
     <View style={[styles.content, contentStyle]}>
       {eyebrow ? (
-        <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text>
+        <Text style={[styles.eyebrow, { color: theme.textMuted }]}>{eyebrow}</Text>
       ) : null}
       {title ? <Text style={[styles.title, { color: theme.text }]}>{title}</Text> : null}
       {subtitle ? (
@@ -89,28 +89,26 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignSelf: 'center',
     paddingHorizontal: tokens.layout.screenPadding,
-    paddingTop: tokens.space.md,
+    paddingTop: tokens.space.lg,
     paddingBottom: tokens.space.xxl
   },
   eyebrow: {
-    marginBottom: tokens.space.sm,
+    marginBottom: 6,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.35,
-    textTransform: 'uppercase'
+    fontWeight: tokens.weight.medium
   },
   title: {
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1.15
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.7
   },
   subtitle: {
     marginTop: tokens.space.sm,
     marginBottom: tokens.space.lg,
     fontSize: tokens.type.body,
     lineHeight: tokens.lineHeight.body,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,

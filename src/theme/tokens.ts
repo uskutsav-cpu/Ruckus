@@ -2,23 +2,23 @@ import { Platform } from 'react-native';
 
 export const tokens = {
   color: {
-    ruckus: '#C8F53D',
-    ruckusPressed: '#B2DC32',
-    ruckusSoft: '#EDFFC1',
-    violet: '#6C4BFF',
-    violetLight: '#A99AFF',
-    violetDeep: '#33266B',
-    coral: '#FF625F',
-    coralSoft: '#FFE1DF',
-    cyan: '#5DDBF2',
-    amber: '#FFBC42',
-    green: '#30C77B',
-    ink: '#101114',
-    inkSoft: '#24262D',
-    paper: '#FFFDF7',
-    night: '#090A0D',
-    slate: '#68707D',
-    danger: '#D93442',
+    ruckus: '#BCEB49',
+    ruckusPressed: '#A9D53E',
+    ruckusSoft: '#EFF8D8',
+    violet: '#176B5B',
+    violetLight: '#65C9B0',
+    violetDeep: '#163D35',
+    coral: '#C64B52',
+    coralSoft: '#F8E6E7',
+    cyan: '#4F8FA3',
+    amber: '#B87521',
+    green: '#2F7D5C',
+    ink: '#171918',
+    inkSoft: '#252826',
+    paper: '#F8F8F5',
+    night: '#0D0F0E',
+    slate: '#666C68',
+    danger: '#C33E46',
     white: '#FFFFFF'
   },
   space: {
@@ -32,81 +32,81 @@ export const tokens = {
     huge: 64
   },
   radius: {
-    xs: 8,
-    sm: 12,
-    md: 18,
-    lg: 26,
-    xl: 34,
+    xs: 6,
+    sm: 10,
+    md: 14,
+    lg: 18,
+    xl: 24,
     pill: 999
   },
   type: {
-    hero: 48,
-    display: 40,
-    title: 32,
-    heading: 24,
+    hero: 44,
+    display: 36,
+    title: 30,
+    heading: 22,
     body: 16,
-    label: 14,
-    caption: 12,
-    micro: 11
+    label: 15,
+    caption: 13,
+    micro: 12
   },
   weight: {
     regular: '400',
-    medium: '600',
-    bold: '700',
-    heavy: '800',
-    black: '900'
+    medium: '500',
+    bold: '600',
+    heavy: '700',
+    black: '700'
   },
   lineHeight: {
-    hero: 49,
-    display: 43,
+    hero: 48,
+    display: 41,
     title: 36,
-    heading: 29,
+    heading: 28,
     body: 24,
     caption: 18
   },
   motion: {
-    instant: 90,
-    quick: 160,
-    standard: 260,
-    slow: 420,
-    celebration: 650
+    instant: 80,
+    quick: 140,
+    standard: 220,
+    slow: 320,
+    celebration: 420
   },
   layout: {
     maxContentWidth: 560,
     screenPadding: 20,
-    cardPadding: 18,
-    actionHeight: 58,
+    cardPadding: 16,
+    actionHeight: 52,
     compactPhoneHeight: 700
   },
   shadow: {
     card: Platform.select({
       ios: {
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 14 },
-        shadowOpacity: 0.2,
-        shadowRadius: 24
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12
       },
-      android: { elevation: 10 },
+      android: { elevation: 3 },
       default: {
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.18,
-        shadowRadius: 22
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.06,
+        shadowRadius: 10
       }
     }),
     floating: Platform.select({
       ios: {
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.14,
-        shadowRadius: 16
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6
       },
-      android: { elevation: 7 },
+      android: { elevation: 2 },
       default: {
         shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 7 },
-        shadowOpacity: 0.12,
-        shadowRadius: 14
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6
       }
     })
   },
@@ -120,47 +120,47 @@ export const tokens = {
 } as const;
 
 export const lightTheme = {
-  background: '#F4F2EA',
-  surface: '#FFFDF7',
+  background: '#F7F7F4',
+  surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  surfaceMuted: '#EAE7DE',
-  surfaceStrong: '#DDD9CF',
-  text: '#101114',
-  textMuted: '#565D68',
-  textSubtle: '#7B818B',
-  border: '#D8D4CA',
-  primary: tokens.color.ruckus,
-  onPrimary: tokens.color.ink,
+  surfaceMuted: '#EFF1EE',
+  surfaceStrong: '#E2E5E1',
+  text: '#171918',
+  textMuted: '#5C625E',
+  textSubtle: '#818782',
+  border: '#DEE1DD',
+  primary: '#176B5B',
+  onPrimary: tokens.color.white,
   accent: tokens.color.violet,
-  accentMuted: '#E7E2FF',
+  accentMuted: '#E2F1ED',
   danger: tokens.color.danger,
-  success: '#16794A',
-  warning: '#8D5600',
-  overlay: 'rgba(9,10,13,0.78)',
-  skeleton: '#DDD9CF',
-  offline: '#2B2311'
+  success: '#2F7658',
+  warning: '#945B16',
+  overlay: 'rgba(12,14,13,0.68)',
+  skeleton: '#E2E5E1',
+  offline: '#342B1C'
 } as const;
 
 export const darkTheme = {
-  background: '#090A0D',
-  surface: '#15161B',
-  surfaceElevated: '#1C1E24',
-  surfaceMuted: '#24262D',
-  surfaceStrong: '#30333C',
-  text: '#FAFAF7',
-  textMuted: '#B6BBC4',
-  textSubtle: '#858B96',
-  border: '#353841',
-  primary: tokens.color.ruckus,
-  onPrimary: tokens.color.ink,
+  background: '#0D0F0E',
+  surface: '#151816',
+  surfaceElevated: '#1B1E1C',
+  surfaceMuted: '#232724',
+  surfaceStrong: '#303531',
+  text: '#F5F6F4',
+  textMuted: '#B5BAB6',
+  textSubtle: '#858B86',
+  border: '#303531',
+  primary: '#65C9B0',
+  onPrimary: '#0B1E19',
   accent: tokens.color.violetLight,
   accentMuted: tokens.color.violetDeep,
-  danger: '#FF7A84',
-  success: '#61E6A5',
-  warning: '#FFD17A',
-  overlay: 'rgba(3,4,6,0.86)',
-  skeleton: '#292C33',
-  offline: '#332A13'
+  danger: '#F07B80',
+  success: '#6BC79C',
+  warning: '#D6A15B',
+  overlay: 'rgba(3,5,4,0.82)',
+  skeleton: '#292E2A',
+  offline: '#332A1C'
 } as const;
 
 export type AppTheme = typeof lightTheme | typeof darkTheme;

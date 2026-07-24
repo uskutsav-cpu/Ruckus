@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -16,9 +17,9 @@ export function StatusPill({ label, icon, tone = 'neutral', style }: StatusPillP
     tone === 'accent'
       ? { background: theme.accentMuted, foreground: theme.accent }
       : tone === 'success'
-        ? { background: tokens.color.ruckusSoft, foreground: '#335400' }
+        ? { background: theme.accentMuted, foreground: theme.success }
         : tone === 'warning'
-          ? { background: tokens.color.coralSoft, foreground: '#8B2522' }
+          ? { background: tokens.color.coralSoft, foreground: theme.warning }
           : tone === 'dark'
             ? {
                 background: 'rgba(9,10,13,0.72)',
@@ -32,9 +33,9 @@ export function StatusPill({ label, icon, tone = 'neutral', style }: StatusPillP
       accessibilityLabel={label}
     >
       {icon ? (
-        <Text aria-hidden style={[styles.icon, { color: palette.foreground }]}>
-          {icon}
-        </Text>
+        <View style={styles.icon}>
+          <AppIcon color={palette.foreground} name={icon} size={13} />
+        </View>
       ) : null}
       <Text style={[styles.label, { color: palette.foreground }]}>{label}</Text>
     </View>
@@ -43,22 +44,19 @@ export function StatusPill({ label, icon, tone = 'neutral', style }: StatusPillP
 
 const styles = StyleSheet.create({
   pill: {
-    minHeight: 34,
+    minHeight: 28,
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     borderRadius: tokens.radius.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 7
+    paddingHorizontal: 9,
+    paddingVertical: 5
   },
   icon: {
-    marginRight: 6,
-    fontSize: 12,
-    fontWeight: tokens.weight.black
+    marginRight: 6
   },
   label: {
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 0.1
+    fontWeight: tokens.weight.medium
   }
 });

@@ -7,8 +7,8 @@ import {
   type ViewStyle
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -67,23 +67,6 @@ export function PrimaryButton({
     onPress();
   };
 
-  const content = (
-    <>
-      {loading ? (
-        <ActivityIndicator color={textColor} />
-      ) : (
-        <>
-          {leadingIcon ? (
-            <Text aria-hidden style={[styles.icon, { color: textColor }]}>
-              {leadingIcon}
-            </Text>
-          ) : null}
-          <Text style={[styles.label, { color: textColor }]}>{label}</Text>
-        </>
-      )}
-    </>
-  );
-
   return (
     <Pressable
       accessibilityRole="button"
@@ -95,24 +78,28 @@ export function PrimaryButton({
       style={({ pressed }) => [
         styles.pressable,
         {
+          backgroundColor: isPrimary ? theme.primary : background,
           borderColor,
           opacity: disabled ? 0.42 : 1,
-          transform: [{ scale: pressed ? 0.985 : 1 }]
+          transform: [{ scale: pressed ? 0.99 : 1 }]
         },
         style
       ]}
     >
-      {isPrimary ? (
-        <LinearGradient
-          colors={[tokens.color.ruckus, tokens.color.ruckusPressed]}
-          end={{ x: 1, y: 0.8 }}
-          style={styles.fill}
-        >
-          {content}
-        </LinearGradient>
-      ) : (
-        <View style={[styles.fill, { backgroundColor: background }]}>{content}</View>
-      )}
+      <View style={styles.fill}>
+        {loading ? (
+          <ActivityIndicator color={textColor} />
+        ) : (
+          <>
+            {leadingIcon ? (
+              <View style={styles.icon}>
+                <AppIcon color={textColor} name={leadingIcon} size={18} />
+              </View>
+            ) : null}
+            <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+          </>
+        )}
+      </View>
     </Pressable>
   );
 }
@@ -122,7 +109,7 @@ const styles = StyleSheet.create({
     minHeight: tokens.layout.actionHeight,
     overflow: 'hidden',
     borderWidth: 1,
-    borderRadius: tokens.radius.pill
+    borderRadius: tokens.radius.sm
   },
   fill: {
     minHeight: tokens.layout.actionHeight - 2,
@@ -130,16 +117,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: tokens.space.lg,
-    paddingVertical: 14
+    paddingVertical: 12
   },
   icon: {
     marginRight: tokens.space.sm,
-    fontSize: 18,
-    fontWeight: tokens.weight.black
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   label: {
-    fontSize: 16,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.15
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.bold
   }
 });

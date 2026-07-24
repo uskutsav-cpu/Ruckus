@@ -42,7 +42,7 @@ export function SegmentedControl<T extends string>({
                 backgroundColor: selected ? theme.surfaceElevated : 'transparent',
                 opacity: pressed ? 0.68 : 1
               },
-              selected && tokens.shadow.floating
+              selected && { borderColor: theme.border }
             ]}
           >
             <Text
@@ -61,19 +61,21 @@ const styles = StyleSheet.create({
   control: {
     minHeight: 52,
     flexDirection: 'row',
-    borderRadius: tokens.radius.pill,
+    borderRadius: tokens.radius.sm,
     padding: 4
   },
   option: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.pill,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    borderRadius: tokens.radius.xs,
     paddingHorizontal: tokens.space.sm
   },
   label: {
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.medium,
     textAlign: 'center'
   }
 });

@@ -28,8 +28,8 @@ export function AuthScaffold({
   return (
     <AppScreen footer={footer}>
       <View style={styles.brand}>
-        <View style={[styles.mark, { backgroundColor: theme.primary }]}>
-          <Text style={[styles.markText, { color: theme.onPrimary }]}>R</Text>
+        <View style={[styles.mark, { backgroundColor: tokens.color.ruckus }]}>
+          <Text style={styles.markText}>R</Text>
         </View>
         <Text style={[styles.wordmark, { color: theme.text }]}>RUCKUS</Text>
       </View>
@@ -39,18 +39,7 @@ export function AuthScaffold({
         </View>
       ) : null}
       <ScreenHeader eyebrow={eyebrow} title={title} subtitle={subtitle} />
-      <View
-        style={[
-          styles.form,
-          {
-            backgroundColor: theme.surface,
-            borderColor: theme.border
-          },
-          tokens.shadow.floating
-        ]}
-      >
-        {children}
-      </View>
+      <View style={styles.form}>{children}</View>
     </AppScreen>
   );
 }
@@ -59,31 +48,27 @@ const styles = StyleSheet.create({
   brand: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: tokens.space.xl
+    marginBottom: tokens.space.xxl
   },
   mark: {
     width: 38,
     height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.sm,
-    transform: [{ rotate: '-5deg' }]
+    borderRadius: tokens.radius.sm
   },
   markText: {
     fontSize: 21,
-    fontWeight: tokens.weight.black,
+    color: tokens.color.ink,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   wordmark: {
     marginLeft: 11,
     fontSize: 17,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 2.2
+    fontWeight: tokens.weight.bold,
+    letterSpacing: 1.5
   },
   progress: { marginBottom: tokens.space.lg },
-  form: {
-    borderWidth: 1,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.space.lg
-  }
+  form: { paddingBottom: tokens.space.lg }
 });

@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -23,9 +24,9 @@ export function InlineNotice({ message, tone = 'info', icon }: InlineNoticeProps
   return (
     <View accessibilityRole="alert" style={[styles.notice, { backgroundColor }]}>
       {icon ? (
-        <Text aria-hidden style={styles.icon}>
-          {icon}
-        </Text>
+        <View style={styles.icon}>
+          <AppIcon color={color} name={icon} size={17} />
+        </View>
       ) : null}
       <Text style={[styles.copy, { color }]}>{message}</Text>
     </View>
@@ -42,11 +43,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: tokens.space.md
   },
-  icon: { marginRight: tokens.space.sm, fontSize: 16 },
+  icon: { marginRight: tokens.space.sm },
   copy: {
     flex: 1,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.regular
   }
 });

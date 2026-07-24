@@ -9,11 +9,14 @@ export function DemoModeBanner() {
   return (
     <View
       accessibilityRole="alert"
-      style={[styles.banner, { backgroundColor: theme.accentMuted }]}
+      style={[
+        styles.banner,
+        { backgroundColor: theme.surfaceMuted, borderBottomColor: theme.border }
+      ]}
     >
-      <Text style={[styles.label, { color: theme.accent }]}>DEMO PREVIEW</Text>
+      <Text style={[styles.label, { color: theme.text }]}>Demo</Text>
       <Text numberOfLines={2} style={[styles.copy, { color: theme.text }]}>
-        No real matches, messages, attendance, XP, or account changes.
+        Preview data only. Nothing here changes a real account.
       </Text>
     </View>
   );
@@ -26,17 +29,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: tokens.layout.screenPadding,
-    paddingVertical: 7
+    paddingVertical: 7,
+    borderBottomWidth: StyleSheet.hairlineWidth
   },
   label: {
     marginRight: tokens.space.sm,
-    fontSize: 9,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.bold
   },
   copy: {
     flexShrink: 1,
-    fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.heavy
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.regular
   }
 });

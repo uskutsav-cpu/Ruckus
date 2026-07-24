@@ -38,8 +38,8 @@ export function BottomSheet({ children, header, footer }: BottomSheetProps) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    borderTopLeftRadius: tokens.radius.xl,
-    borderTopRightRadius: tokens.radius.xl
+    borderTopLeftRadius: tokens.radius.lg,
+    borderTopRightRadius: tokens.radius.lg
   },
   handle: {
     width: 42,

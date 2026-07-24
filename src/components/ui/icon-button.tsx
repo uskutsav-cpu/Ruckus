@@ -1,12 +1,7 @@
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  type StyleProp,
-  type ViewStyle
-} from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -49,18 +44,14 @@ export function IconButton({
           borderColor: isDarkTone ? 'rgba(255,255,255,0.18)' : theme.border,
           opacity: pressed ? 0.72 : 1
         },
-        tokens.shadow.floating,
         style
       ]}
     >
-      <Text
-        style={[
-          styles.icon,
-          { color: isDarkTone ? tokens.color.white : tokens.color.ink }
-        ]}
-      >
-        {icon}
-      </Text>
+      <AppIcon
+        color={isDarkTone ? tokens.color.white : theme.text}
+        name={icon}
+        size={20}
+      />
     </Pressable>
   );
 }
@@ -73,10 +64,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderRadius: tokens.radius.pill
-  },
-  icon: {
-    fontSize: 20,
-    lineHeight: 22,
-    fontWeight: tokens.weight.black
   }
 });

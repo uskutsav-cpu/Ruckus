@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -27,15 +28,15 @@ export function ChoiceRow({ selected, label, detail, icon, onPress }: ChoiceRowP
       style={({ pressed }) => [
         styles.row,
         {
-          backgroundColor: selected ? theme.accentMuted : theme.surfaceElevated,
-          borderColor: selected ? theme.accent : theme.border,
+          backgroundColor: selected ? theme.accentMuted : 'transparent',
+          borderColor: selected ? theme.primary : theme.border,
           opacity: pressed ? 0.78 : 1
         }
       ]}
     >
       {icon ? (
         <View style={[styles.leadingIcon, { backgroundColor: theme.surfaceMuted }]}>
-          <Text style={styles.leadingIconText}>{icon}</Text>
+          <AppIcon color={theme.text} name={icon} size={21} />
         </View>
       ) : null}
       <View style={styles.copy}>
@@ -66,8 +67,8 @@ const styles = StyleSheet.create({
     minHeight: 76,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderRadius: tokens.radius.lg,
+    borderWidth: 1,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md,
     marginBottom: tokens.space.sm
   },
@@ -78,9 +79,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  leadingIconText: { fontSize: 22 },
   copy: { flex: 1, marginHorizontal: tokens.space.md },
-  label: { fontSize: 16, fontWeight: tokens.weight.heavy },
+  label: { fontSize: 16, fontWeight: tokens.weight.bold },
   detail: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
     height: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderRadius: tokens.radius.pill
   },
-  checkText: { fontSize: 15, fontWeight: tokens.weight.black }
+  checkText: { fontSize: 15, fontWeight: tokens.weight.bold }
 });

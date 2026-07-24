@@ -25,7 +25,7 @@ export function ScreenHeader({
     <View style={[styles.header, compact && styles.compact]}>
       <View style={styles.copy}>
         {eyebrow ? (
-          <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text>
+          <Text style={[styles.eyebrow, { color: theme.textMuted }]}>{eyebrow}</Text>
         ) : null}
         <Text
           style={[compact ? styles.compactTitle : styles.title, { color: theme.text }]}
@@ -51,29 +51,27 @@ const styles = StyleSheet.create({
   compact: { alignItems: 'center', marginBottom: tokens.space.md },
   copy: { flex: 1 },
   eyebrow: {
-    marginBottom: 6,
+    marginBottom: 4,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase'
+    fontWeight: tokens.weight.medium
   },
   title: {
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1.1
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.7
   },
   compactTitle: {
     fontSize: tokens.type.heading,
     lineHeight: tokens.lineHeight.heading,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.65
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.45
   },
   subtitle: {
     marginTop: 6,
     fontSize: tokens.type.label,
     lineHeight: 20,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   action: { marginLeft: tokens.space.md }
 });

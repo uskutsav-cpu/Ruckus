@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
@@ -25,10 +26,10 @@ export function StatePanel({
   return (
     <View style={styles.container}>
       <View style={[styles.iconWrap, { backgroundColor: theme.surfaceMuted }]}>
-        <Text style={styles.icon}>{icon}</Text>
+        <AppIcon color={theme.textMuted} name={icon} size={34} />
       </View>
       {eyebrow ? (
-        <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text>
+        <Text style={[styles.eyebrow, { color: theme.textMuted }]}>{eyebrow}</Text>
       ) : null}
       <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
       <Text style={[styles.message, { color: theme.textMuted }]}>{message}</Text>
@@ -52,23 +53,19 @@ const styles = StyleSheet.create({
     height: 76,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.lg,
-    transform: [{ rotate: '-4deg' }]
+    borderRadius: tokens.radius.md
   },
-  icon: { fontSize: 38 },
   eyebrow: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase'
+    fontWeight: tokens.weight.medium
   },
   title: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.heading,
     lineHeight: tokens.lineHeight.heading,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.6,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.4,
     textAlign: 'center'
   },
   message: {
@@ -76,7 +73,7 @@ const styles = StyleSheet.create({
     maxWidth: 330,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium,
+    fontWeight: tokens.weight.regular,
     textAlign: 'center'
   },
   button: { minWidth: 200, marginTop: tokens.space.lg }
