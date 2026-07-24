@@ -39,3 +39,30 @@ docs/                        Smoke-test and operational runbooks
 
 Setup and local-development instructions will be finalized as the implementation
 milestones land.
+
+## Local backend
+
+The backend is reproducible from migrations and seed data. Docker Desktop (or another
+Docker-compatible runtime) is required.
+
+```sh
+cp .env.example .env
+npm install
+npm run db:start
+npm run db:reset
+npm run test:db
+```
+
+Use `npx supabase status -o env` to copy the local API URL and publishable key into
+`.env`. The seeded login password is `CampusClash1!`; accounts
+`demo1@example.edu` through `demo6@example.edu`, `host@example.edu`, and
+`admin@example.edu` are local-only.
+
+After a fresh reset, validate concurrent matching with:
+
+```sh
+SUPABASE_PUBLISHABLE_KEY="<local publishable key>" npm run test:matching
+```
+
+This fires four right swipes concurrently and verifies that every account is assigned
+exactly once to the same group.
