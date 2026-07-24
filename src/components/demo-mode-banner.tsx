@@ -16,7 +16,7 @@ export function DemoModeBanner() {
     >
       <Text style={[styles.label, { color: theme.text }]}>Demo</Text>
       <Text numberOfLines={2} style={[styles.copy, { color: theme.text }]}>
-        Preview data only. Nothing here changes a real account.
+        Preview data. No account changes.
       </Text>
     </View>
   );

@@ -2,10 +2,10 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { ChoiceRow } from '@/components/ui/choice-row';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { StatusPill } from '@/components/ui/status-pill';
 import { AuthScaffold } from '@/features/auth/auth-scaffold';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
@@ -34,30 +34,27 @@ export default function AgeAndSafetyScreen() {
 
   return (
     <AuthScaffold
-      eyebrow="Play it social. Keep it safe."
-      title="A few ground rules."
-      subtitle="Ruckus is built for adults meeting in groups at approved public venues—never one-to-one or at a live location."
-      progress={{ current: 1, total: 4, label: 'Player setup' }}
+      eyebrow="Safety"
+      title="Before you continue."
+      subtitle="Ruckus is for adults meeting in groups at approved public venues."
+      progress={{ current: 1, total: 4, label: 'Account setup' }}
     >
       <View style={[styles.safetyCard, { backgroundColor: theme.surfaceMuted }]}>
-        <View style={styles.safetyTop}>
-          <View style={[styles.shield, { backgroundColor: theme.primary }]}>
-            <Text style={[styles.shieldText, { color: theme.onPrimary }]}>✓</Text>
-          </View>
-          <StatusPill label="GROUP-FIRST" tone="accent" />
+        <View style={[styles.shield, { backgroundColor: theme.accentMuted }]}>
+          <AppIcon color={theme.primary} name="safety" size={22} />
         </View>
         <Text style={[styles.safetyTitle, { color: theme.text }]}>
-          Designed for public plans
+          Group meetups only
         </Text>
         <View style={styles.rules}>
           <Text style={[styles.rule, { color: theme.textMuted }]}>
-            • No dating, DMs, or one-to-one matching
+            No dating or one-to-one matching
           </Text>
           <Text style={[styles.rule, { color: theme.textMuted }]}>
-            • No background or exact live location
+            No background location or live-location sharing
           </Text>
           <Text style={[styles.rule, { color: theme.textMuted }]}>
-            • The venue unlocks only after the group confirms
+            Exact venues appear only after the group confirms
           </Text>
         </View>
       </View>
@@ -65,19 +62,19 @@ export default function AgeAndSafetyScreen() {
         selected={adult}
         onPress={() => setAdult((value) => !value)}
         icon="18"
-        label="I confirm I am at least 18"
-        detail="This is an attestation, not automated age or identity verification."
+        label="I am at least 18"
+        detail="This is an attestation, not automated identity verification."
       />
       <ChoiceRow
         selected={safety}
         onPress={() => setSafety((value) => !value)}
         icon="◎"
-        label="I agree to the community rules"
-        detail="Respect boundaries, meet at the revealed public venue, and report concerns."
+        label="I agree to the community guidelines"
+        detail="Respect boundaries, meet at the approved venue, and report concerns."
       />
       {error ? <InlineNotice tone="error" icon="!" message={error} /> : null}
       <PrimaryButton
-        label="Agree and keep going"
+        label="Agree and continue"
         disabled={!adult || !safety}
         loading={loading}
         onPress={() => void submit()}
@@ -96,25 +93,17 @@ const styles = StyleSheet.create({
     padding: tokens.space.md,
     marginBottom: tokens.space.lg
   },
-  safetyTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
   shield: {
     width: 44,
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.sm,
-    transform: [{ rotate: '-5deg' }]
+    borderRadius: tokens.radius.sm
   },
-  shieldText: { fontSize: 22, fontWeight: tokens.weight.black },
   safetyTitle: {
     marginTop: tokens.space.md,
     fontSize: 19,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.35
+    fontWeight: tokens.weight.bold
   },
   rules: { marginTop: tokens.space.sm, gap: 5 },
   rule: {

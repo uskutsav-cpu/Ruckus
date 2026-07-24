@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { AppIcon } from '@/components/ui/app-icon';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { ErrorState } from '@/components/ui/error-state';
 import { IconButton } from '@/components/ui/icon-button';
@@ -37,7 +38,7 @@ export default function ActivityDetailScreen() {
     demoActivities.find((item) => item.id === id);
 
   if (activities.isLoading && !activity) {
-    return <LoadingScreen label="Opening the plan…" />;
+    return <LoadingScreen label="Opening activity…" />;
   }
 
   if (!activity) {
@@ -45,9 +46,9 @@ export default function ActivityDetailScreen() {
       <AppScreen>
         <ErrorState
           icon="↙"
-          title="This plan moved on"
-          message="It may have closed or been cancelled. Your deck is ready with other options."
-          actionLabel="Back to the deck"
+          title="Activity unavailable"
+          message="It may have closed or been cancelled."
+          actionLabel="Back to activities"
           onAction={() => router.back()}
         />
       </AppScreen>
@@ -98,8 +99,8 @@ export default function ActivityDetailScreen() {
               style={[styles.close, { top: Math.max(insets.top, tokens.space.md) }]}
             />
             <View style={styles.heroCopy}>
-              <StatusPill label={activity.category.toUpperCase()} tone="success" />
-              <Text style={styles.title}>{activity.title.toUpperCase()}</Text>
+              <StatusPill label={activity.category} tone="dark" />
+              <Text style={styles.title}>{activity.title}</Text>
             </View>
           </View>
         }
@@ -113,8 +114,8 @@ export default function ActivityDetailScreen() {
               style={styles.passButton}
             />
             <PrimaryButton
-              label="I’m in"
-              leadingIcon="↗"
+              label="Join"
+              leadingIcon="check"
               onPress={() => choose('right')}
               loading={swipe.isPending}
               style={styles.joinButton}
@@ -129,27 +130,24 @@ export default function ActivityDetailScreen() {
           <View style={styles.inner}>
             <ActivityMetadata activity={activity} />
             <View style={styles.section}>
-              <Text style={[styles.sectionLabel, { color: theme.accent }]}>THE PLAN</Text>
+              <Text style={[styles.sectionLabel, { color: theme.text }]}>
+                About this activity
+              </Text>
               <Text style={[styles.description, { color: theme.text }]}>
                 {activity.description}
               </Text>
             </View>
-            <View
-              style={[
-                styles.safety,
-                { backgroundColor: theme.surfaceMuted, borderColor: theme.border }
-              ]}
-            >
-              <View style={[styles.safetyIcon, { backgroundColor: theme.primary }]}>
-                <Text style={[styles.safetyIconText, { color: theme.onPrimary }]}>✓</Text>
+            <View style={[styles.safety, { backgroundColor: theme.surfaceMuted }]}>
+              <View style={[styles.safetyIcon, { backgroundColor: theme.accentMuted }]}>
+                <AppIcon color={theme.primary} name="safety" size={20} />
               </View>
               <View style={styles.safetyCopy}>
                 <Text style={[styles.safetyTitle, { color: theme.text }]}>
                   Public-venue meetup
                 </Text>
                 <Text style={[styles.safetyBody, { color: theme.textMuted }]}>
-                  The approved meeting spot stays hidden until enough group members
-                  confirm. Ruckus never shares exact live location.
+                  The exact meeting spot appears only after the group confirms. Ruckus
+                  does not share live location.
                 </Text>
               </View>
             </View>
@@ -189,9 +187,9 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     color: tokens.color.white,
     fontSize: 36,
-    lineHeight: 37,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1.5
+    lineHeight: 39,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.9
   },
   scroll: { paddingBottom: tokens.space.xl },
   inner: {
@@ -202,19 +200,17 @@ const styles = StyleSheet.create({
   },
   section: { marginTop: tokens.space.xl },
   sectionLabel: {
-    fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.2
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.bold
   },
   description: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.body,
     lineHeight: tokens.lineHeight.body,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   safety: {
     flexDirection: 'row',
-    borderWidth: 1,
     borderRadius: tokens.radius.md,
     padding: tokens.space.md,
     marginTop: tokens.space.lg
@@ -226,14 +222,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  safetyIconText: { fontSize: 19, fontWeight: tokens.weight.black },
   safetyCopy: { flex: 1, marginLeft: tokens.space.md },
-  safetyTitle: { fontSize: 15, fontWeight: tokens.weight.black },
+  safetyTitle: { fontSize: 15, fontWeight: tokens.weight.bold },
   safetyBody: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   actions: { flexDirection: 'row', gap: tokens.space.sm },
   passButton: { flex: 0.8 },

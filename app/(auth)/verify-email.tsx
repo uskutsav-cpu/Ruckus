@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { AuthScaffold } from '@/features/auth/auth-scaffold';
@@ -21,26 +22,25 @@ export default function VerifyEmailScreen() {
     setLoading(true);
     const result = await resendVerification(email);
     setLoading(false);
-    setMessage(result.error ?? 'Fresh link sent. Check your inbox.');
+    setMessage(result.error ?? 'A new link is on the way.');
   };
 
   return (
     <AuthScaffold
-      eyebrow="One quick check"
-      title="Open your campus inbox."
-      subtitle={`We sent a secure link to ${email || 'your university email'}. Open it on this device to continue.`}
+      eyebrow="Check your email"
+      title="Verify your university email."
+      subtitle={`We sent a secure link to ${email || 'your university email'}.`}
     >
       <View style={[styles.mail, { backgroundColor: theme.accentMuted }]}>
         <View style={[styles.iconWrap, { backgroundColor: theme.surfaceElevated }]}>
-          <Text style={styles.icon}>↗</Text>
+          <AppIcon color={theme.primary} name="forward" size={22} />
         </View>
         <View style={styles.mailCopy}>
           <Text style={[styles.mailTitle, { color: theme.text }]}>
-            Your Ruckus link is ready
+            Open the link on this device
           </Text>
           <Text style={[styles.copy, { color: theme.textMuted }]}>
-            Email verification confirms access to that university inbox. It is not
-            identity verification.
+            This confirms access to your university inbox, not your identity.
           </Text>
         </View>
       </View>
@@ -51,7 +51,7 @@ export default function VerifyEmailScreen() {
         onPress={() => void resend()}
       />
       <PrimaryButton
-        label="I’ve verified — sign in"
+        label="Continue to sign in"
         onPress={() => router.replace('/sign-in')}
         variant="ghost"
         style={styles.signInButton}
@@ -74,18 +74,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  icon: {
-    fontSize: 22,
-    fontWeight: tokens.weight.black,
-    transform: [{ rotate: '-14deg' }]
-  },
   mailCopy: { flex: 1, marginLeft: tokens.space.md },
-  mailTitle: { fontSize: 15, fontWeight: tokens.weight.black },
+  mailTitle: { fontSize: 15, fontWeight: tokens.weight.bold },
   copy: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   signInButton: { marginTop: tokens.space.sm }
 });

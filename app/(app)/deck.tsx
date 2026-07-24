@@ -13,7 +13,6 @@ import { ActivityCardSkeleton } from '@/components/ui/loading-skeleton';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SecondaryButton } from '@/components/ui/secondary-button';
-import { ActivityCard } from '@/features/activities/activity-card';
 import type { SwipeDirection } from '@/features/activities/activity-types';
 import { MatchCelebration } from '@/features/activities/match-celebration';
 import { SwipeCard } from '@/features/activities/swipe-card';
@@ -67,16 +66,16 @@ export default function DeckScreen() {
     <AppScreen scroll={false} contentStyle={styles.screen}>
       <ScreenHeader
         compact={compact}
-        eyebrow="Tonight on campus"
-        title="Pick your next move."
+        eyebrow="Tonight"
+        title="Find something to do."
         subtitle={
           activities.isLoading
-            ? 'Finding fresh plans…'
-            : `${cards.length} ${cards.length === 1 ? 'activity' : 'activities'} waiting`
+            ? 'Loading activities…'
+            : `${cards.length} ${cards.length === 1 ? 'activity' : 'activities'} available`
         }
         action={
           <IconButton
-            icon="⚡"
+            icon="person"
             accessibilityLabel="Open profile"
             onPress={() => router.push('/profile')}
           />
@@ -96,51 +95,22 @@ export default function DeckScreen() {
       ) : activities.isError ? (
         <ErrorState
           icon="↻"
-          title="The deck took a timeout"
-          message="Check your connection. Your previous choices are still safe."
+          title="Activities are unavailable"
+          message="Check your connection and try again."
           actionLabel="Try again"
           onAction={() => void activities.refetch()}
         />
       ) : cards.length === 0 ? (
         <EmptyState
           icon="✓"
-          title="You cleared the deck"
-          message="Fresh activities drop regularly. Check your pending picks while the next round gets ready."
+          title="No more activities right now"
+          message="Check your pending activities or come back later."
           actionLabel="View pending picks"
           onAction={() => router.push('/pending')}
         />
       ) : (
         <>
-          <View
-            style={[
-              styles.deck,
-              { minHeight: deckMinHeight, marginBottom: compact ? 10 : 16 }
-            ]}
-          >
-            {cards
-              .slice(1, 3)
-              .reverse()
-              .map((activity, reverseIndex, array) => {
-                const depth = array.length - reverseIndex;
-                return (
-                  <View
-                    key={activity.id}
-                    pointerEvents="none"
-                    style={[
-                      styles.nextCard,
-                      {
-                        transform: [
-                          { translateY: depth * 9 },
-                          { scale: 1 - depth * 0.025 }
-                        ],
-                        opacity: 1 - depth * 0.14
-                      }
-                    ]}
-                  >
-                    <ActivityCard activity={activity} onDetails={() => undefined} />
-                  </View>
-                );
-              })}
+          <View style={[styles.deck, { minHeight: deckMinHeight }]}>
             <SwipeCard
               key={current!.id}
               activity={current!}
@@ -158,7 +128,7 @@ export default function DeckScreen() {
           <View style={styles.actions}>
             <SecondaryButton
               label="Pass"
-              leadingIcon="×"
+              leadingIcon="close"
               accessibilityLabel={`Pass on ${current!.title}`}
               disabled={swipe.isPending}
               haptic={false}
@@ -166,8 +136,8 @@ export default function DeckScreen() {
               style={styles.passButton}
             />
             <PrimaryButton
-              label="I’m in"
-              leadingIcon="↗"
+              label="Join"
+              leadingIcon="check"
               accessibilityLabel={`Join waitlist for ${current!.title}`}
               loading={swipe.isPending}
               haptic={false}
@@ -203,10 +173,9 @@ export default function DeckScreen() {
 
 const styles = StyleSheet.create({
   screen: { paddingBottom: tokens.space.md },
-  deck: { flex: 1 },
-  nextCard: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
+  deck: { flex: 1, marginBottom: tokens.space.md },
   actions: { flexDirection: 'row', gap: tokens.space.sm },
-  passButton: { flex: 0.8 },
-  joinButton: { flex: 1.2 },
+  passButton: { flex: 1 },
+  joinButton: { flex: 1 },
   error: { marginTop: tokens.space.sm }
 });

@@ -5,7 +5,6 @@ import * as Haptics from 'expo-haptics';
 
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { StatusPill } from '@/components/ui/status-pill';
 import { TextField } from '@/components/ui/text-field';
 import { AuthScaffold } from '@/features/auth/auth-scaffold';
 import { onboardingSchema } from '@/features/auth/auth-schema';
@@ -15,20 +14,19 @@ import { tokens } from '@/theme/tokens';
 
 const stepCopy = [
   {
-    eyebrow: 'Pick your player name',
-    title: 'What should your crew call you?',
-    subtitle: 'Use a first name or nickname you feel good sharing with activity groups.'
+    eyebrow: 'Your profile',
+    title: 'How should we introduce you?',
+    subtitle: 'Use a first name or nickname you are comfortable sharing with groups.'
   },
   {
-    eyebrow: 'Give the group a vibe check',
-    title: 'A little context goes far.',
-    subtitle: 'Keep it light. Your bio appears only where a public profile is needed.'
+    eyebrow: 'About you',
+    title: 'Add a short bio.',
+    subtitle: 'This helps group members know who they are meeting.'
   },
   {
-    eyebrow: 'Tune your activity mix',
-    title: 'What gets you out the door?',
-    subtitle:
-      'Pick three to five interests. They organize activities—there are no AI recommendations.'
+    eyebrow: 'Interests',
+    title: 'What do you like to do?',
+    subtitle: 'Choose three to five interests to organize your activity list.'
   }
 ] as const;
 
@@ -118,7 +116,7 @@ export default function OnboardingScreen() {
       title={copy.title}
       subtitle={copy.subtitle}
       footer={footer}
-      progress={{ current: step + 2, total: 4, label: 'Player setup' }}
+      progress={{ current: step + 2, total: 4, label: 'Account setup' }}
     >
       {step === 0 ? (
         <>
@@ -130,7 +128,7 @@ export default function OnboardingScreen() {
             </View>
             <View style={styles.previewCopy}>
               <Text style={[styles.previewName, { color: theme.text }]}>
-                {displayName.trim() || 'Your player name'}
+                {displayName.trim() || 'Your display name'}
               </Text>
               <Text style={[styles.previewMeta, { color: theme.textMuted }]}>
                 Class of {graduationYear || '—'} · Verified campus email
@@ -159,10 +157,6 @@ export default function OnboardingScreen() {
       ) : null}
       {step === 1 ? (
         <>
-          <View style={styles.bioHints}>
-            <StatusPill label="KEEP IT SOCIAL" icon="+" />
-            <StatusPill label="NO CONTACT INFO" icon="×" tone="warning" />
-          </View>
           <TextField
             label="Short bio (optional)"
             value={bio}
@@ -171,8 +165,11 @@ export default function OnboardingScreen() {
             maxLength={280}
             style={styles.bio}
             help={`${bio.length}/280`}
-            placeholder="Night owl, taco critic, undefeated at trivia…"
+            placeholder="A few words about you"
           />
+          <Text style={[styles.bioGuidance, { color: theme.textMuted }]}>
+            Keep contact details and social handles private.
+          </Text>
         </>
       ) : null}
       {step === 2 ? (
@@ -206,7 +203,6 @@ export default function OnboardingScreen() {
                     }
                   ]}
                 >
-                  <Text style={styles.chipEmoji}>{interest.emoji}</Text>
                   <Text
                     style={[
                       styles.chipLabel,
@@ -239,14 +235,13 @@ const styles = StyleSheet.create({
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.md,
-    transform: [{ rotate: '-4deg' }]
+    borderRadius: tokens.radius.md
   },
-  avatarText: { fontSize: 25, fontWeight: tokens.weight.black },
+  avatarText: { fontSize: 25, fontWeight: tokens.weight.bold },
   previewCopy: { flex: 1, marginLeft: tokens.space.md },
   previewName: {
     fontSize: 17,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -0.25
   },
   previewMeta: {
@@ -255,35 +250,33 @@ const styles = StyleSheet.create({
     lineHeight: tokens.lineHeight.caption,
     fontWeight: tokens.weight.medium
   },
-  bioHints: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: tokens.space.sm,
-    marginBottom: tokens.space.md
-  },
   bio: {
     minHeight: 150,
     paddingTop: tokens.space.md,
     textAlignVertical: 'top'
+  },
+  bioGuidance: {
+    marginTop: -tokens.space.sm,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption
   },
   selectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: tokens.space.md
   },
-  selectionLabel: { fontSize: tokens.type.label, fontWeight: tokens.weight.heavy },
+  selectionLabel: { fontSize: tokens.type.label, fontWeight: tokens.weight.medium },
   selectionLimit: { fontSize: tokens.type.caption, fontWeight: tokens.weight.bold },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: tokens.space.sm },
   chip: {
     minHeight: 54,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderRadius: tokens.radius.pill,
+    borderWidth: 1,
+    borderRadius: tokens.radius.sm,
     paddingHorizontal: tokens.space.md
   },
-  chipEmoji: { marginRight: 7, fontSize: 20 },
-  chipLabel: { fontSize: 15, fontWeight: tokens.weight.heavy },
+  chipLabel: { fontSize: 15, fontWeight: tokens.weight.medium },
   footer: { flexDirection: 'row', gap: tokens.space.sm },
   backButton: { minWidth: 110 },
   continueButton: { flex: 1 }

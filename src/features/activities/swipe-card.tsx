@@ -123,13 +123,13 @@ export function SwipeCard({ activity, disabled, onDetails, onSwipe }: SwipeCardP
           pointerEvents="none"
           style={[styles.stamp, styles.interested, interestedStyle]}
         >
-          <Text style={styles.interestedText}>I’M IN</Text>
+          <Text style={styles.interestedText}>Join</Text>
         </Animated.View>
         <Animated.View
           pointerEvents="none"
           style={[styles.stamp, styles.pass, passStyle]}
         >
-          <Text style={styles.passText}>PASS</Text>
+          <Text style={styles.passText}>Pass</Text>
         </Animated.View>
         {disabled ? <View style={StyleSheet.absoluteFill} /> : null}
       </Animated.View>
@@ -142,22 +142,22 @@ const styles = StyleSheet.create({
   stamp: {
     position: 'absolute',
     top: 84,
-    borderWidth: 3,
+    borderWidth: 2,
     borderRadius: tokens.radius.sm,
     paddingHorizontal: 13,
     paddingVertical: 7,
     backgroundColor: 'rgba(9,10,13,0.58)'
   },
-  interested: { left: 22, borderColor: tokens.color.ruckus },
+  interested: { left: 22, borderColor: '#8DD7C5' },
   pass: { right: 22, borderColor: tokens.color.coral },
   interestedText: {
-    color: tokens.color.ruckus,
-    fontSize: 27,
-    fontWeight: tokens.weight.black
+    color: '#C8EEE5',
+    fontSize: 23,
+    fontWeight: tokens.weight.bold
   },
   passText: {
     color: '#FFAAA7',
-    fontSize: 27,
-    fontWeight: tokens.weight.black
+    fontSize: 23,
+    fontWeight: tokens.weight.bold
   }
 });

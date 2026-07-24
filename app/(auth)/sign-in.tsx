@@ -37,8 +37,8 @@ export default function SignInScreen() {
   return (
     <AuthScaffold
       eyebrow="Welcome back"
-      title="The campus is waiting."
-      subtitle="Use your verified university email to jump back into tonight’s plans."
+      title="Sign in to Ruckus."
+      subtitle="Use your verified university email."
     >
       <TextField
         label="University email"
@@ -60,13 +60,9 @@ export default function SignInScreen() {
         onSubmitEditing={() => void submit()}
       />
       {error ? <InlineNotice tone="error" icon="!" message={error} /> : null}
+      <PrimaryButton label="Sign in" loading={loading} onPress={() => void submit()} />
       <PrimaryButton
-        label="Sign in to Ruckus"
-        loading={loading}
-        onPress={() => void submit()}
-      />
-      <PrimaryButton
-        label="Create a new account"
+        label="Create account"
         onPress={() => router.replace('/sign-up')}
         variant="ghost"
         style={styles.switchButton}

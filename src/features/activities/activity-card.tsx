@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { formatDistanceToNowStrict } from 'date-fns';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { ActivityMetadata } from '@/features/activities/activity-metadata';
 import type { Activity } from '@/features/activities/activity-types';
 import { tokens } from '@/theme/tokens';
@@ -42,13 +43,9 @@ export const ActivityCard = memo(function ActivityCard({
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.topRow}>
-        <View style={styles.category}>
-          <Text style={styles.categoryText}>{activity.category}</Text>
-        </View>
         <View style={styles.countdown}>
-          <View style={styles.countdownDot} />
           <Text style={styles.countdownText}>
-            {formatDistanceToNowStrict(closesAt)} left
+            Closes in {formatDistanceToNowStrict(closesAt)}
           </Text>
         </View>
       </View>
@@ -58,7 +55,7 @@ export const ActivityCard = memo(function ActivityCard({
           adjustsFontSizeToFit
           style={[styles.title, compact && styles.titleCompact]}
         >
-          {activity.title.toUpperCase()}
+          {activity.title}
         </Text>
         <View style={[styles.metadata, compact && styles.metadataCompact]}>
           <ActivityMetadata activity={activity} contrast="light" compact={compact} />
@@ -74,10 +71,10 @@ export const ActivityCard = memo(function ActivityCard({
             { opacity: pressed ? 0.62 : 1 }
           ]}
         >
-          <Text style={styles.detailsText}>See the full plan</Text>
-          <Text aria-hidden style={styles.detailsArrow}>
-            ↗
-          </Text>
+          <Text style={styles.detailsText}>View details</Text>
+          <View style={styles.detailsArrow}>
+            <AppIcon color={tokens.color.white} name="forward" size={15} />
+          </View>
         </Pressable>
       </View>
     </View>
@@ -88,48 +85,26 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     overflow: 'hidden',
-    borderRadius: tokens.radius.xl,
+    borderRadius: tokens.radius.lg,
     backgroundColor: tokens.color.inkSoft
   },
   topRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: tokens.space.sm,
+    justifyContent: 'flex-end',
     padding: tokens.space.md
   },
-  category: {
-    minHeight: 34,
-    justifyContent: 'center',
-    borderRadius: tokens.radius.pill,
-    backgroundColor: tokens.color.ruckus,
-    paddingHorizontal: 12
-  },
-  categoryText: {
-    color: tokens.color.ink,
-    fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 0.9,
-    textTransform: 'uppercase'
-  },
   countdown: {
-    minHeight: 34,
+    minHeight: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: tokens.radius.pill,
-    backgroundColor: 'rgba(9,10,13,0.72)',
-    paddingHorizontal: 12
-  },
-  countdownDot: {
-    width: 7,
-    height: 7,
-    borderRadius: tokens.radius.pill,
-    backgroundColor: tokens.color.coral,
-    marginRight: 7
+    borderRadius: tokens.radius.xs,
+    backgroundColor: 'rgba(13,15,14,0.68)',
+    paddingHorizontal: 10
   },
   countdownText: {
     color: tokens.color.white,
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.medium
   },
   copy: {
     position: 'absolute',
@@ -142,12 +117,12 @@ const styles = StyleSheet.create({
   title: {
     maxWidth: 360,
     color: tokens.color.white,
-    fontSize: 34,
-    lineHeight: 35,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1.35
+    fontSize: 32,
+    lineHeight: 36,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.8
   },
-  titleCompact: { fontSize: 28, lineHeight: 29, letterSpacing: -1 },
+  titleCompact: { fontSize: 27, lineHeight: 31, letterSpacing: -0.6 },
   metadata: { marginTop: tokens.space.md },
   metadataCompact: { marginTop: tokens.space.sm },
   details: {
@@ -161,12 +136,11 @@ const styles = StyleSheet.create({
   detailsText: {
     color: tokens.color.white,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   detailsArrow: {
     marginLeft: 7,
-    color: tokens.color.ruckus,
-    fontSize: 17,
-    fontWeight: tokens.weight.black
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });

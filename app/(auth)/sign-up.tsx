@@ -38,9 +38,9 @@ export default function SignUpScreen() {
 
   return (
     <AuthScaffold
-      eyebrow="Your invite starts here"
-      title="Claim your spot."
-      subtitle={`Use your @${env.universityEmailDomain} inbox. This confirms email-domain access—not identity.`}
+      eyebrow="Create account"
+      title="Join your campus."
+      subtitle={`Use your @${env.universityEmailDomain} email. This confirms access to your university inbox.`}
     >
       <TextField
         label="First name or nickname"
@@ -49,7 +49,7 @@ export default function SignUpScreen() {
         autoCapitalize="words"
         autoComplete="name"
         returnKeyType="next"
-        placeholder="What should your crew call you?"
+        placeholder="First name or nickname"
       />
       <TextField
         label="University email"
@@ -73,12 +73,12 @@ export default function SignUpScreen() {
       />
       {error ? <InlineNotice tone="error" icon="!" message={error} /> : null}
       <PrimaryButton
-        label="Create my account"
+        label="Create account"
         loading={loading}
         onPress={() => void submit()}
       />
       <PrimaryButton
-        label="Back to welcome"
+        label="Back"
         onPress={() => router.back()}
         variant="ghost"
         style={styles.backButton}
