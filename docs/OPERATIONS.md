@@ -4,6 +4,7 @@
 
 Mobile-safe variables:
 
+- `EXPO_PUBLIC_APP_ENV`: `development`, `preview`, or `production`
 - `EXPO_PUBLIC_SUPABASE_URL`
 - `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN`
@@ -18,6 +19,29 @@ Edge-only secrets, set with `supabase secrets set`:
 
 Never use the service-role key in an `EXPO_PUBLIC_*` variable. Supabase supplies it to
 deployed functions.
+
+### Backend modes
+
+- Local development with both Supabase variables absent starts in intentional demo
+  mode. No Supabase client is constructed, and backend-only actions remain unavailable.
+- Connected development requires both a valid HTTP(S) Supabase URL and a publishable
+  client key. A partial or malformed pair displays an actionable setup screen.
+- EAS preview and production profiles set `EXPO_PUBLIC_APP_ENV` explicitly. Their
+  config evaluation fails when either credential is missing or malformed, so those
+  builds cannot silently ship demo mode.
+
+Configure EAS environment variables for both preview and production:
+
+```sh
+eas env:create --environment preview --name EXPO_PUBLIC_SUPABASE_URL
+eas env:create --environment preview --name EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+eas env:create --environment production --name EXPO_PUBLIC_SUPABASE_URL
+eas env:create --environment production --name EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+```
+
+Use only the project URL and publishable/anonymous client key. Never place a
+service-role key, database password, check-in pepper, or cron secret in an
+`EXPO_PUBLIC_*` variable.
 
 ## Deploy
 

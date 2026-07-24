@@ -12,7 +12,7 @@ import {
 
 import { env } from '@/lib/env';
 import { logger } from '@/lib/logger';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 import type { InterestRow, ProfileRow } from '@/types/database.generated';
 
 type AuthUser = {
@@ -92,10 +92,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [interests, setInterests] = useState<InterestRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(env.backendMode !== 'configuration-error');
   const [isDemo, setIsDemo] = useState(false);
 
   const loadProfile = useCallback(async (userId: string) => {
+    const supabase = requireSupabase();
     const [{ data: profileData, error: profileError }, { data: interestData }] =
       await Promise.all([
         supabase.from('profiles').select('*').eq('id', userId).single(),
@@ -116,6 +117,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const handleAuthUrl = useCallback(async (url: string) => {
     try {
+      const supabase = requireSupabase();
       const parsed = new URL(url);
       const code = parsed.searchParams.get('code');
       if (code) {
@@ -142,7 +144,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     let active = true;
 
-    if (!env.isBackendConfigured) {
+    if (env.backendMode === 'configuration-error') {
+      return () => {
+        active = false;
+      };
+    }
+
+    if (env.backendMode === 'demo') {
       void AsyncStorage.getItem(demoSessionKey).then((value) => {
         if (!active) return;
         if (value === 'active') {
@@ -161,6 +169,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       };
     }
 
+    const supabase = requireSupabase();
     void Promise.all([supabase.auth.getSession(), Linking.getInitialURL()]).then(
       async ([{ data }, initialUrl]) => {
         if (!active) return;
@@ -199,6 +208,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       if (!env.isBackendConfigured) {
         return { error: 'Configure Supabase to test real email registration.' };
       }
+      const supabase = requireSupabase();
       const { error } = await supabase.auth.signUp({
         email: input.email,
         password: input.password,
@@ -214,8 +224,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const signIn = useCallback(async (input: { email: string; password: string }) => {
     if (!env.isBackendConfigured) {
-      return { error: 'Use “Enter demo” until Supabase is configured.' };
+      return {
+        error: env.configurationError ?? 'Use local demo until Supabase is configured.'
+      };
     }
+    const supabase = requireSupabase();
     const { error } = await supabase.auth.signInWithPassword(input);
     return { error: error?.message ?? null };
   }, []);
@@ -228,13 +241,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setProfile(null);
       return;
     }
-    await supabase.auth.signOut();
+    await requireSupabase().auth.signOut();
   }, [isDemo]);
 
   const resendVerification = useCallback(async (email: string) => {
     if (!env.isBackendConfigured) {
       return { error: 'Email delivery requires a configured Supabase project.' };
     }
+    const supabase = requireSupabase();
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email,
@@ -249,6 +263,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const attestAgeAndSafety = useCallback(async () => {
     if (isDemo) return { error: null };
+    const supabase = requireSupabase();
     const { data, error } = await supabase.rpc('attest_age_and_safety');
     if (data) setProfile(data);
     return { error: error?.message ?? null };
@@ -257,6 +272,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const completeOnboarding = useCallback(
     async (input: CompleteOnboardingInput) => {
       if (isDemo) return { error: null };
+      const supabase = requireSupabase();
       const { data, error } = await supabase.rpc('complete_onboarding', {
         display_name_value: input.displayName,
         graduation_year_value: input.graduationYear,
@@ -270,6 +286,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
   );
 
   const enterDemo = useCallback(async () => {
+    if (!env.isDemoAvailable) {
+      logger.warn('demo.entry_unavailable', { backendMode: env.backendMode });
+      return;
+    }
     await AsyncStorage.setItem(demoSessionKey, 'active');
     setIsDemo(true);
     setUser({

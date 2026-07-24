@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 
 type ReportInput = {
   messageId?: string;
@@ -11,6 +11,7 @@ type ReportInput = {
 
 export async function submitReport(input: ReportInput, isDemo: boolean): Promise<void> {
   if (isDemo) return;
+  const supabase = requireSupabase();
 
   if (input.messageId) {
     const { error } = await supabase.rpc('report_message', {
@@ -47,6 +48,7 @@ export async function submitReport(input: ReportInput, isDemo: boolean): Promise
 
 export async function requestAccountDeletion(isDemo: boolean): Promise<void> {
   if (isDemo) return;
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('request_account_deletion');
   if (error) throw error;
 }

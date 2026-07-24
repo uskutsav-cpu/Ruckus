@@ -8,17 +8,26 @@
       "node": "22.13.0",
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "channel": "development",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development"
+      }
     },
     "preview": {
       "node": "22.13.0",
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "preview"
+      }
     },
     "production": {
       "node": "22.13.0",
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production"
+      }
     }
   },
   "submit": {

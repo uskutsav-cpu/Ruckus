@@ -11,7 +11,7 @@ import type {
   SwipeDirection
 } from '@/features/activities/activity-types';
 import { logger } from '@/lib/logger';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 import type { ActivityFeedRow, Json } from '@/types/database.generated';
 
 type StoredDecision = {
@@ -99,6 +99,7 @@ async function sendDecision(
   sessionId: string,
   direction: SwipeDirection
 ): Promise<MatchState> {
+  const supabase = requireSupabase();
   if (direction === 'left') {
     const { data, error } = await supabase.rpc('record_activity_pass', {
       target_session_id: sessionId
@@ -210,6 +211,7 @@ export async function fetchActivities(
     return demoActivities.filter((activity) => !excluded.has(activity.id));
   }
 
+  const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('activity_feed')
     .select('*')

@@ -19,7 +19,7 @@ import {
   sendMessage
 } from '@/features/groups/group-service';
 import type { ChatMessage, OutboxMessage } from '@/features/groups/group-types';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/auth-provider';
 
 export function useGroups() {
@@ -122,6 +122,7 @@ export function useChat(groupId: string) {
 
   useEffect(() => {
     if (isDemo || !groupId) return;
+    const supabase = requireSupabase();
     const channel = supabase
       .channel(`group:${groupId}`, { config: { private: true } })
       .on(

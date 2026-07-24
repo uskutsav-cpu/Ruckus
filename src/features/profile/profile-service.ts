@@ -3,7 +3,7 @@ import type {
   LeaderboardPeriod,
   ProfileDashboard
 } from '@/features/profile/profile-types';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 
 const demoLeaderboard: LeaderboardEntry[] = [
   {
@@ -67,6 +67,7 @@ export async function fetchProfileDashboard(
     };
   }
 
+  const supabase = requireSupabase();
   const [
     { data: xpTotal, error: totalError },
     { data: ledger, error: ledgerError },
@@ -116,6 +117,7 @@ export async function fetchLeaderboard(
       xp: entry.xp * multiplier
     }));
   }
+  const supabase = requireSupabase();
   const { data, error } = await supabase.rpc('get_leaderboard', { period });
   if (error) throw error;
   return (data ?? []).map((entry) => ({
@@ -133,6 +135,7 @@ export async function uploadAvatar(input: {
   uri: string;
   mimeType: string;
 }): Promise<string> {
+  const supabase = requireSupabase();
   const extension = input.mimeType === 'image/png' ? 'png' : 'jpg';
   const path = `${input.userId}/avatar-${Date.now()}.${extension}`;
   const response = await fetch(input.uri);
@@ -164,6 +167,7 @@ export async function submitRating(
   isDemo: boolean
 ): Promise<void> {
   if (isDemo) return;
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('submit_event_rating', {
     target_session_id: sessionId,
     rating_value: rating,

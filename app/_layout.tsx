@@ -2,7 +2,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { BackendConfigurationScreen } from '@/components/backend-configuration-screen';
 import { LoadingScreen } from '@/components/ui/loading-screen';
+import { env } from '@/lib/env';
 import { AppProviders } from '@/providers/app-providers';
 import { useAuth } from '@/providers/auth-provider';
 import { NotificationBootstrap } from '@/providers/notification-bootstrap';
@@ -12,6 +14,9 @@ function RootNavigator() {
   const { isDark, theme } = useTheme();
   const { isLoading, profile, user } = useAuth();
 
+  if (env.configurationError) {
+    return <BackendConfigurationScreen message={env.configurationError} />;
+  }
   if (isLoading) return <LoadingScreen />;
 
   const onboardingComplete = Boolean(

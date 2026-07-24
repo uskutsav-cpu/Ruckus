@@ -12,7 +12,7 @@ import type {
   GroupLobby,
   PendingMatch
 } from '@/features/groups/group-types';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 import type { MessageRow } from '@/types/database.generated';
 
 const messagePageSize = 30;
@@ -26,6 +26,7 @@ export async function fetchGroupLobby(
     if (!lobby || lobby.id !== groupId) throw new Error('Group not found.');
     return lobby;
   }
+  const supabase = requireSupabase();
   const { data, error } = await supabase.rpc('get_group_lobby', {
     target_group_id: groupId
   });
@@ -38,6 +39,7 @@ export async function fetchGroups(isDemo: boolean): Promise<GroupLobby[]> {
     const lobby = getDemoLobby();
     return lobby ? [lobby] : [];
   }
+  const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('group_members')
     .select('group_id')
@@ -52,6 +54,7 @@ export async function fetchGroups(isDemo: boolean): Promise<GroupLobby[]> {
 export async function fetchPendingMatches(isDemo: boolean): Promise<PendingMatch[]> {
   if (isDemo) return getDemoPendingMatches();
 
+  const supabase = requireSupabase();
   const { data: waitlist, error: waitlistError } = await supabase
     .from('waitlist_entries')
     .select('id, activity_session_id, joined_at')
@@ -99,6 +102,7 @@ export async function confirmAttendance(groupId: string, isDemo: boolean): Promi
     confirmDemoAttendance();
     return;
   }
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('confirm_attendance', {
     target_group_id: groupId
   });
@@ -110,6 +114,7 @@ export async function leaveGroup(groupId: string, isDemo: boolean): Promise<void
     leaveDemoGroup();
     return;
   }
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('leave_group', {
     target_group_id: groupId,
     apply_late_penalty: true
@@ -122,6 +127,7 @@ export async function finalizeGroup(
   isDemo: boolean
 ): Promise<{ checkedInCount: number; noShowCount: number }> {
   if (isDemo) return { checkedInCount: 4, noShowCount: 0 };
+  const supabase = requireSupabase();
   const { data, error } = await supabase.rpc('finalize_group_attendance', {
     target_group_id: groupId
   });
@@ -161,6 +167,7 @@ export async function fetchMessagePage(
   const offset = page * messagePageSize;
   if (isDemo) return getDemoMessages(offset, messagePageSize);
 
+  const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('messages')
     .select('*')
@@ -196,6 +203,7 @@ export async function sendMessage(
   };
   if (isDemo) return sendDemoMessage(optimistic);
 
+  const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('messages')
     .insert({

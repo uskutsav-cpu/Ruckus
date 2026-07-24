@@ -2,7 +2,7 @@ import type {
   CheckinResult,
   GeneratedCheckinToken
 } from '@/features/checkin/checkin-types';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 
 const demoToken = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
@@ -17,6 +17,7 @@ export async function generateCheckinToken(
       qrPayload: `campusclash://check-in/${groupId}?token=${demoToken}`
     };
   }
+  const supabase = requireSupabase();
   const { data, error } = await supabase.functions.invoke('generate-checkin-token', {
     body: { groupId }
   });
@@ -41,6 +42,7 @@ export async function redeemCheckinToken(
       xpAwarded: 50
     };
   }
+  const supabase = requireSupabase();
   const { data, error } = await supabase.functions.invoke('redeem-checkin', {
     body: { token }
   });
