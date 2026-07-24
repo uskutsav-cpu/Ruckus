@@ -221,6 +221,22 @@ export type PushTokenRow = {
   updated_at: string;
 };
 
+export type NotificationPreferenceRow = {
+  profile_id: string;
+  enabled: boolean;
+  chat_messages: boolean;
+  activity_reminders: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type NotificationDispatchRow = {
+  id: string;
+  event_type: string;
+  source_id: string;
+  dispatched_at: string;
+};
+
 export type XpLedgerRow = {
   id: string;
   profile_id: string;
@@ -399,6 +415,14 @@ export type Database = {
         PushTokenRow,
         'id' | 'last_seen_at' | 'invalidated_at' | 'created_at' | 'updated_at'
       >;
+      notification_preferences: TableDefinition<
+        NotificationPreferenceRow,
+        'enabled' | 'chat_messages' | 'activity_reminders' | 'created_at' | 'updated_at'
+      >;
+      notification_dispatches: TableDefinition<
+        NotificationDispatchRow,
+        'id' | 'dispatched_at'
+      >;
       xp_ledger: TableDefinition<XpLedgerRow, 'id' | 'note' | 'created_at'>;
       blocks: TableDefinition<BlockRow, 'id' | 'created_at' | 'updated_at'>;
       reports: TableDefinition<
@@ -526,6 +550,14 @@ export type Database = {
           feedback_value?: string;
         };
         Returns: string;
+      };
+      set_notification_preferences: {
+        Args: {
+          enabled_value: boolean;
+          chat_messages_value: boolean;
+          activity_reminders_value: boolean;
+        };
+        Returns: undefined;
       };
     };
     Enums: {

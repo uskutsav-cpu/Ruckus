@@ -55,6 +55,7 @@ export default {
     if (result.state === 'matched' && result.groupId && Array.isArray(result.memberIds)) {
       await sendPushToProfiles(context.supabaseAdmin, {
         profileIds: result.memberIds,
+        category: 'transactional',
         title: 'Crew assembled ⚡',
         body: 'Your group formed. Confirm now before the countdown ends.',
         url: `/group/${result.groupId}`,

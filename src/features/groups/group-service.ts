@@ -184,5 +184,9 @@ export async function sendMessage(
     .select()
     .single();
   if (error) throw error;
-  return toChatMessage(data);
+  const saved = toChatMessage(data);
+  void supabase.functions.invoke('notify-chat-message', {
+    body: { messageId: saved.id }
+  });
+  return saved;
 }

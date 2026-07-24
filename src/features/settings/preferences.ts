@@ -14,6 +14,7 @@ export const defaultNotificationPreferences: NotificationPreferences = {
 
 const preferenceKey = 'campus-clash.notification-preferences';
 const themeKey = 'campus-clash.theme-preference';
+const notificationListeners = new Set<(preferences: NotificationPreferences) => void>();
 
 export async function readNotificationPreferences(): Promise<NotificationPreferences> {
   const value = await AsyncStorage.getItem(preferenceKey);
@@ -43,6 +44,14 @@ export async function saveNotificationPreferences(
   preferences: NotificationPreferences
 ): Promise<void> {
   await AsyncStorage.setItem(preferenceKey, JSON.stringify(preferences));
+  notificationListeners.forEach((listener) => listener(preferences));
+}
+
+export function subscribeNotificationPreferences(
+  listener: (preferences: NotificationPreferences) => void
+): () => void {
+  notificationListeners.add(listener);
+  return () => notificationListeners.delete(listener);
 }
 
 export async function readThemePreference(): Promise<'system' | 'light' | 'dark'> {

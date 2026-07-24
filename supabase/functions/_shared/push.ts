@@ -13,6 +13,7 @@ type ExpoPushTicket = {
 
 type PushInput = {
   profileIds: string[];
+  category: 'transactional' | 'chat' | 'activity';
   title: string;
   body: string;
   url: string;
@@ -28,10 +29,38 @@ export async function sendPushToProfiles(
 ): Promise<void> {
   if (input.profileIds.length === 0) return;
 
+  const uniqueProfileIds = [...new Set(input.profileIds)];
+  const { data: preferences, error: preferenceError } = await admin
+    .from('notification_preferences')
+    .select('profile_id, enabled, chat_messages, activity_reminders')
+    .in('profile_id', uniqueProfileIds);
+  if (preferenceError) {
+    console.error(
+      JSON.stringify({
+        level: 'error',
+        event: 'push.preference_lookup_failed',
+        code: preferenceError.code
+      })
+    );
+    return;
+  }
+  const preferenceMap = new Map(
+    (preferences ?? []).map((preference) => [preference.profile_id, preference])
+  );
+  const eligibleProfileIds = uniqueProfileIds.filter((profileId) => {
+    const preference = preferenceMap.get(profileId);
+    if (!preference) return true;
+    if (!preference.enabled) return false;
+    if (input.category === 'chat') return preference.chat_messages;
+    if (input.category === 'activity') return preference.activity_reminders;
+    return true;
+  });
+  if (eligibleProfileIds.length === 0) return;
+
   const { data, error } = await admin
     .from('push_tokens')
     .select('id, expo_push_token')
-    .in('profile_id', input.profileIds)
+    .in('profile_id', eligibleProfileIds)
     .is('invalidated_at', null);
 
   if (error) {

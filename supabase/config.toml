@@ -71,5 +71,11 @@ verify_jwt = true
 [functions.redeem-checkin]
 verify_jwt = true
 
-[functions.delete-account]
+[functions.notify-chat-message]
 verify_jwt = true
+
+[functions.notification-sweep]
+verify_jwt = false
+
+[functions.purge-deleted-accounts]
+verify_jwt = false

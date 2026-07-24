@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { AppProviders } from '@/providers/app-providers';
 import { useAuth } from '@/providers/auth-provider';
+import { NotificationBootstrap } from '@/providers/notification-bootstrap';
 import { useTheme } from '@/providers/theme-provider';
 
 function RootNavigator() {
@@ -23,6 +24,7 @@ function RootNavigator() {
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
+      <NotificationBootstrap />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: theme.background },

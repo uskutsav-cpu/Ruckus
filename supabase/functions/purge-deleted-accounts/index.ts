@@ -1,30 +1,17 @@
 import { withSupabase } from '@supabase/server';
 
 import { jsonError } from '../_shared/http.ts';
+import { isAuthorizedCronRequest } from '../_shared/internal.ts';
 
 const retentionDays = 7;
 const batchSize = 50;
-
-function secretsMatch(provided: string | null, expected: string): boolean {
-  if (!provided || provided.length !== expected.length) return false;
-  let mismatch = 0;
-  for (let index = 0; index < expected.length; index += 1) {
-    mismatch |= provided.charCodeAt(index) ^ expected.charCodeAt(index);
-  }
-  return mismatch === 0;
-}
 
 export default {
   fetch: withSupabase({ auth: 'none' }, async (request, context) => {
     if (request.method !== 'POST') {
       return jsonError('Method not allowed.', 405, 'METHOD_NOT_ALLOWED');
     }
-    const cronSecret = Deno.env.get('CRON_SECRET');
-    if (
-      !cronSecret ||
-      cronSecret.length < 32 ||
-      !secretsMatch(request.headers.get('x-campus-clash-cron-secret'), cronSecret)
-    ) {
+    if (!isAuthorizedCronRequest(request)) {
       return jsonError('Unauthorized.', 401, 'UNAUTHORIZED');
     }
 

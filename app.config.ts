@@ -45,6 +45,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       }
     ],
     [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'Campus Clash accesses a photo only when you choose an optional profile image.'
+      }
+    ],
+    [
       'expo-secure-store',
       {
         configureAndroidBackup: true
