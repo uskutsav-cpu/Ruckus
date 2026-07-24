@@ -9,6 +9,7 @@ coverage/
 dist/
 supabase/.branches/
 supabase/.temp/
+work/
 *.jks
 *.p8
 *.p12

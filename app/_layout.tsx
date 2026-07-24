@@ -1,7 +1,6 @@
-import 'react-native-gesture-handler';
-
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { AppProviders } from '@/providers/app-providers';
@@ -48,8 +47,10 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <AppProviders>
-      <RootNavigator />
-    </AppProviders>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppProviders>
+        <RootNavigator />
+      </AppProviders>
+    </GestureHandlerRootView>
   );
 }
