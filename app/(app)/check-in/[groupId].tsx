@@ -78,7 +78,7 @@ export default function ScanCheckinScreen() {
       <AppScreen
         eyebrow="Event check-in"
         title="Camera permission"
-        subtitle="Campus Clash only uses the camera to scan the short-lived QR shown by your group host."
+        subtitle="Ruckus only uses the camera to scan the short-lived QR shown by your group host."
       >
         <PrimaryButton label="Allow camera" onPress={() => void requestPermission()} />
         {!permission.canAskAgain ? (

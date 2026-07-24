@@ -7,7 +7,7 @@ export function parseCheckinPayload(payload: string, expectedGroupId: string): s
   try {
     url = new URL(payload);
   } catch {
-    throw new Error('That is not a Campus Clash check-in code.');
+    throw new Error('That is not a Ruckus check-in code.');
   }
   const groupId = url.pathname.replace(/^\/+/, '');
   const token = url.searchParams.get('token');

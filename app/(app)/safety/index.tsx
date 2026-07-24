@@ -15,7 +15,7 @@ const safetyActions = [
   {
     icon: '🤝',
     title: 'Community guidelines',
-    copy: 'The behavior expected in every Campus Clash crew and public meetup.',
+    copy: 'The behavior expected in every Ruckus crew and public meetup.',
     route: '/safety/guidelines'
   },
   {
@@ -32,7 +32,7 @@ export default function SafetyCenterScreen() {
     <AppScreen
       eyebrow="Safety center"
       title="Your safety comes first"
-      subtitle="Campus Clash verifies access to one university email domain. That is not proof of identity—use the same care you would with any new group."
+      subtitle="Ruckus verifies access to one university email domain. That is not proof of identity—use the same care you would with any new group."
     >
       <Pressable
         accessibilityRole="button"

@@ -1,6 +1,6 @@
 # Architecture
 
-Campus Clash uses a typed Expo Router client and a Supabase backend. The client is
+Ruckus uses a typed Expo Router client and a Supabase backend. The client is
 untrusted: authorization, matching, group assignment, check-in, XP, and administrative
 operations are enforced in Postgres functions and Edge Functions.
 

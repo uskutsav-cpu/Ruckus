@@ -43,7 +43,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <AppScreen eyebrow="Player card" title={profile?.display_name ?? 'Campus Clasher'}>
+    <AppScreen eyebrow="Player card" title={profile?.display_name ?? 'Ruckus player'}>
       <View style={styles.topActions}>
         <Pressable
           accessibilityRole="button"

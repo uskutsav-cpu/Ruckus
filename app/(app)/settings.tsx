@@ -143,7 +143,7 @@ export default function SettingsScreen() {
           • Meet only at the public, staffed venue in the confirmed lobby.
         </Text>
         <Text style={[styles.rule, { color: theme.text }]}>
-          • Keep plans in group chat; Campus Clash has no 1:1 DMs.
+          • Keep plans in group chat; Ruckus has no 1:1 DMs.
         </Text>
         <Text style={[styles.rule, { color: theme.text }]}>
           • Leave any situation that feels unsafe and contact emergency or campus safety

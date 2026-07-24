@@ -32,13 +32,13 @@ export default function EmergencyInformationScreen() {
         />
         <EmergencyStep
           number="4"
-          title="Report in Campus Clash afterward"
+          title="Report in Ruckus afterward"
           copy="When you are safe, report the member, message, or group from its lobby. Reports go only to authorized campus reviewers."
         />
       </View>
       <View style={[styles.notice, { borderColor: theme.danger }]}>
         <Text style={[styles.noticeTitle, { color: theme.danger }]}>
-          Campus Clash cannot dispatch emergency responders
+          Ruckus cannot dispatch emergency responders
         </Text>
         <Text style={[styles.noticeCopy, { color: theme.textMuted }]}>
           Chat and report tools may not be monitored in real time. Do not wait for an

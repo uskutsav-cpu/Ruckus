@@ -38,7 +38,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
   return {
     ...config,
-    name: 'Campus Clash',
+    name: 'Ruckus',
     slug: 'campus-clash',
     scheme: 'campusclash',
     version: '0.1.0',
@@ -55,7 +55,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       package: bundleIdentifier,
       adaptiveIcon: {
-        backgroundColor: '#7C3AED'
+        backgroundColor: '#C8F53D'
       },
       permissions: ['CAMERA'],
       predictiveBackGestureEnabled: true
@@ -66,7 +66,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         'expo-camera',
         {
           cameraPermission:
-            'Campus Clash uses your camera only to scan event check-in QR codes.',
+            'Ruckus uses your camera only to scan event check-in QR codes.',
           recordAudioAndroid: false,
           barcodeScannerEnabled: true
         }
@@ -74,7 +74,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-notifications',
         {
-          color: '#7C3AED',
+          color: '#C8F53D',
           defaultChannel: 'activity-updates'
         }
       ],
@@ -82,7 +82,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         'expo-image-picker',
         {
           photosPermission:
-            'Campus Clash accesses a photo only when you choose an optional profile image.'
+            'Ruckus accesses a photo only when you choose an optional profile image.'
         }
       ],
       [
@@ -94,7 +94,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-splash-screen',
         {
-          backgroundColor: '#111827',
+          backgroundColor: '#090A0D',
           imageWidth: 120
         }
       ]

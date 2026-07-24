@@ -36,7 +36,7 @@ export default function CommunityGuidelinesScreen() {
     <AppScreen
       eyebrow="Community guidelines"
       title="Make room for a great crew"
-      subtitle="These rules apply in the app, group chat, and at every Campus Clash activity."
+      subtitle="These rules apply in the app, group chat, and at every Ruckus activity."
     >
       <View style={styles.guidelines}>
         {guidelines.map(([title, copy], index) => (

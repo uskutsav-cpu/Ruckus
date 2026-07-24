@@ -217,7 +217,7 @@ export default function GroupLobbyScreen() {
           </>
         ) : (
           <Text style={[styles.venueCopy, { color: theme.textMuted }]}>
-            Revealed only after the minimum crew size confirms. Campus Clash uses public,
+            Revealed only after the minimum crew size confirms. Ruckus uses public,
             staffed venues—never private homes.
           </Text>
         )}

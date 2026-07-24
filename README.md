@@ -1,10 +1,12 @@
-# Campus Clash
+# Ruckus
 
-Campus Clash is a production-oriented mobile MVP for verified adult students at one
-launch university. Students swipe on scheduled group activities; the backend forms
-overlap-safe crews, gates a private lobby and Realtime chat, reveals an approved public
-venue after confirmation, verifies attendance with rotating QR codes, and awards XP
-from an append-only server ledger.
+**Swipe into something.**
+
+Ruckus helps verified college students swipe into spontaneous group activities, meet
+safely in public places, and earn XP for showing up. The backend forms overlap-safe
+crews, gates a private lobby and Realtime chat, reveals an approved public venue after
+confirmation, verifies attendance with rotating QR codes, and awards XP from an
+append-only server ledger.
 
 This is explicitly a group social activity app. It has no dating, one-to-one matching,
 direct messages, payments, user-created activities, AI recommendations, or live and

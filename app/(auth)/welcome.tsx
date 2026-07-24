@@ -54,10 +54,10 @@ export default function WelcomeScreen() {
                 <View style={styles.liveDot} />
                 <Text style={styles.liveCopy}>PLANS ARE FORMING TONIGHT</Text>
               </View>
-              <Text style={styles.title}>START{'\n'}SOMETHING.</Text>
+              <Text style={styles.title}>SWIPE INTO{'\n'}SOMETHING.</Text>
               <Text style={styles.subtitle}>
-                Swipe into spontaneous campus plans. When enough people join, your crew
-                unlocks.
+                Meet safely through spontaneous group activities — and earn XP for showing
+                up.
               </Text>
             </View>
           </View>
@@ -91,7 +91,7 @@ export default function WelcomeScreen() {
             onPress={() => router.push('/sign-in')}
             style={styles.secondary}
           />
-          {!env.isBackendConfigured ? (
+          {env.isDemoAvailable ? (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Enter local demo"
