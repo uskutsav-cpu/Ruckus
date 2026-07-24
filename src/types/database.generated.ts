@@ -431,6 +431,10 @@ export type Database = {
       };
     };
     Functions: {
+      attest_age_and_safety: {
+        Args: Record<PropertyKey, never>;
+        Returns: ProfileRow;
+      };
       block_user: {
         Args: { target_profile_id: string };
         Returns: undefined;
@@ -438,6 +442,15 @@ export type Database = {
       confirm_attendance: {
         Args: { target_group_id: string };
         Returns: Json;
+      };
+      complete_onboarding: {
+        Args: {
+          display_name_value: string;
+          graduation_year_value: number;
+          bio_value: string;
+          interest_ids: string[];
+        };
+        Returns: ProfileRow;
       };
       create_checkin_token_digest: {
         Args: {
