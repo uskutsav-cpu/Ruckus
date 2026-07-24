@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.ns", "dom", "dom.iterable"],
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "imports": {
+    "@supabase/server": "npm:@supabase/server@^1",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2"
+  }
+}
