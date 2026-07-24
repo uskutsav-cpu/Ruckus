@@ -17,12 +17,13 @@ export function TextField({ label, error, help, style, ...props }: TextFieldProp
       <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
-        placeholderTextColor={theme.textMuted}
-        selectionColor={theme.primary}
+        accessibilityHint={error}
+        placeholderTextColor={theme.textSubtle}
+        selectionColor={theme.accent}
         style={[
           styles.input,
           {
-            backgroundColor: theme.surface,
+            backgroundColor: theme.surfaceElevated,
             borderColor: error ? theme.danger : theme.border,
             color: theme.text
           },
@@ -31,7 +32,10 @@ export function TextField({ label, error, help, style, ...props }: TextFieldProp
         {...props}
       />
       {error || help ? (
-        <Text style={[styles.support, { color: error ? theme.danger : theme.textMuted }]}>
+        <Text
+          accessibilityRole={error ? 'alert' : undefined}
+          style={[styles.support, { color: error ? theme.danger : theme.textMuted }]}
+        >
           {error ?? help}
         </Text>
       ) : null}
@@ -41,18 +45,23 @@ export function TextField({ label, error, help, style, ...props }: TextFieldProp
 
 const styles = StyleSheet.create({
   wrapper: { marginBottom: tokens.space.md },
-  label: { marginBottom: 7, fontSize: 14, fontWeight: '800' },
+  label: {
+    marginBottom: tokens.space.sm,
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.heavy
+  },
   input: {
-    minHeight: 54,
-    borderWidth: 1,
+    minHeight: tokens.layout.actionHeight,
+    borderWidth: 1.5,
     borderRadius: tokens.radius.md,
     paddingHorizontal: tokens.space.md,
-    fontSize: tokens.type.body
+    fontSize: tokens.type.body,
+    fontWeight: tokens.weight.medium
   },
   support: {
     marginTop: 6,
-    paddingHorizontal: 2,
+    paddingHorizontal: tokens.space.xs,
     fontSize: tokens.type.caption,
-    lineHeight: 18
+    lineHeight: tokens.lineHeight.caption
   }
 });

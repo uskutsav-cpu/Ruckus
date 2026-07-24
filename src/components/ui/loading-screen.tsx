@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
-export function LoadingScreen({ label = 'Loading Campus Clash…' }: { label?: string }) {
+export function LoadingScreen({ label = 'Loading Ruckus…' }: { label?: string }) {
   const { theme } = useTheme();
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -15,5 +15,9 @@ export function LoadingScreen({ label = 'Loading Campus Clash…' }: { label?: s
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  label: { marginTop: tokens.space.md, fontSize: 15, fontWeight: '700' }
+  label: {
+    marginTop: tokens.space.md,
+    fontSize: 15,
+    fontWeight: tokens.weight.heavy
+  }
 });

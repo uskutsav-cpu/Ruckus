@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { PrimaryButton } from '@/components/ui/primary-button';
+import { SecondaryButton } from '@/components/ui/secondary-button';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
-type StatePanelProps = {
+export type StatePanelProps = {
   icon: string;
+  eyebrow?: string;
   title: string;
   message: string;
   actionLabel?: string;
@@ -14,6 +15,7 @@ type StatePanelProps = {
 
 export function StatePanel({
   icon,
+  eyebrow,
   title,
   message,
   actionLabel,
@@ -22,16 +24,16 @@ export function StatePanel({
   const { theme } = useTheme();
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
+      <View style={[styles.iconWrap, { backgroundColor: theme.surfaceMuted }]}>
+        <Text style={styles.icon}>{icon}</Text>
+      </View>
+      {eyebrow ? (
+        <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text>
+      ) : null}
       <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
       <Text style={[styles.message, { color: theme.textMuted }]}>{message}</Text>
       {actionLabel && onAction ? (
-        <PrimaryButton
-          label={actionLabel}
-          onPress={onAction}
-          variant="secondary"
-          style={styles.button}
-        />
+        <SecondaryButton label={actionLabel} onPress={onAction} style={styles.button} />
       ) : null}
     </View>
   );
@@ -42,21 +44,40 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.space.xl
+    paddingHorizontal: tokens.space.xl,
+    paddingVertical: tokens.space.xxl
   },
-  icon: { fontSize: 52 },
+  iconWrap: {
+    width: 76,
+    height: 76,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.lg,
+    transform: [{ rotate: '-4deg' }]
+  },
+  icon: { fontSize: 38 },
+  eyebrow: {
+    marginTop: tokens.space.lg,
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.black,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase'
+  },
   title: {
-    marginTop: tokens.space.md,
+    marginTop: tokens.space.sm,
     fontSize: tokens.type.heading,
-    fontWeight: '900',
+    lineHeight: tokens.lineHeight.heading,
+    fontWeight: tokens.weight.black,
+    letterSpacing: -0.6,
     textAlign: 'center'
   },
   message: {
     marginTop: tokens.space.sm,
     maxWidth: 330,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: tokens.type.label,
+    lineHeight: 21,
+    fontWeight: tokens.weight.medium,
     textAlign: 'center'
   },
-  button: { minWidth: 180, marginTop: tokens.space.lg }
+  button: { minWidth: 200, marginTop: tokens.space.lg }
 });

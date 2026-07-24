@@ -5,7 +5,8 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
+  type ViewStyle
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -18,6 +19,7 @@ type AppScreenProps = PropsWithChildren<{
   subtitle?: string;
   footer?: ReactNode;
   scroll?: boolean;
+  contentStyle?: ViewStyle;
 }>;
 
 export function AppScreen({
@@ -26,13 +28,14 @@ export function AppScreen({
   eyebrow,
   subtitle,
   footer,
-  scroll = true
+  scroll = true,
+  contentStyle
 }: AppScreenProps) {
   const { theme } = useTheme();
   const content = (
-    <View style={styles.content}>
+    <View style={[styles.content, contentStyle]}>
       {eyebrow ? (
-        <Text style={[styles.eyebrow, { color: theme.primary }]}>{eyebrow}</Text>
+        <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text>
       ) : null}
       {title ? <Text style={[styles.title, { color: theme.text }]}>{title}</Text> : null}
       {subtitle ? (
@@ -46,12 +49,15 @@ export function AppScreen({
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={8}
         style={styles.flex}
       >
         {scroll ? (
           <ScrollView
             contentContainerStyle={styles.scroll}
+            keyboardDismissMode="interactive"
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             {content}
           </ScrollView>
@@ -65,7 +71,7 @@ export function AppScreen({
               { backgroundColor: theme.background, borderTopColor: theme.border }
             ]}
           >
-            {footer}
+            <View style={styles.footerInner}>{footer}</View>
           </View>
         ) : null}
       </KeyboardAvoidingView>
@@ -78,31 +84,43 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   scroll: { flexGrow: 1 },
   content: {
+    width: '100%',
+    maxWidth: tokens.layout.maxContentWidth,
     flexGrow: 1,
-    paddingHorizontal: tokens.space.lg,
-    paddingTop: tokens.space.lg,
+    alignSelf: 'center',
+    paddingHorizontal: tokens.layout.screenPadding,
+    paddingTop: tokens.space.md,
     paddingBottom: tokens.space.xxl
   },
   eyebrow: {
     marginBottom: tokens.space.sm,
     fontSize: tokens.type.caption,
-    fontWeight: '900',
-    letterSpacing: 1.4,
+    fontWeight: tokens.weight.black,
+    letterSpacing: 1.35,
     textTransform: 'uppercase'
   },
   title: {
     fontSize: tokens.type.title,
-    fontWeight: '900',
-    letterSpacing: -0.8
+    lineHeight: tokens.lineHeight.title,
+    fontWeight: tokens.weight.black,
+    letterSpacing: -1.15
   },
   subtitle: {
     marginTop: tokens.space.sm,
     marginBottom: tokens.space.lg,
     fontSize: tokens.type.body,
-    lineHeight: 24
+    lineHeight: tokens.lineHeight.body,
+    fontWeight: tokens.weight.medium
   },
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    padding: tokens.space.md
+    paddingHorizontal: tokens.layout.screenPadding,
+    paddingTop: tokens.space.md,
+    paddingBottom: tokens.space.sm
+  },
+  footerInner: {
+    width: '100%',
+    maxWidth: tokens.layout.maxContentWidth,
+    alignSelf: 'center'
   }
 });
