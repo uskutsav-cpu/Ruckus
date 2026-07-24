@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Linking from 'expo-linking';
 import {
   ActivityIndicator,
   StyleSheet,
@@ -163,14 +164,16 @@ export default function ScanCheckinScreen() {
               ? 'You stay in control, and Ruckus never stores the camera feed.'
               : 'Re-enable camera access in system settings, then return here to scan.'}
           </Text>
-          {permission.canAskAgain ? (
-            <PrimaryButton
-              label="Allow camera"
-              leadingIcon="↗"
-              onPress={() => void requestPermission()}
-              style={styles.permissionButton}
-            />
-          ) : null}
+          <PrimaryButton
+            label={permission.canAskAgain ? 'Allow camera' : 'Open system settings'}
+            leadingIcon="↗"
+            onPress={() =>
+              permission.canAskAgain
+                ? void requestPermission()
+                : void Linking.openSettings()
+            }
+            style={styles.permissionButton}
+          />
         </View>
       </AppScreen>
     );

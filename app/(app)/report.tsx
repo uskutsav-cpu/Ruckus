@@ -383,8 +383,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.xs,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.heavy,
-    textTransform: 'capitalize'
+    fontWeight: tokens.weight.heavy
   },
   submit: { marginTop: tokens.space.lg },
   secondary: { marginTop: tokens.space.sm },

@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Stack } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DemoModeBanner } from '@/components/demo-mode-banner';
 import { useAuth } from '@/providers/auth-provider';
@@ -9,19 +10,28 @@ import { useTheme } from '@/providers/theme-provider';
 export default function AppLayout() {
   const { isDemo } = useAuth();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const [demoBannerHeight, setDemoBannerHeight] = useState(42);
 
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>
       {isDemo ? (
         <SafeAreaView
           edges={['top']}
+          onLayout={(event) => {
+            const contentHeight = Math.max(
+              42,
+              event.nativeEvent.layout.height - insets.top
+            );
+            setDemoBannerHeight(contentHeight);
+          }}
           pointerEvents="none"
           style={[styles.demoOverlay, { backgroundColor: theme.accentMuted }]}
         >
           <DemoModeBanner />
         </SafeAreaView>
       ) : null}
-      <View style={[styles.stack, isDemo && styles.stackWithDemoBanner]}>
+      <View style={[styles.stack, isDemo ? { marginTop: demoBannerHeight } : undefined]}>
         <Stack
           screenOptions={{
             headerShown: false,
@@ -62,7 +72,6 @@ export default function AppLayout() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   stack: { flex: 1 },
-  stackWithDemoBanner: { marginTop: 42 },
   demoOverlay: {
     position: 'absolute',
     top: 0,

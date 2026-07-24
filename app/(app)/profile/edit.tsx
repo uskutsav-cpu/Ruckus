@@ -245,7 +245,11 @@ const styles = StyleSheet.create({
   },
   photoButton: { marginTop: tokens.space.sm, marginBottom: tokens.space.lg },
   bio: { minHeight: 120, paddingTop: tokens.space.md, textAlignVertical: 'top' },
-  sectionTitle: { marginTop: tokens.space.lg, fontSize: 17, fontWeight: '900' },
+  sectionTitle: {
+    marginTop: tokens.space.lg,
+    fontSize: 17,
+    fontWeight: tokens.weight.black
+  },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -261,7 +265,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13
   },
   chipEmoji: { marginRight: 6, fontSize: 18 },
-  chipText: { fontSize: 13, fontWeight: '800' },
+  chipText: { fontSize: 13, fontWeight: tokens.weight.heavy },
   footer: { flexDirection: 'row', gap: tokens.space.sm },
   footerButton: { flex: 1 }
 });

@@ -1,7 +1,11 @@
 import { Component, type ErrorInfo, type PropsWithChildren } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { AppScreen } from '@/components/ui/app-screen';
+import { PrimaryButton } from '@/components/ui/primary-button';
+import { StatusPill } from '@/components/ui/status-pill';
 import { logger } from '@/lib/logger';
+import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
 type State = {
@@ -25,52 +29,62 @@ export class ErrorBoundary extends Component<PropsWithChildren, State> {
   public override render() {
     if (!this.state.error) return this.props.children;
 
-    return (
-      <View style={styles.container} accessibilityRole="alert">
-        <Text style={styles.emoji}>🛟</Text>
-        <Text style={styles.title}>We hit a rough patch</Text>
-        <Text style={styles.message}>
-          Your account is safe. Try reloading this screen.
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => this.setState({ error: null })}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Try again</Text>
-        </Pressable>
-      </View>
-    );
+    return <ErrorFallback onRetry={() => this.setState({ error: null })} />;
   }
+}
+
+function ErrorFallback({ onRetry }: { onRetry: () => void }) {
+  const { theme } = useTheme();
+
+  return (
+    <AppScreen scroll={false}>
+      <View accessibilityRole="alert" style={styles.container}>
+        <StatusPill label="APP RECOVERY" tone="warning" />
+        <View style={[styles.mark, { backgroundColor: theme.surfaceMuted }]}>
+          <Text style={[styles.markText, { color: theme.text }]}>↻</Text>
+        </View>
+        <Text style={[styles.title, { color: theme.text }]}>
+          Ruckus hit a rough patch.
+        </Text>
+        <Text style={[styles.message, { color: theme.textMuted }]}>
+          Your account data remains protected. Retry this screen; if the problem
+          continues, restart the app.
+        </Text>
+        <PrimaryButton label="Try again" onPress={onRetry} style={styles.button} />
+      </View>
+    </AppScreen>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: tokens.space.xl,
-    backgroundColor: '#111827'
+    justifyContent: 'center'
   },
-  emoji: { fontSize: 52, marginBottom: tokens.space.md },
+  mark: {
+    width: 82,
+    height: 82,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.lg,
+    marginTop: tokens.space.lg
+  },
+  markText: { fontSize: 40, fontWeight: tokens.weight.black },
   title: {
-    color: '#FFFFFF',
+    marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
-    fontWeight: '800',
+    lineHeight: tokens.lineHeight.title,
+    fontWeight: tokens.weight.black,
     textAlign: 'center'
   },
   message: {
-    color: '#CBD5E1',
-    fontSize: tokens.type.body,
-    textAlign: 'center',
-    marginVertical: tokens.space.md
+    maxWidth: 350,
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.label,
+    lineHeight: 22,
+    fontWeight: tokens.weight.medium,
+    textAlign: 'center'
   },
-  button: {
-    minHeight: tokens.touchTarget,
-    justifyContent: 'center',
-    paddingHorizontal: tokens.space.lg,
-    borderRadius: tokens.radius.pill,
-    backgroundColor: tokens.color.violet
-  },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' }
+  button: { minWidth: 220, marginTop: tokens.space.xl }
 });

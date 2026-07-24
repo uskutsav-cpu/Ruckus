@@ -30,14 +30,30 @@ const impacts = [
 ] as const;
 
 export default function AccountDeletionScreen() {
-  const { isDemo, refreshProfile } = useAuth();
+  const { isDemo, signOut } = useAuth();
   const { theme } = useTheme();
   const network = useNetInfo();
   const [confirmation, setConfirmation] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [demoComplete, setDemoComplete] = useState(false);
+  const [requestScheduled, setRequestScheduled] = useState(false);
   const [error, setError] = useState('');
   const confirmed = confirmation.trim().toUpperCase() === 'DELETE';
+
+  const finishSignOut = async () => {
+    setSubmitting(true);
+    setError('');
+    try {
+      await signOut();
+      router.replace('/account-deletion-confirmed');
+    } catch {
+      setError(
+        'Deletion is scheduled, but sign-out did not finish. Reconnect and try signing out again.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const requestDeletion = async () => {
     if (!confirmed || network.isConnected === false) return;
@@ -45,14 +61,27 @@ export default function AccountDeletionScreen() {
     setError('');
     try {
       await requestAccountDeletion(isDemo);
-      if (isDemo) {
-        setDemoComplete(true);
-      } else {
-        await refreshProfile();
-      }
     } catch {
       setError(
         'Your account was not changed. The deletion request could not be verified—check your connection and try again.'
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    if (isDemo) {
+      setDemoComplete(true);
+      setSubmitting(false);
+      return;
+    }
+
+    setRequestScheduled(true);
+    try {
+      await signOut();
+      router.replace('/account-deletion-confirmed');
+    } catch {
+      setError(
+        'Deletion is scheduled, but sign-out did not finish. Reconnect and try signing out again.'
       );
     } finally {
       setSubmitting(false);
@@ -77,6 +106,49 @@ export default function AccountDeletionScreen() {
           <PrimaryButton
             label="Back to settings"
             onPress={() => router.replace('/settings')}
+            style={styles.completeButton}
+          />
+        </View>
+      </AppScreen>
+    );
+  }
+
+  if (requestScheduled) {
+    return (
+      <AppScreen scroll={false}>
+        <View style={styles.complete}>
+          <StatusPill label="DELETION SCHEDULED" tone="warning" />
+          <View
+            style={[
+              styles.completeMark,
+              {
+                backgroundColor: tokens.color.coralSoft,
+                borderColor: tokens.color.coral,
+                borderWidth: 1
+              }
+            ]}
+          >
+            <Text style={[styles.completeMarkText, { color: '#7C2421' }]}>!</Text>
+          </View>
+          <Text style={[styles.completeTitle, { color: theme.text }]}>
+            Finish signing out.
+          </Text>
+          <Text style={[styles.completeCopy, { color: theme.textMuted }]}>
+            The deletion request succeeded and social participation is disabled. Sign out
+            must finish before this device leaves the account.
+          </Text>
+          {network.isConnected === false ? (
+            <InlineNotice
+              tone="offline"
+              message="Reconnect to finish the secure sign-out."
+            />
+          ) : null}
+          {error ? <InlineNotice tone="error" message={error} /> : null}
+          <PrimaryButton
+            label="Finish signing out"
+            loading={submitting}
+            disabled={network.isConnected === false}
+            onPress={() => void finishSignOut()}
             style={styles.completeButton}
           />
         </View>

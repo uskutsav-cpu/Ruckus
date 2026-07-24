@@ -44,6 +44,9 @@ export default function HostCheckinScreen() {
         const next = await generateCheckinToken(groupId, isDemo);
         if (!active) return;
         setToken(next);
+        setRemaining(
+          Math.max(0, Math.ceil((new Date(next.expiresAt).getTime() - Date.now()) / 1000))
+        );
         setError('');
         refreshTimer = setTimeout(() => void refresh(), 70_000);
       } catch {

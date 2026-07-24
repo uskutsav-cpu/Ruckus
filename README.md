@@ -75,7 +75,8 @@ pgTAP. CI runs both the app and database suites.
 
 Deployment, secrets, schedules, and account-purge behavior are documented in
 [`docs/OPERATIONS.md`](docs/OPERATIONS.md). The complete device acceptance checklist is
-in [`docs/E2E_SMOKE.md`](docs/E2E_SMOKE.md).
+in [`docs/E2E_SMOKE.md`](docs/E2E_SMOKE.md), and the screen-by-screen light/dark
+acceptance matrix is in [`docs/VISUAL_QA.md`](docs/VISUAL_QA.md).
 
 Build profiles are EAS-compatible:
 

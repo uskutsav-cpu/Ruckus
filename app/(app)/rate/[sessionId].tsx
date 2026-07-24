@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   completeTitle: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
-    fontWeight: '900',
+    fontWeight: tokens.weight.black,
     textAlign: 'center'
   },
   completeCopy: {
