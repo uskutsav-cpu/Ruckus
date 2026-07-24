@@ -3,6 +3,7 @@ import type {
   GroupStatus,
   MessageKind
 } from '@/types/database.generated';
+import type { ImageSource } from 'expo-image';
 
 export type GroupMemberCard = {
   id: string;
@@ -34,6 +35,7 @@ export type PendingMatch = {
   title: string;
   startsAt: string;
   joinedAt: string;
+  imageSource: ImageSource | number;
 };
 
 export type ChatMessage = {

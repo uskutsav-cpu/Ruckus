@@ -2,11 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { format, formatDistanceToNowStrict } from 'date-fns';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { BackButton } from '@/components/ui/back-button';
+import { ErrorState } from '@/components/ui/error-state';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { StatePanel } from '@/components/ui/state-panel';
+import { SecondaryButton } from '@/components/ui/secondary-button';
+import { StatusPill } from '@/components/ui/status-pill';
+import type { GroupLobby } from '@/features/groups/group-types';
 import {
   useConfirmAttendance,
   useFinalizeGroup,
@@ -31,35 +37,54 @@ function useCountdown(deadline?: string): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')} remaining`;
 }
 
+function statusForGroup(group: GroupLobby) {
+  if (group.status === 'confirmed') {
+    return { label: 'CREW CONFIRMED', tone: 'success' as const };
+  }
+  if (group.status === 'pending_confirmation') {
+    return { label: 'CONFIRMATION OPEN', tone: 'warning' as const };
+  }
+  if (group.status === 'completed') {
+    return { label: 'ACTIVITY COMPLETE', tone: 'neutral' as const };
+  }
+  if (group.status === 'cancelled') {
+    return { label: 'GROUP CANCELLED', tone: 'warning' as const };
+  }
+  return { label: 'CREW FORMING', tone: 'accent' as const };
+}
+
 export default function GroupLobbyScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const groupId = Array.isArray(id) ? id[0] : id;
   const { user } = useAuth();
   const { theme } = useTheme();
+  const network = useNetInfo();
   const lobby = useGroupLobby(groupId ?? '');
   const confirm = useConfirmAttendance(groupId ?? '');
   const leave = useLeaveGroup(groupId ?? '');
   const finalize = useFinalizeGroup(groupId ?? '');
   const countdown = useCountdown(lobby.data?.confirmationDeadline);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(Date.now()), 60_000);
     return () => clearInterval(timer);
   }, []);
+
   const currentMember = useMemo(
     () => lobby.data?.members.find((member) => member.id === user?.id),
     [lobby.data?.members, user?.id]
   );
 
-  if (lobby.isLoading) return <LoadingScreen label="Opening the crew lobby…" />;
+  if (lobby.isLoading) return <LoadingScreen label="Opening your crew…" />;
   if (lobby.isError || !lobby.data) {
     return (
       <AppScreen>
-        <StatePanel
-          icon="🔒"
-          title="Lobby unavailable"
-          message="You may no longer be an active member, or the connection was interrupted."
-          actionLabel="Back to groups"
+        <ErrorState
+          icon="×"
+          title="This lobby isn’t available"
+          message="You may have been removed, the group may have expired, or your connection was interrupted."
+          actionLabel="Back to crews"
           onAction={() => router.replace('/groups')}
         />
       </AppScreen>
@@ -67,8 +92,17 @@ export default function GroupLobbyScreen() {
   }
 
   const group = lobby.data;
+  const status = statusForGroup(group);
   const isPending = group.status === 'pending_confirmation';
-  const canConfirm = isPending && currentMember?.confirmation !== 'confirmed';
+  const isInactive = group.status === 'cancelled' || group.status === 'completed';
+  const canConfirm =
+    isPending &&
+    currentMember?.confirmation !== 'confirmed' &&
+    currentMember?.confirmation !== 'expired' &&
+    currentMember?.confirmation !== 'declined';
+  const confirmedCount = group.members.filter(
+    (member) => member.confirmation === 'confirmed'
+  ).length;
   const canFinalize =
     group.status === 'confirmed' &&
     currentMember?.isHost === true &&
@@ -77,9 +111,9 @@ export default function GroupLobbyScreen() {
   const confirmLeave = () => {
     Alert.alert(
       'Leave this crew?',
-      'Leaving within 24 hours of the activity can apply a −15 XP reliability penalty.',
+      'Leaving within 24 hours of the activity can apply the existing −15 XP reliability penalty.',
       [
-        { text: 'Stay', style: 'cancel' },
+        { text: 'Stay in crew', style: 'cancel' },
         {
           text: 'Leave group',
           style: 'destructive',
@@ -93,60 +127,158 @@ export default function GroupLobbyScreen() {
   };
 
   return (
-    <AppScreen
-      eyebrow={group.status === 'confirmed' ? 'Crew confirmed' : 'Action needed'}
-      title={group.title}
-      subtitle={`${format(new Date(group.startsAt), 'EEEE, MMMM d · h:mm a')} · ${formatDistanceToNowStrict(new Date(group.startsAt), { addSuffix: true })}`}
-    >
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => router.replace('/groups')}
-        style={[styles.back, { backgroundColor: theme.surfaceMuted }]}
+    <AppScreen>
+      <BackButton label="All crews" onPress={() => router.replace('/groups')} />
+
+      {network.isConnected === false ? (
+        <InlineNotice
+          icon="↯"
+          tone="offline"
+          message="Offline — confirmations, chat, and venue updates need a connection."
+        />
+      ) : null}
+
+      <View
+        style={[
+          styles.hero,
+          { backgroundColor: theme.surfaceElevated, borderColor: theme.border },
+          tokens.shadow.card
+        ]}
       >
-        <Text style={[styles.backText, { color: theme.text }]}>← All groups</Text>
-      </Pressable>
+        <View style={styles.heroAccent} />
+        <StatusPill label={status.label} tone={status.tone} />
+        <Text style={[styles.title, { color: theme.text }]}>{group.title}</Text>
+        <Text style={[styles.when, { color: theme.textMuted }]}>
+          {format(new Date(group.startsAt), 'EEEE, MMMM d · h:mm a')}
+        </Text>
+        <Text style={[styles.distance, { color: theme.accent }]}>
+          {formatDistanceToNowStrict(new Date(group.startsAt), { addSuffix: true })}
+        </Text>
+      </View>
+
+      {group.status === 'cancelled' ? (
+        <InlineNotice
+          tone="error"
+          icon="!"
+          message="This group was cancelled. Chat, venue, and check-in actions are closed."
+        />
+      ) : group.status === 'completed' ? (
+        <InlineNotice
+          icon="✓"
+          message="This activity is complete. Your verified attendance and XP history remain on your profile."
+        />
+      ) : null}
 
       {isPending ? (
-        <View style={[styles.confirmCard, { borderColor: tokens.color.amber }]}>
-          <Text style={[styles.confirmTitle, { color: theme.text }]}>
-            Confirm you’re attending
-          </Text>
-          <Text style={[styles.countdown, { color: tokens.color.coral }]}>
-            {countdown}
-          </Text>
-          <Text style={[styles.confirmCopy, { color: theme.textMuted }]}>
-            The crew needs {group.members.length > 3 ? 'enough' : 'more'} responses before
-            its staffed public meeting spot unlocks.
+        <View
+          style={[
+            styles.confirmCard,
+            {
+              backgroundColor: theme.surfaceElevated,
+              borderColor: canConfirm ? tokens.color.coral : theme.border
+            }
+          ]}
+        >
+          <View style={styles.confirmTop}>
+            <View style={styles.confirmCopyWrap}>
+              <Text style={[styles.confirmTitle, { color: theme.text }]}>
+                {canConfirm ? 'Hold your spot' : 'Your spot is held'}
+              </Text>
+              <Text
+                accessibilityLiveRegion="polite"
+                style={[styles.countdown, { color: theme.danger }]}
+              >
+                {countdown}
+              </Text>
+            </View>
+            <View style={[styles.confirmCount, { backgroundColor: theme.surfaceMuted }]}>
+              <Text style={[styles.confirmCountValue, { color: theme.text }]}>
+                {confirmedCount}/{group.members.length}
+              </Text>
+              <Text style={[styles.confirmCountLabel, { color: theme.textMuted }]}>
+                confirmed
+              </Text>
+            </View>
+          </View>
+          <View
+            accessibilityLabel={`${confirmedCount} of ${group.members.length} members confirmed`}
+            style={styles.segments}
+          >
+            {group.members.map((member) => (
+              <View
+                key={member.id}
+                style={[
+                  styles.segment,
+                  {
+                    backgroundColor:
+                      member.confirmation === 'confirmed'
+                        ? theme.primary
+                        : theme.surfaceStrong
+                  }
+                ]}
+              />
+            ))}
+          </View>
+          <Text style={[styles.confirmBody, { color: theme.textMuted }]}>
+            The public venue unlocks only after enough real members confirm. Ruckus never
+            reveals a private home or live location.
           </Text>
           {canConfirm ? (
             <PrimaryButton
               label="Yes, I’m attending"
+              leadingIcon="✓"
               loading={confirm.isPending}
+              disabled={network.isConnected === false}
               onPress={() => confirm.mutate()}
               style={styles.confirmButton}
             />
           ) : (
-            <Text style={[styles.confirmedText, { color: theme.success }]}>
-              ✓ Your response is confirmed
-            </Text>
+            <StatusPill
+              label={
+                currentMember?.confirmation === 'confirmed'
+                  ? 'YOU’RE CONFIRMED'
+                  : 'RESPONSE CLOSED'
+              }
+              tone={currentMember?.confirmation === 'confirmed' ? 'success' : 'neutral'}
+              style={styles.confirmedPill}
+            />
           )}
           {confirm.isError ? (
-            <Text accessibilityRole="alert" style={{ color: theme.danger }}>
-              Confirmation failed. The deadline may have passed; refresh and try again.
-            </Text>
+            <InlineNotice
+              tone="error"
+              icon="!"
+              message="Confirmation failed. The deadline may have passed; refresh and try again."
+            />
           ) : null}
         </View>
       ) : null}
 
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>
-        Crew · {group.members.length}
-      </Text>
-      <View style={styles.memberGrid}>
+      <View style={styles.sectionHeader}>
+        <View>
+          <Text style={[styles.sectionEyebrow, { color: theme.accent }]}>
+            PRIVATE CREW
+          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            {group.members.length} members
+          </Text>
+        </View>
+        <Text style={[styles.sectionMeta, { color: theme.textMuted }]}>
+          {confirmedCount} attending
+        </Text>
+      </View>
+
+      <View accessibilityRole="list" style={styles.memberGrid}>
         {group.members.map((member) => (
           <Pressable
             key={member.id}
             accessibilityRole="button"
-            accessibilityLabel={`${member.displayName}${member.isHost ? ', host' : ''}`}
+            accessibilityLabel={`${member.displayName}${member.isHost ? ', host' : ''}. ${
+              member.confirmation === 'confirmed'
+                ? 'Attending'
+                : member.confirmation === 'declined'
+                  ? 'Declined'
+                  : 'Awaiting response'
+            }`}
             accessibilityHint={
               member.id === user?.id ? undefined : 'Long-press to report or block'
             }
@@ -159,21 +291,39 @@ export default function GroupLobbyScreen() {
                       params: { userId: member.id, groupId: group.id }
                     })
             }
-            style={[
+            style={({ pressed }) => [
               styles.member,
-              { backgroundColor: theme.surface, borderColor: theme.border }
+              {
+                backgroundColor: theme.surfaceElevated,
+                borderColor: theme.border,
+                opacity: pressed ? 0.72 : 1
+              }
             ]}
           >
-            <View style={[styles.avatar, { backgroundColor: theme.surfaceMuted }]}>
-              <Text style={[styles.avatarText, { color: theme.primary }]}>
+            <View
+              style={[
+                styles.avatar,
+                {
+                  backgroundColor: member.isHost ? theme.accentMuted : theme.surfaceMuted
+                }
+              ]}
+            >
+              <Text style={[styles.avatarText, { color: theme.text }]}>
                 {member.displayName.slice(0, 1).toUpperCase()}
               </Text>
             </View>
             <View style={styles.memberCopy}>
-              <Text numberOfLines={1} style={[styles.memberName, { color: theme.text }]}>
-                {member.displayName}
-                {member.isHost ? ' · Host' : ''}
-              </Text>
+              <View style={styles.memberNameRow}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.memberName, { color: theme.text }]}
+                >
+                  {member.displayName}
+                </Text>
+                {member.isHost ? (
+                  <Text style={[styles.host, { color: theme.accent }]}>HOST</Text>
+                ) : null}
+              </View>
               <Text
                 style={[
                   styles.memberStatus,
@@ -181,11 +331,19 @@ export default function GroupLobbyScreen() {
                     color:
                       member.confirmation === 'confirmed'
                         ? theme.success
-                        : theme.textMuted
+                        : member.confirmation === 'declined'
+                          ? theme.danger
+                          : theme.textMuted
                   }
                 ]}
               >
-                {member.confirmation === 'confirmed' ? '✓ Attending' : 'Awaiting reply'}
+                {member.confirmation === 'confirmed'
+                  ? '✓ Attending'
+                  : member.confirmation === 'declined'
+                    ? 'Not attending'
+                    : member.confirmation === 'expired'
+                      ? 'Response expired'
+                      : 'Awaiting response'}
               </Text>
             </View>
           </Pressable>
@@ -195,142 +353,299 @@ export default function GroupLobbyScreen() {
       <View
         style={[
           styles.venue,
-          { backgroundColor: theme.surface, borderColor: theme.border }
+          {
+            backgroundColor: group.venue ? theme.accentMuted : theme.surfaceMuted,
+            borderColor: group.venue ? theme.accent : theme.border
+          }
         ]}
       >
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>
-          {group.venue ? 'Public meeting spot' : '🔒 Meeting spot locked'}
-        </Text>
+        <View style={styles.venueHeading}>
+          <View
+            style={[
+              styles.venueIcon,
+              { backgroundColor: group.venue ? theme.primary : theme.surfaceStrong }
+            ]}
+          >
+            <Text style={[styles.venueIconText, { color: theme.onPrimary }]}>
+              {group.venue ? '⌖' : '×'}
+            </Text>
+          </View>
+          <View style={styles.venueTitleWrap}>
+            <Text style={[styles.sectionEyebrow, { color: theme.accent }]}>
+              PUBLIC MEETING SPOT
+            </Text>
+            <Text style={[styles.venueTitle, { color: theme.text }]}>
+              {group.venue ? 'Venue revealed' : 'Locked until confirmation'}
+            </Text>
+          </View>
+        </View>
         {group.venue ? (
           <>
             <Text style={[styles.venueName, { color: theme.text }]}>
               {group.venue.name}
             </Text>
-            <Text style={[styles.venueCopy, { color: theme.textMuted }]}>
+            <Text style={[styles.venueBody, { color: theme.textMuted }]}>
               {group.venue.address}
             </Text>
             {group.venue.notes ? (
-              <Text style={[styles.venueCopy, { color: theme.textMuted }]}>
+              <Text style={[styles.venueBody, { color: theme.textMuted }]}>
                 {group.venue.notes}
               </Text>
             ) : null}
           </>
         ) : (
-          <Text style={[styles.venueCopy, { color: theme.textMuted }]}>
-            Revealed only after the minimum crew size confirms. Ruckus uses public,
-            staffed venues—never private homes.
+          <Text style={[styles.venueBody, { color: theme.textMuted }]}>
+            The exact venue is withheld until the group reaches its real confirmation
+            threshold. Approved venues are public and staffed.
           </Text>
         )}
       </View>
 
-      <View style={styles.actions}>
-        <PrimaryButton
-          label="Open group chat"
-          onPress={() =>
-            router.push({ pathname: '/group/[id]/chat', params: { id: group.id } })
-          }
-        />
-        {group.status === 'confirmed' ? (
+      {!isInactive ? (
+        <View style={styles.actions}>
           <PrimaryButton
-            label={currentMember?.isHost ? 'Show check-in QR' : 'Scan check-in QR'}
-            variant="secondary"
+            label="Open crew chat"
+            leadingIcon="↗"
             onPress={() =>
-              currentMember?.isHost
-                ? router.push({
-                    pathname: '/group/[id]/host-check-in',
-                    params: { id: group.id }
-                  })
-                : router.push({
-                    pathname: '/check-in/[groupId]',
-                    params: { groupId: group.id }
-                  })
+              router.push({ pathname: '/group/[id]/chat', params: { id: group.id } })
             }
           />
-        ) : null}
-        {canFinalize ? (
+          {group.status === 'confirmed' ? (
+            <SecondaryButton
+              label={currentMember?.isHost ? 'Show check-in QR' : 'Scan check-in QR'}
+              leadingIcon="⌁"
+              onPress={() =>
+                currentMember?.isHost
+                  ? router.push({
+                      pathname: '/group/[id]/host-check-in',
+                      params: { id: group.id }
+                    })
+                  : router.push({
+                      pathname: '/check-in/[groupId]',
+                      params: { groupId: group.id }
+                    })
+              }
+            />
+          ) : null}
+          {canFinalize ? (
+            <SecondaryButton
+              label="Finalize attendance"
+              leadingIcon="✓"
+              loading={finalize.isPending}
+              onPress={() =>
+                finalize.mutate(undefined, {
+                  onSuccess: (result) =>
+                    Alert.alert(
+                      'Attendance finalized',
+                      `${result.checkedInCount} verified check-ins · ${result.noShowCount} no-show ledger entries.`
+                    )
+                })
+              }
+            />
+          ) : null}
+          {finalize.isError ? (
+            <InlineNotice
+              tone="error"
+              icon="!"
+              message="Attendance could not be finalized. Refresh the lobby and try again."
+            />
+          ) : null}
+        </View>
+      ) : null}
+
+      <View style={[styles.safetyActions, { borderTopColor: theme.border }]}>
+        {!isInactive ? (
           <PrimaryButton
-            label="Finalize attendance"
-            variant="secondary"
-            loading={finalize.isPending}
-            onPress={() =>
-              finalize.mutate(undefined, {
-                onSuccess: (result) =>
-                  Alert.alert(
-                    'Attendance finalized',
-                    `${result.checkedInCount} verified check-ins · ${result.noShowCount} no-show ledger entries. Host completion XP is awarded once when the minimum attended.`
-                  )
-              })
-            }
+            label="Leave this group"
+            variant="ghost"
+            loading={leave.isPending}
+            onPress={confirmLeave}
           />
         ) : null}
         <PrimaryButton
-          label="Leave group"
-          variant="ghost"
-          loading={leave.isPending}
-          onPress={confirmLeave}
-        />
-        <PrimaryButton
-          label="Report a group safety concern"
+          label="Report a safety concern"
           variant="ghost"
           onPress={() =>
             router.push({ pathname: '/report', params: { groupId: group.id } })
           }
         />
+        {leave.isError ? (
+          <InlineNotice
+            tone="error"
+            icon="!"
+            message="The group could not be left. Your membership has not changed."
+          />
+        ) : null}
       </View>
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  back: {
-    minHeight: tokens.touchTarget,
-    alignSelf: 'flex-start',
-    justifyContent: 'center',
-    borderRadius: tokens.radius.md,
-    paddingHorizontal: tokens.space.md,
+  hero: {
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderRadius: tokens.radius.xl,
+    padding: tokens.space.lg,
     marginBottom: tokens.space.lg
   },
-  backText: { fontSize: 14, fontWeight: '800' },
+  heroAccent: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 88,
+    height: 8,
+    borderBottomLeftRadius: tokens.radius.pill,
+    backgroundColor: tokens.color.ruckus
+  },
+  title: {
+    marginTop: tokens.space.lg,
+    fontSize: tokens.type.title,
+    lineHeight: tokens.lineHeight.title,
+    fontWeight: tokens.weight.black,
+    letterSpacing: -1
+  },
+  when: {
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.body,
+    lineHeight: tokens.lineHeight.body,
+    fontWeight: tokens.weight.heavy
+  },
+  distance: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.black
+  },
   confirmCard: {
     borderWidth: 2,
     borderRadius: tokens.radius.lg,
     padding: tokens.space.lg,
     marginBottom: tokens.space.xl
   },
-  confirmTitle: { fontSize: 21, fontWeight: '900' },
-  countdown: { marginTop: 5, fontSize: 18, fontWeight: '900' },
-  confirmCopy: { marginTop: tokens.space.sm, fontSize: 14, lineHeight: 21 },
+  confirmTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: tokens.space.md
+  },
+  confirmCopyWrap: { flex: 1 },
+  confirmTitle: { fontSize: 22, fontWeight: tokens.weight.black },
+  countdown: {
+    marginTop: tokens.space.xs,
+    fontSize: 17,
+    fontWeight: tokens.weight.black
+  },
+  confirmCount: {
+    minWidth: 76,
+    alignItems: 'center',
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.sm
+  },
+  confirmCountValue: { fontSize: 18, fontWeight: tokens.weight.black },
+  confirmCountLabel: { fontSize: 9, fontWeight: tokens.weight.black },
+  segments: {
+    flexDirection: 'row',
+    gap: tokens.space.xs,
+    marginTop: tokens.space.lg
+  },
+  segment: { height: 8, flex: 1, borderRadius: tokens.radius.pill },
+  confirmBody: {
+    marginTop: tokens.space.md,
+    fontSize: tokens.type.label,
+    lineHeight: 21,
+    fontWeight: tokens.weight.medium
+  },
   confirmButton: { marginTop: tokens.space.md },
-  confirmedText: { marginTop: tokens.space.md, fontSize: 15, fontWeight: '900' },
-  sectionTitle: { fontSize: 18, fontWeight: '900' },
+  confirmedPill: { marginTop: tokens.space.md },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between'
+  },
+  sectionEyebrow: {
+    fontSize: tokens.type.micro,
+    fontWeight: tokens.weight.black,
+    letterSpacing: 1.1
+  },
+  sectionTitle: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.heading,
+    fontWeight: tokens.weight.black,
+    letterSpacing: -0.5
+  },
+  sectionMeta: { fontSize: tokens.type.caption, fontWeight: tokens.weight.heavy },
   memberGrid: { gap: tokens.space.sm, marginTop: tokens.space.md },
   member: {
-    minHeight: 66,
+    minHeight: 70,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: tokens.space.md,
     borderWidth: 1,
     borderRadius: tokens.radius.md,
     padding: tokens.space.sm
   },
   avatar: {
-    width: 46,
-    height: 46,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15
+    borderRadius: tokens.radius.sm
   },
-  avatarText: { fontSize: 20, fontWeight: '900' },
-  memberCopy: { flex: 1 },
-  memberName: { fontSize: 15, fontWeight: '900' },
-  memberStatus: { marginTop: 3, fontSize: 12, fontWeight: '700' },
+  avatarText: { fontSize: 18, fontWeight: tokens.weight.black },
+  memberCopy: { flex: 1, marginLeft: tokens.space.md },
+  memberNameRow: { flexDirection: 'row', alignItems: 'center' },
+  memberName: {
+    flexShrink: 1,
+    fontSize: 15,
+    fontWeight: tokens.weight.black
+  },
+  host: {
+    marginLeft: tokens.space.sm,
+    fontSize: 9,
+    fontWeight: tokens.weight.black,
+    letterSpacing: 1
+  },
+  memberStatus: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.heavy
+  },
   venue: {
     borderWidth: 1,
     borderRadius: tokens.radius.lg,
     padding: tokens.space.lg,
     marginTop: tokens.space.xl
   },
-  venueName: { marginTop: tokens.space.md, fontSize: 17, fontWeight: '900' },
-  venueCopy: { marginTop: 5, fontSize: 14, lineHeight: 21 },
-  actions: { gap: tokens.space.sm, marginTop: tokens.space.xl }
+  venueHeading: { flexDirection: 'row', alignItems: 'center' },
+  venueIcon: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.sm
+  },
+  venueIconText: { fontSize: 18, fontWeight: tokens.weight.black },
+  venueTitleWrap: { flex: 1, marginLeft: tokens.space.md },
+  venueTitle: {
+    marginTop: tokens.space.xs,
+    fontSize: 17,
+    fontWeight: tokens.weight.black
+  },
+  venueName: {
+    marginTop: tokens.space.lg,
+    fontSize: 19,
+    fontWeight: tokens.weight.black
+  },
+  venueBody: {
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.label,
+    lineHeight: 21,
+    fontWeight: tokens.weight.medium
+  },
+  actions: { gap: tokens.space.sm, marginTop: tokens.space.xl },
+  safetyActions: {
+    gap: tokens.space.xs,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: tokens.space.xl,
+    paddingTop: tokens.space.md
+  }
 });

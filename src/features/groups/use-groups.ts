@@ -205,6 +205,8 @@ export function useChat(groupId: string) {
       right.createdAt.localeCompare(left.createdAt)
     ) as (ChatMessage | OutboxMessage)[],
     send,
-    retry
+    retry,
+    sendError: mutation.error,
+    isSending: mutation.isPending
   };
 }

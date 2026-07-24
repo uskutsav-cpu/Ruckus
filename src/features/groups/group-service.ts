@@ -6,6 +6,7 @@ import {
   leaveDemoGroup,
   sendDemoMessage
 } from '@/features/groups/demo-groups';
+import { localActivityImage } from '@/features/activities/demo-activities';
 import { parseLobby } from '@/features/groups/group-parser';
 import type {
   ChatMessage,
@@ -75,23 +76,43 @@ export async function fetchPendingMatches(isDemo: boolean): Promise<PendingMatch
   ];
   const { data: templates, error: templateError } = await supabase
     .from('activity_templates')
-    .select('id, title')
+    .select('id, title, image_path')
     .in('id', templateIds);
   if (templateError) throw templateError;
 
   const sessionMap = new Map((sessions ?? []).map((row) => [row.id, row]));
-  const titleMap = new Map((templates ?? []).map((row) => [row.id, row.title]));
+  const templateMap = new Map((templates ?? []).map((row) => [row.id, row]));
+  const imagePaths = (templates ?? [])
+    .map((template) => template.image_path)
+    .filter((path): path is string => Boolean(path));
+  const signedImages = new Map<string, string>();
+  if (imagePaths.length) {
+    const { data: signed } = await supabase.storage
+      .from('activity-images')
+      .createSignedUrls(imagePaths, 60 * 60);
+    signed?.forEach((image) => {
+      if (image.path && image.signedUrl) {
+        signedImages.set(image.path, image.signedUrl);
+      }
+    });
+  }
   return waitlist.flatMap((entry) => {
     const session = sessionMap.get(entry.activity_session_id);
-    const title = session ? titleMap.get(session.activity_template_id) : null;
-    if (!session || !title) return [];
+    const template = session ? templateMap.get(session.activity_template_id) : undefined;
+    if (!session || !template) return [];
+    const imageUrl = template.image_path
+      ? signedImages.get(template.image_path)
+      : undefined;
     return [
       {
         id: entry.id,
         activitySessionId: entry.activity_session_id,
-        title,
+        title: template.title,
         startsAt: session.starts_at,
-        joinedAt: entry.joined_at
+        joinedAt: entry.joined_at,
+        imageSource: imageUrl
+          ? { uri: imageUrl }
+          : localActivityImage(session.activity_template_id)
       }
     ];
   });

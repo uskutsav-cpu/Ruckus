@@ -4,6 +4,7 @@ import type {
   PendingMatch
 } from '@/features/groups/group-types';
 
+const tacoImage = require('../../../assets/activities/taco-taste-off.png') as number;
 const demoUserId = '10000000-0000-4000-8000-000000000001';
 const demoGroupId = '50000000-0000-4000-8000-000000000001';
 const startsAt = new Date(Date.now() + 26 * 60 * 60_000);
@@ -89,7 +90,8 @@ export function getDemoPendingMatches(): PendingMatch[] {
       activitySessionId: '40000000-0000-4000-8000-000000000002',
       title: 'Taco Taste-Off',
       startsAt: new Date(startsAt.getTime() + 24 * 60 * 60_000).toISOString(),
-      joinedAt: new Date(Date.now() - 20 * 60_000).toISOString()
+      joinedAt: new Date(Date.now() - 20 * 60_000).toISOString(),
+      imageSource: tacoImage
     }
   ];
 }
