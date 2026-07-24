@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.env.local
+.expo/
+android/
+ios/
+node_modules/
+coverage/
+dist/
+supabase/.branches/
+supabase/.temp/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
