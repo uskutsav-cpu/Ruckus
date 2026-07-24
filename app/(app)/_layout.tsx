@@ -36,6 +36,8 @@ export default function AppLayout() {
           <Stack.Screen name="profile/edit" />
           <Stack.Screen name="leaderboard" />
           <Stack.Screen name="settings" />
+          <Stack.Screen name="legal" />
+          <Stack.Screen name="account-deletion" />
           <Stack.Screen name="safety/index" />
           <Stack.Screen name="safety/emergency" />
           <Stack.Screen name="safety/guidelines" />

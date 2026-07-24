@@ -9,8 +9,19 @@ type ReportInput = {
   blockUser: boolean;
 };
 
-export async function submitReport(input: ReportInput, isDemo: boolean): Promise<void> {
-  if (isDemo) return;
+export type ReportOutcome = {
+  reportSubmitted: boolean;
+  userBlocked: boolean;
+  blockFailed: boolean;
+};
+
+export async function submitReport(
+  input: ReportInput,
+  isDemo: boolean
+): Promise<ReportOutcome> {
+  if (isDemo) {
+    return { reportSubmitted: false, userBlocked: false, blockFailed: false };
+  }
   const supabase = requireSupabase();
 
   if (input.messageId) {
@@ -42,8 +53,16 @@ export async function submitReport(input: ReportInput, isDemo: boolean): Promise
     const { error } = await supabase.rpc('block_user', {
       target_profile_id: input.userId
     });
-    if (error) throw error;
+    if (error) {
+      return { reportSubmitted: true, userBlocked: false, blockFailed: true };
+    }
   }
+
+  return {
+    reportSubmitted: true,
+    userBlocked: Boolean(input.blockUser && input.userId),
+    blockFailed: false
+  };
 }
 
 export async function requestAccountDeletion(isDemo: boolean): Promise<void> {
