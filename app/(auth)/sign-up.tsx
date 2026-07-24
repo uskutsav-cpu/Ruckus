@@ -1,18 +1,18 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-import { AppScreen } from '@/components/ui/app-screen';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
+import { AuthScaffold } from '@/features/auth/auth-scaffold';
 import { signUpSchema } from '@/features/auth/auth-schema';
 import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
-import { useTheme } from '@/providers/theme-provider';
+import { tokens } from '@/theme/tokens';
 
 export default function SignUpScreen() {
   const { signUp } = useAuth();
-  const { theme } = useTheme();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,17 +37,19 @@ export default function SignUpScreen() {
   };
 
   return (
-    <AppScreen
-      eyebrow="Step into the game"
-      title="Create your campus account"
-      subtitle={`Use your @${env.universityEmailDomain} address. This verifies access to the university email domain—not your identity.`}
+    <AuthScaffold
+      eyebrow="Your invite starts here"
+      title="Claim your spot."
+      subtitle={`Use your @${env.universityEmailDomain} inbox. This confirms email-domain access—not identity.`}
     >
       <TextField
-        label="First name or display name"
+        label="First name or nickname"
         value={displayName}
         onChangeText={setDisplayName}
         autoCapitalize="words"
         autoComplete="name"
+        returnKeyType="next"
+        placeholder="What should your crew call you?"
       />
       <TextField
         label="University email"
@@ -56,6 +58,7 @@ export default function SignUpScreen() {
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"
+        returnKeyType="next"
         placeholder={`you@${env.universityEmailDomain}`}
       />
       <TextField
@@ -64,24 +67,26 @@ export default function SignUpScreen() {
         onChangeText={setPassword}
         secureTextEntry
         autoComplete="new-password"
+        returnKeyType="go"
+        onSubmitEditing={() => void submit()}
         help="10+ characters with uppercase, lowercase, and a number."
       />
-      {error ? (
-        <Text accessibilityRole="alert" style={{ color: theme.danger, marginBottom: 12 }}>
-          {error}
-        </Text>
-      ) : null}
+      {error ? <InlineNotice tone="error" icon="!" message={error} /> : null}
       <PrimaryButton
-        label="Create account"
+        label="Create my account"
         loading={loading}
         onPress={() => void submit()}
       />
       <PrimaryButton
-        label="Back"
+        label="Back to welcome"
         onPress={() => router.back()}
         variant="ghost"
-        style={{ marginTop: 8 }}
+        style={styles.backButton}
       />
-    </AppScreen>
+    </AuthScaffold>
   );
 }
+
+const styles = StyleSheet.create({
+  backButton: { marginTop: tokens.space.sm }
+});
