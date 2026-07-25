@@ -23,7 +23,7 @@ export const ActivityCard = memo(function ActivityCard({
   const closesAt = new Date(activity.swipeClosesAt);
 
   return (
-    <View style={[styles.card, tokens.shadow.card]}>
+    <View style={styles.card}>
       <Image
         source={activity.imageSource}
         accessibilityLabel={`${activity.title} activity`}

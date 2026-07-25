@@ -47,7 +47,7 @@ export default function RateActivityScreen() {
       <AppScreen scroll={false}>
         <View style={styles.complete}>
           <StatusPill
-            label={isDemo ? 'DEMO FEEDBACK · NOT SENT' : 'FEEDBACK RECORDED'}
+            label={isDemo ? 'Demo feedback · not sent' : 'Feedback recorded'}
             tone={isDemo ? 'accent' : 'success'}
           />
           <View

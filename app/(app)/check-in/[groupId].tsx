@@ -52,7 +52,7 @@ function scanIssueFromError(error: unknown): {
   return {
     kind: 'expired-or-replaced',
     message:
-      'That code expired, was replaced, or no longer applies to this confirmed crew.'
+      'That code expired, was replaced, or no longer applies to this confirmed group.'
   };
 }
 
@@ -225,7 +225,7 @@ export default function ScanCheckinScreen() {
             <ActivityIndicator color={tokens.color.ruckus} size="large" />
             <Text style={styles.processingTitle}>Verifying securely</Text>
             <Text style={styles.processingCopy}>
-              Checking crew, event window, and one-time attendance…
+              Checking group, event window, and one-time attendance…
             </Text>
           </View>
         ) : null}
@@ -236,7 +236,7 @@ export default function ScanCheckinScreen() {
           <InlineNotice
             tone="error"
             icon="!"
-            message={`${issue.kind === 'wrong-group' ? 'Wrong crew — ' : issue.kind === 'invalid-code' ? 'Invalid code — ' : issue.kind === 'network' ? 'Network failure — ' : 'Code unavailable — '}${issue.message}`}
+            message={`${issue.kind === 'wrong-group' ? 'Wrong group — ' : issue.kind === 'invalid-code' ? 'Invalid code — ' : issue.kind === 'network' ? 'Network failure — ' : 'Code unavailable — '}${issue.message}`}
           />
           <PrimaryButton
             label="Scan another code"

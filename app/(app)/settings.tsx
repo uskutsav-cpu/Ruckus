@@ -8,7 +8,6 @@ import { BackButton } from '@/components/ui/back-button';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { StatusPill } from '@/components/ui/status-pill';
 import {
   defaultNotificationPreferences,
   readNotificationPreferences,
@@ -104,15 +103,13 @@ export default function SettingsScreen() {
   return (
     <AppScreen>
       <BackButton label="Profile" onPress={() => router.back()} />
-      <StatusPill
-        label={isDemo ? 'DEMO SETTINGS · LOCAL ONLY' : 'SETTINGS & SAFETY'}
-        tone={isDemo ? 'accent' : 'neutral'}
-      />
-      <Text style={[styles.heading, { color: theme.text }]}>Make Ruckus yours.</Text>
+      <Text style={[styles.heading, { color: theme.text }]}>Settings</Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-        Control appearance and notification categories, review safety information, and
-        manage your account.
+        Manage appearance, notifications, safety, and your account.
       </Text>
+      {isDemo ? (
+        <InlineNotice message="Changes in this demo stay on this device." />
+      ) : null}
 
       <SettingsSection title="Appearance">
         <SegmentedControl
@@ -140,8 +137,8 @@ export default function SettingsScreen() {
               }
             />
             <SettingSwitch
-              title="Crew chat"
-              description="Updates when another crew member posts."
+              title="Group chat"
+              description="Updates when another group member posts."
               value={notifications.enabled && notifications.chatMessages}
               disabled={!notifications.enabled}
               onChange={(chatMessages) =>
@@ -174,14 +171,14 @@ export default function SettingsScreen() {
             onPress={() => router.push('/safety')}
           />
           <ActionRow
-            mark="§"
+            mark="rules"
             title="Community guidelines"
-            description="Read the conduct rules for crews, chat, and activities."
+            description="Read the conduct rules for groups, chat, and activities."
             tone="accent"
             onPress={() => router.push('/safety/guidelines')}
           />
           <ActionRow
-            mark="i"
+            mark="info"
             title="Privacy & data use"
             description="Review what the app uses and what it intentionally does not collect."
             onPress={() => router.push('/legal')}
@@ -192,7 +189,7 @@ export default function SettingsScreen() {
       <SettingsSection title="Support & legal">
         <View style={styles.rows}>
           <ActionRow
-            mark="?"
+            mark="help"
             title="Campus support"
             description="No verified campus support contact is configured in this build."
             status="Not configured"
@@ -200,7 +197,7 @@ export default function SettingsScreen() {
             onPress={() => undefined}
           />
           <ActionRow
-            mark="¶"
+            mark="document"
             title="Terms and privacy documents"
             description="Approved production document URLs must be supplied by the deploying organization."
             status="Pending"
@@ -298,7 +295,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -311,7 +308,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: tokens.space.md,
     fontSize: tokens.type.heading,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   help: {
     marginTop: tokens.space.sm,
@@ -326,11 +323,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: tokens.space.md,
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
   settingCopy: { flex: 1 },
-  settingTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  settingTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   settingDescription: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,

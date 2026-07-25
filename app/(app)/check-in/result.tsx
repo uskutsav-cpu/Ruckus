@@ -32,7 +32,7 @@ export default function CheckinResultScreen() {
     ? 'The scanner flow completed locally. No attendance or XP was recorded.'
     : already
       ? 'Your original verified check-in is still recorded. XP is awarded only once.'
-      : 'You’re checked in with your crew. The append-only XP ledger recorded this event.';
+      : 'You’re checked in with your group. The append-only XP ledger recorded this event.';
 
   return (
     <AppScreen scroll={false}>

@@ -14,10 +14,8 @@ export default function SafetyCenterScreen() {
   return (
     <AppScreen>
       <BackButton label="Settings" onPress={() => router.back()} />
-      <StatusPill label="SAFETY CENTER" tone="warning" />
-      <Text style={[styles.title, { color: theme.text }]}>
-        Safety before the activity.
-      </Text>
+      <StatusPill label="Safety center" tone="warning" />
+      <Text style={[styles.title, { color: theme.text }]}>Plan for safety</Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
         University-email access narrows the community. It does not prove identity, so use
         the same judgment you would with any new group.
@@ -30,38 +28,38 @@ export default function SafetyCenterScreen() {
         ]}
       >
         <Text style={[styles.foundationEyebrow, { color: theme.accent }]}>
-          RUCKUS SAFETY MODEL
+          How Ruckus works
         </Text>
         <Text style={[styles.foundationTitle, { color: theme.text }]}>
-          Public, group-based, and intentionally limited.
+          Public, group-based, and intentionally limited
         </Text>
         <Text style={[styles.foundationCopy, { color: theme.textMuted }]}>
           There are no direct messages, one-to-one matches, user-created activities, or
           live and background location collection. Approved public venue details stay
-          locked until the crew confirms.
+          hidden until the group confirms.
         </Text>
       </View>
 
       <Text style={[styles.sectionTitle, { color: theme.text }]}>Get guidance</Text>
       <View style={styles.actions}>
         <ActionRow
-          mark="!"
+          mark="warning"
           title="Emergency information"
           description="Leave first, get immediate help, and report only after you are safe."
           tone="danger"
           onPress={() => router.push('/safety/emergency')}
         />
         <ActionRow
-          mark="§"
+          mark="rules"
           title="Community guidelines"
-          description="The conduct expected in every crew, chat, and public meetup."
+          description="The conduct expected in every group, chat, and public meetup."
           tone="accent"
           onPress={() => router.push('/safety/guidelines')}
         />
         <ActionRow
-          mark="↗"
+          mark="forward"
           title="Report from the source"
-          description="Open the relevant crew or message first so reviewers receive the right context."
+          description="Open the relevant group or message first so reviewers receive the right context."
           onPress={() => router.push('/groups')}
         />
       </View>
@@ -87,7 +85,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -99,19 +97,18 @@ const styles = StyleSheet.create({
   },
   foundation: {
     borderWidth: 1,
-    borderRadius: tokens.radius.xl,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.lg
   },
   foundationEyebrow: {
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1
+    fontWeight: tokens.weight.bold
   },
   foundationTitle: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.heading,
     lineHeight: tokens.lineHeight.heading,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   foundationCopy: {
     marginTop: tokens.space.sm,
@@ -123,19 +120,19 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.xl,
     marginBottom: tokens.space.md,
     fontSize: tokens.type.heading,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   actions: { gap: tokens.space.sm },
   reminder: {
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md,
     marginTop: tokens.space.xl
   },
   reminderTitle: {
     color: '#7C2421',
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   reminderCopy: {
     marginTop: tokens.space.xs,

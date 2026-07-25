@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { AppIcon } from '@/components/ui/app-icon';
 import { BackButton } from '@/components/ui/back-button';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -17,7 +18,7 @@ import { tokens } from '@/theme/tokens';
 const impacts = [
   {
     title: 'Immediately after the request',
-    copy: 'Push tokens are disabled, waitlists are withdrawn, pending attendance is declined, and active crew membership ends.'
+    copy: 'Push tokens are disabled, waitlists are withdrawn, pending attendance is declined, and active group membership ends.'
   },
   {
     title: 'During the seven-day window',
@@ -25,7 +26,7 @@ const impacts = [
   },
   {
     title: 'After seven days',
-    copy: 'The scheduled trusted purge deletes the Auth user, avatar, and profile-owned data. Retained crew messages become anonymous.'
+    copy: 'The scheduled trusted purge deletes the Auth user, avatar, and profile-owned data. Retained group messages become anonymous.'
   }
 ] as const;
 
@@ -92,9 +93,9 @@ export default function AccountDeletionScreen() {
     return (
       <AppScreen scroll={false}>
         <View style={styles.complete}>
-          <StatusPill label="DEMO RESULT · NOT REQUESTED" tone="accent" />
+          <StatusPill label="Demo result · not requested" tone="accent" />
           <View style={[styles.completeMark, { backgroundColor: theme.accentMuted }]}>
-            <Text style={[styles.completeMarkText, { color: theme.accent }]}>i</Text>
+            <AppIcon name="info" size={34} color={theme.accent} />
           </View>
           <Text style={[styles.completeTitle, { color: theme.text }]}>
             Deletion preview complete
@@ -117,7 +118,7 @@ export default function AccountDeletionScreen() {
     return (
       <AppScreen scroll={false}>
         <View style={styles.complete}>
-          <StatusPill label="DELETION SCHEDULED" tone="warning" />
+          <StatusPill label="Deletion scheduled" tone="warning" />
           <View
             style={[
               styles.completeMark,
@@ -128,7 +129,7 @@ export default function AccountDeletionScreen() {
               }
             ]}
           >
-            <Text style={[styles.completeMarkText, { color: '#7C2421' }]}>!</Text>
+            <AppIcon name="warning" size={34} color="#7C2421" />
           </View>
           <Text style={[styles.completeTitle, { color: theme.text }]}>
             Finish signing out.
@@ -160,15 +161,12 @@ export default function AccountDeletionScreen() {
     <AppScreen>
       <BackButton label="Settings" onPress={() => router.back()} />
       <StatusPill
-        label={isDemo ? 'DEMO DELETION · NO ACCOUNT CHANGE' : 'ACCOUNT DELETION'}
+        label={isDemo ? 'Demo deletion · no account change' : 'Account deletion'}
         tone={isDemo ? 'accent' : 'warning'}
       />
-      <Text style={[styles.heading, { color: theme.text }]}>
-        A deliberate seven-day process.
-      </Text>
+      <Text style={[styles.heading, { color: theme.text }]}>Delete account</Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-        Review each consequence before submitting. Ruckus does not hide the action or
-        pressure you to keep your account.
+        Review what happens before you submit a deletion request.
       </Text>
 
       {network.isConnected === false ? (
@@ -252,7 +250,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -266,7 +264,7 @@ const styles = StyleSheet.create({
   impact: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
   number: {
@@ -276,9 +274,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  numberText: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  numberText: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   impactCopy: { flex: 1, marginLeft: tokens.space.md },
-  impactTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  impactTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   impactDescription: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
@@ -287,14 +285,14 @@ const styles = StyleSheet.create({
   },
   confirmCard: {
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md,
     marginTop: tokens.space.xl
   },
   confirmTitle: {
     color: '#7C2421',
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   confirmCopy: {
     marginTop: tokens.space.xs,
@@ -314,12 +312,11 @@ const styles = StyleSheet.create({
     borderRadius: 43,
     marginTop: tokens.space.lg
   },
-  completeMarkText: { fontSize: 48, fontWeight: tokens.weight.black },
   completeTitle: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   completeCopy: {

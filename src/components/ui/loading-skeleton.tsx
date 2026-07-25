@@ -68,8 +68,16 @@ const styles = StyleSheet.create({
     gap: tokens.space.md,
     marginTop: tokens.space.lg
   },
-  action: { width: 118, height: tokens.layout.actionHeight, borderRadius: 999 },
-  actionWide: { width: 154, height: tokens.layout.actionHeight, borderRadius: 999 },
+  action: {
+    width: 118,
+    height: tokens.layout.actionHeight,
+    borderRadius: tokens.radius.md
+  },
+  actionWide: {
+    width: 154,
+    height: tokens.layout.actionHeight,
+    borderRadius: tokens.radius.md
+  },
   list: { gap: tokens.space.md },
-  listCard: { width: '100%', height: 146, borderRadius: tokens.radius.lg }
+  listCard: { width: '100%', height: 146, borderRadius: tokens.radius.md }
 });

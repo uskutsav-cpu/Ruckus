@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type PropsWithChildren } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { AppIcon } from '@/components/ui/app-icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatusPill } from '@/components/ui/status-pill';
 import { logger } from '@/lib/logger';
@@ -39,13 +40,11 @@ function ErrorFallback({ onRetry }: { onRetry: () => void }) {
   return (
     <AppScreen scroll={false}>
       <View accessibilityRole="alert" style={styles.container}>
-        <StatusPill label="APP RECOVERY" tone="warning" />
+        <StatusPill label="App recovery" tone="warning" />
         <View style={[styles.mark, { backgroundColor: theme.surfaceMuted }]}>
-          <Text style={[styles.markText, { color: theme.text }]}>↻</Text>
+          <AppIcon name="refresh" size={34} color={theme.text} />
         </View>
-        <Text style={[styles.title, { color: theme.text }]}>
-          Ruckus hit a rough patch.
-        </Text>
+        <Text style={[styles.title, { color: theme.text }]}>Something went wrong</Text>
         <Text style={[styles.message, { color: theme.textMuted }]}>
           Your account data remains protected. Retry this screen; if the problem
           continues, restart the app.
@@ -70,12 +69,11 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.lg,
     marginTop: tokens.space.lg
   },
-  markText: { fontSize: 40, fontWeight: tokens.weight.black },
   title: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   message: {

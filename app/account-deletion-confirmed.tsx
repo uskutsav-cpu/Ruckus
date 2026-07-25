@@ -14,18 +14,18 @@ export default function AccountDeletionConfirmedScreen() {
   return (
     <AppScreen scroll={false}>
       <View style={styles.content}>
-        <StatusPill label="DELETION SCHEDULED" tone="warning" />
+        <StatusPill label="Deletion scheduled" tone="warning" />
         <View
           style={[
             styles.mark,
             { backgroundColor: tokens.color.coralSoft, borderColor: tokens.color.coral }
           ]}
         >
-          <Text style={styles.markText}>7</Text>
-          <Text style={styles.markLabel}>DAYS</Text>
+          <Text style={styles.markLabel}>Purge window</Text>
+          <Text style={styles.markText}>7 days</Text>
         </View>
         <Text style={[styles.title, { color: theme.text }]}>
-          Your request is verified.
+          Your request is verified
         </Text>
         <Text style={[styles.copy, { color: theme.textMuted }]}>
           You were signed out immediately. Social participation and push tokens are
@@ -45,31 +45,30 @@ export default function AccountDeletionConfirmedScreen() {
 const styles = StyleSheet.create({
   content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   mark: {
-    width: 94,
-    height: 94,
+    minWidth: 150,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderRadius: 47,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md,
     marginTop: tokens.space.lg
   },
   markText: {
     color: '#7C2421',
-    fontSize: 38,
-    lineHeight: 40,
-    fontWeight: tokens.weight.black
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: tokens.weight.bold
   },
   markLabel: {
     color: '#7C2421',
-    fontSize: 9,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
   },
   title: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   copy: {

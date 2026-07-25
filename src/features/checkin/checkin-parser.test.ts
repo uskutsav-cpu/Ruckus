@@ -18,10 +18,10 @@ describe('parseCheckinPayload', () => {
         `campusclash://check-in/50000000-0000-4000-8000-000000000002?token=${token}`,
         groupId
       )
-    ).toThrow('different crew');
+    ).toThrow('different group');
   });
 
-  it('classifies QR codes for another crew', () => {
+  it('classifies QR codes for another group', () => {
     try {
       parseCheckinPayload(
         `campusclash://check-in/50000000-0000-4000-8000-000000000002?token=${token}`,

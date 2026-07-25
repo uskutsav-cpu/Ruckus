@@ -14,7 +14,7 @@ export function AvatarStack({ members, max = 4 }: AvatarStackProps) {
   const remaining = members.length - visible.length;
 
   return (
-    <View accessibilityLabel={`${members.length} crew members`} style={styles.stack}>
+    <View accessibilityLabel={`${members.length} group members`} style={styles.stack}>
       {visible.map((member, index) => (
         <View
           key={member.id}

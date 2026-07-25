@@ -28,7 +28,7 @@ export default function PendingMatchesScreen() {
       title="Pending activities"
       subtitle="We’ll notify you when a group is ready."
     >
-      <BackButton label="Your crews" onPress={() => router.replace('/groups')} />
+      <BackButton label="Your groups" onPress={() => router.replace('/groups')} />
 
       {network.isConnected === false ? (
         <InlineNotice

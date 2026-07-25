@@ -18,11 +18,10 @@ export function BackendConfigurationScreen({ message }: BackendConfigurationScre
         accessibilityRole="alert"
         style={[
           styles.panel,
-          { backgroundColor: theme.surfaceElevated, borderColor: theme.border },
-          tokens.shadow.card
+          { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
         ]}
       >
-        <StatusPill label="DEVELOPMENT SETUP" tone="warning" />
+        <StatusPill label="Development setup" tone="warning" />
         <Text style={[styles.title, { color: theme.text }]}>
           Ruckus needs valid backend settings.
         </Text>
@@ -58,14 +57,14 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 480,
     borderWidth: 1,
-    borderRadius: tokens.radius.xl,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.xl
   },
   title: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   message: {
@@ -82,12 +81,12 @@ const styles = StyleSheet.create({
   helpTitle: {
     marginBottom: tokens.space.sm,
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   variable: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   helpBody: {
     marginTop: tokens.space.md,

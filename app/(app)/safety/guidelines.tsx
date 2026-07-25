@@ -9,7 +9,7 @@ import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
 const guidelines = [
-  ['Respect the crew', 'No harassment, hate, threats, pressure, or sexual misconduct.'],
+  ['Respect the group', 'No harassment, hate, threats, pressure, or sexual misconduct.'],
   [
     'Keep it public and group-based',
     'Meet only at the lobby venue. Never redirect members to a home or isolated location.'
@@ -24,11 +24,11 @@ const guidelines = [
   ],
   [
     'Keep chat activity-specific',
-    'No spam, solicitation, impersonation, or attempts to turn the crew into one-to-one messaging.'
+    'No spam, solicitation, impersonation, or attempts to turn the group into one-to-one messaging.'
   ],
   [
     'Speak up safely',
-    'Leave concerning situations first. Report a student, message, or crew after you are safe.'
+    'Leave concerning situations first. Report a student, message, or group after you are safe.'
   ]
 ] as const;
 
@@ -38,10 +38,8 @@ export default function CommunityGuidelinesScreen() {
   return (
     <AppScreen>
       <BackButton label="Safety center" onPress={() => router.back()} />
-      <StatusPill label="COMMUNITY GUIDELINES" tone="warning" />
-      <Text style={[styles.heading, { color: theme.text }]}>
-        Make room for a safe crew.
-      </Text>
+      <StatusPill label="Community guidelines" tone="warning" />
+      <Text style={[styles.heading, { color: theme.text }]}>Community guidelines</Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
         These expectations apply in Ruckus, group chat, and at every activity. Campus
         teams may review reports and enforce access rules.
@@ -57,11 +55,9 @@ export default function CommunityGuidelinesScreen() {
               { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
             ]}
           >
-            <View style={[styles.index, { backgroundColor: theme.surfaceMuted }]}>
-              <Text style={[styles.indexText, { color: theme.text }]}>
-                {(index + 1).toString().padStart(2, '0')}
-              </Text>
-            </View>
+            <Text style={[styles.indexText, { color: theme.textMuted }]}>
+              {index + 1}.
+            </Text>
             <View style={styles.copy}>
               <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
               <Text style={[styles.description, { color: theme.textMuted }]}>{copy}</Text>
@@ -79,7 +75,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -93,19 +89,12 @@ const styles = StyleSheet.create({
   guideline: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
-  index: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: tokens.radius.sm
-  },
-  indexText: { fontSize: tokens.type.caption, fontWeight: tokens.weight.black },
+  indexText: { width: 24, fontSize: tokens.type.caption, fontWeight: tokens.weight.bold },
   copy: { flex: 1, marginLeft: tokens.space.md },
-  title: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  title: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   description: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,

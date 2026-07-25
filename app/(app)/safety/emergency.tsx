@@ -22,11 +22,11 @@ const steps = [
   },
   {
     title: 'Preserve useful context',
-    copy: 'When safe, keep relevant crew or message context available. Do not confront anyone to gather evidence.'
+    copy: 'When safe, keep relevant group or message context available. Do not confront anyone to gather evidence.'
   },
   {
     title: 'Report in Ruckus afterward',
-    copy: 'Start from the relevant student, message, or crew. Reports go only to authorized campus reviewers.'
+    copy: 'Start from the relevant student, message, or group. Reports go only to authorized campus reviewers.'
   }
 ] as const;
 
@@ -36,12 +36,12 @@ export default function EmergencyInformationScreen() {
   return (
     <AppScreen>
       <BackButton label="Safety center" onPress={() => router.back()} />
-      <StatusPill label="URGENT SAFETY GUIDANCE" tone="warning" />
+      <StatusPill label="Emergency information" tone="warning" />
       <Text style={[styles.heading, { color: theme.text }]}>
         If something feels unsafe, leave.
       </Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-        Trust your instincts. You never owe a crew your continued presence, and leaving
+        Trust your instincts. You never owe a group your continued presence, and leaving
         does not require permission from a host.
       </Text>
 
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -108,13 +108,13 @@ const styles = StyleSheet.create({
   },
   notice: {
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
   noticeTitle: {
     color: '#7C2421',
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   noticeCopy: {
     marginTop: tokens.space.xs,
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   step: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
   number: {
@@ -137,9 +137,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  numberText: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  numberText: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   stepCopy: { flex: 1, marginLeft: tokens.space.md },
-  stepTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  stepTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   stepDescription: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,

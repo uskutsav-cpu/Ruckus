@@ -18,7 +18,7 @@ const demoMessages: ChatMessage[] = [
     groupId: demoGroupId,
     senderId: null,
     kind: 'system',
-    body: 'Crew assembled! Confirm attendance to unlock the public meeting spot.',
+    body: 'Your group is ready. Confirm attendance to view the meeting venue.',
     clientId: null,
     createdAt: new Date(Date.now() - 12 * 60_000).toISOString()
   },

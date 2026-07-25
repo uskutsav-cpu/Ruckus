@@ -68,7 +68,7 @@ export default function GroupsScreen() {
         <InlineNotice
           icon="↯"
           tone="offline"
-          message="Offline — crew changes and new messages may be delayed."
+          message="Offline — group changes and new messages may be delayed."
         />
       ) : null}
 
@@ -98,7 +98,7 @@ export default function GroupsScreen() {
               <Pressable
                 key={group.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Open ${group.title} crew. ${status.label}`}
+                accessibilityLabel={`Open ${group.title} group. ${status.label}`}
                 onPress={() =>
                   router.push({ pathname: '/group/[id]', params: { id: group.id } })
                 }

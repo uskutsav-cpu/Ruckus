@@ -54,9 +54,7 @@ export function ChoiceRow({ selected, label, detail, icon, onPress }: ChoiceRowP
           }
         ]}
       >
-        <Text style={[styles.checkText, { color: theme.onPrimary }]}>
-          {selected ? '✓' : ''}
-        </Text>
+        {selected ? <AppIcon color={theme.onPrimary} name="check" size={16} /> : null}
       </View>
     </Pressable>
   );
@@ -93,6 +91,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.5,
     borderRadius: tokens.radius.pill
-  },
-  checkText: { fontSize: 15, fontWeight: tokens.weight.bold }
+  }
 });

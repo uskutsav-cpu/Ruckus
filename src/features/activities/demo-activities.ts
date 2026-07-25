@@ -94,7 +94,7 @@ export const demoActivities: Activity[] = [
     '40000000-0000-4000-8000-000000000004',
     '30000000-0000-4000-8000-000000000004',
     'Paint & Playlist',
-    'Make a mini canvas while the crew builds the night’s shared playlist.',
+    'Make a mini canvas while the group builds the night’s shared playlist.',
     'Arts',
     dateAfter(3, 18),
     90,

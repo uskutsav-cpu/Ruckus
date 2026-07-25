@@ -39,7 +39,7 @@ export function parseCheckinPayload(payload: string, expectedGroupId: string): s
     );
   }
   if (groupId !== expectedGroupId) {
-    throw new CheckinScanError('wrong-group', 'That QR belongs to a different crew.');
+    throw new CheckinScanError('wrong-group', 'That QR belongs to a different group.');
   }
   return token;
 }

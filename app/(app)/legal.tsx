@@ -15,7 +15,7 @@ const dataPractices = [
   },
   {
     title: 'Profile and activity data',
-    copy: 'Your profile, swipe decisions, crew membership, confirmations, reports, check-ins, ratings, and XP support the core experience.'
+    copy: 'Your profile, swipe decisions, group membership, confirmations, reports, check-ins, ratings, and XP support the core experience.'
   },
   {
     title: 'Location boundary',
@@ -37,10 +37,8 @@ export default function LegalAndDataUseScreen() {
   return (
     <AppScreen>
       <BackButton label="Settings" onPress={() => router.back()} />
-      <StatusPill label="PRIVACY & DATA USE" tone="neutral" />
-      <Text style={[styles.heading, { color: theme.text }]}>
-        Designed with boundaries.
-      </Text>
+      <StatusPill label="Privacy and data use" tone="neutral" />
+      <Text style={[styles.heading, { color: theme.text }]}>Data and privacy</Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
         This plain-language product summary explains current app behavior. It is not a
         substitute for approved legal documents.
@@ -75,7 +73,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -88,10 +86,10 @@ const styles = StyleSheet.create({
   list: { gap: tokens.space.sm },
   card: {
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
-  title: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  title: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   copy: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,

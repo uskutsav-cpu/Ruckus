@@ -56,7 +56,7 @@ export default function ReportScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const hasTarget = Boolean(messageId || userId || groupId);
-  const targetLabel = messageId ? 'message' : userId ? 'student' : 'crew';
+  const targetLabel = messageId ? 'message' : userId ? 'student' : 'group';
 
   const submit = async () => {
     if (!user || !hasTarget || !reason) return;
@@ -95,19 +95,19 @@ export default function ReportScreen() {
     return (
       <AppScreen>
         <BackButton label="Back" onPress={() => router.back()} />
-        <StatusPill label="PRIVATE SAFETY REPORT" tone="warning" />
+        <StatusPill label="Private safety report" tone="warning" />
         <Text style={[styles.title, { color: theme.text }]}>
           Report link unavailable.
         </Text>
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-          Reports must start from the relevant crew, student, or message so reviewers
+          Reports must start from the relevant group, student, or message so reviewers
           receive the correct private context.
         </Text>
         <InlineNotice
           tone="error"
-          message="No report target was included. Return to your crews and try again."
+          message="No report target was included. Return to your groups and try again."
         />
-        <PrimaryButton label="Back to crews" onPress={() => router.replace('/groups')} />
+        <PrimaryButton label="Back to groups" onPress={() => router.replace('/groups')} />
       </AppScreen>
     );
   }
@@ -122,11 +122,11 @@ export default function ReportScreen() {
         }}
       />
       <StatusPill
-        label={isDemo ? 'DEMO REPORT · NOT SENT' : 'PRIVATE SAFETY REPORT'}
+        label={isDemo ? 'Demo report · not sent' : 'Private safety report'}
         tone={isDemo ? 'accent' : 'warning'}
       />
       <Text style={[styles.title, { color: theme.text }]}>
-        {reviewing ? 'Review before sending.' : 'Tell the campus team.'}
+        {reviewing ? 'Review before sending' : 'Tell the campus team'}
       </Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
         {reviewing
@@ -241,7 +241,7 @@ export default function ReportScreen() {
                   Block this student after reporting
                 </Text>
                 <Text style={[styles.blockHelp, { color: theme.textMuted }]}>
-                  You’ll leave shared active crews and waitlists. Future matching, member
+                  You’ll leave shared active groups and waitlists. Future matching, member
                   cards, avatar access, and rankings exclude both of you.
                 </Text>
               </View>
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -309,18 +309,18 @@ const styles = StyleSheet.create({
     lineHeight: tokens.lineHeight.body,
     fontWeight: tokens.weight.medium
   },
-  label: { fontSize: tokens.type.body, fontWeight: tokens.weight.black },
+  label: { fontSize: tokens.type.body, fontWeight: tokens.weight.bold },
   reasons: { gap: tokens.space.sm, marginTop: tokens.space.md },
   reason: {
     minHeight: 78,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderRadius: tokens.radius.lg,
+    borderWidth: 1,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
   reasonCopy: { flex: 1, paddingRight: tokens.space.md },
-  reasonText: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  reasonText: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   reasonDetail: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
@@ -351,12 +351,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: tokens.space.md,
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md,
     marginTop: tokens.space.lg
   },
   blockCopy: { flex: 1 },
-  blockTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  blockTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   blockHelp: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   },
   reviewCard: {
     borderWidth: 1,
-    borderRadius: tokens.radius.xl,
+    borderRadius: tokens.radius.md,
     paddingHorizontal: tokens.space.lg
   },
   reviewRow: {
@@ -375,28 +375,26 @@ const styles = StyleSheet.create({
   },
   reviewLabel: {
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase'
+    fontWeight: tokens.weight.bold
   },
   reviewValue: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   submit: { marginTop: tokens.space.lg },
   secondary: { marginTop: tokens.space.sm },
   urgent: {
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md,
     marginTop: tokens.space.xl
   },
   urgentTitle: {
     color: '#7C2421',
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   urgentText: {
     marginTop: tokens.space.xs,

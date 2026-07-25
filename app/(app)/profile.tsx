@@ -193,7 +193,7 @@ export default function ProfileScreen() {
             />
             <ProfileAction
               mark="people"
-              label="Your crews"
+              label="Your groups"
               onPress={() => router.push('/groups')}
             />
             <ProfileAction

@@ -69,9 +69,7 @@ export function ActionRow({
           </Text>
         ) : null}
       </View>
-      <Text aria-hidden style={[styles.chevron, { color: theme.textSubtle }]}>
-        ›
-      </Text>
+      <AppIcon color={theme.textSubtle} name="forward" size={18} />
     </Pressable>
   );
 }
@@ -108,10 +106,5 @@ const styles = StyleSheet.create({
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
     fontWeight: tokens.weight.regular
-  },
-  chevron: {
-    marginLeft: tokens.space.sm,
-    fontSize: 28,
-    fontWeight: tokens.weight.medium
   }
 });

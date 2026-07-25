@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { AppIcon } from '@/components/ui/app-icon';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatusPill } from '@/components/ui/status-pill';
@@ -23,7 +24,7 @@ export default function ReportResultScreen() {
     <AppScreen scroll={false}>
       <View style={styles.content}>
         <StatusPill
-          label={isDemo ? 'DEMO RESULT · NOT SENT' : 'PRIVATE REPORT'}
+          label={isDemo ? 'Demo result · not sent' : 'Private report'}
           tone={isDemo ? 'accent' : 'success'}
         />
         <View
@@ -34,11 +35,11 @@ export default function ReportResultScreen() {
             }
           ]}
         >
-          <Text
-            style={[styles.markText, { color: isDemo ? theme.accent : theme.success }]}
-          >
-            {isDemo ? 'i' : '✓'}
-          </Text>
+          <AppIcon
+            name={isDemo ? 'info' : 'check'}
+            size={34}
+            color={isDemo ? theme.accent : theme.success}
+          />
         </View>
         <Text style={[styles.title, { color: theme.text }]}>
           {isDemo ? 'Report preview complete' : 'Report received'}
@@ -49,16 +50,16 @@ export default function ReportResultScreen() {
             : 'Authorized campus reviewers can now assess the private report. It cannot be edited from the app.'}
         </Text>
         {blocked ? (
-          <InlineNotice message="This student is blocked. Shared active crews and future matching access were removed." />
+          <InlineNotice message="This student is blocked. Shared active groups and future matching access were removed." />
         ) : null}
         {blockFailed ? (
           <InlineNotice
             tone="error"
-            message="The report was received, but blocking did not finish. Return to the student’s crew and retry the block action."
+            message="The report was received, but blocking did not finish. Return to the student’s group and retry the block action."
           />
         ) : null}
         <PrimaryButton
-          label="Return to crews"
+          label="Return to groups"
           onPress={() => router.replace('/groups')}
           style={styles.button}
         />
@@ -83,12 +84,11 @@ const styles = StyleSheet.create({
     borderRadius: 43,
     marginTop: tokens.space.lg
   },
-  markText: { fontSize: 48, fontWeight: tokens.weight.black },
   title: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   copy: {

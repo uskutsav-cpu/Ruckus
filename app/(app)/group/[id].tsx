@@ -111,10 +111,10 @@ export default function GroupLobbyScreen() {
 
   const confirmLeave = () => {
     Alert.alert(
-      'Leave this crew?',
+      'Leave this group?',
       'Leaving within 24 hours of the activity can apply the existing −15 XP reliability penalty.',
       [
-        { text: 'Stay in crew', style: 'cancel' },
+        { text: 'Stay in group', style: 'cancel' },
         {
           text: 'Leave group',
           style: 'destructive',

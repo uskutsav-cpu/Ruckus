@@ -63,8 +63,8 @@ export default function GroupChatScreen() {
         <ErrorState
           icon="×"
           title="Private chat unavailable"
-          message="Only active crew members can open this conversation. Your previous messages remain protected."
-          actionLabel="Back to crews"
+          message="Only active group members can open this conversation. Your previous messages remain protected."
+          actionLabel="Back to groups"
           onAction={() => router.replace('/groups')}
         />
       </AppScreen>
@@ -93,7 +93,7 @@ export default function GroupChatScreen() {
           ) : null}
           <View style={styles.composer}>
             <TextInput
-              accessibilityLabel="Message your crew"
+              accessibilityLabel="Message your group"
               accessibilityHint={
                 online
                   ? 'Messages are visible only to active group members'
@@ -102,7 +102,7 @@ export default function GroupChatScreen() {
               value={draft}
               onChangeText={setDraft}
               onSubmitEditing={send}
-              placeholder={online ? 'Message your crew' : 'Reconnect to send'}
+              placeholder={online ? 'Message your group' : 'Reconnect to send'}
               placeholderTextColor={theme.textSubtle}
               selectionColor={theme.primary}
               editable={online}

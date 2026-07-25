@@ -23,18 +23,18 @@ export default function AccountPendingDeletionScreen() {
   return (
     <AppScreen scroll={false}>
       <View style={styles.content}>
-        <StatusPill label="DELETION SCHEDULED" tone="warning" />
+        <StatusPill label="Deletion scheduled" tone="warning" />
         <View
           style={[
             styles.mark,
             { backgroundColor: tokens.color.coralSoft, borderColor: tokens.color.coral }
           ]}
         >
-          <Text style={styles.markText}>7</Text>
-          <Text style={styles.markLabel}>DAYS</Text>
+          <Text style={styles.markLabel}>Purge window</Text>
+          <Text style={styles.markText}>7 days</Text>
         </View>
         <Text style={[styles.title, { color: theme.text }]}>
-          Account deletion requested.
+          Account deletion requested
         </Text>
         <Text style={[styles.copy, { color: theme.textMuted }]}>
           Social participation and push tokens are disabled. The account becomes eligible
@@ -48,7 +48,7 @@ export default function AccountPendingDeletionScreen() {
         >
           <DeletionRow
             label="Already disabled"
-            value="Waitlists, active crews, pending attendance, and push tokens"
+            value="Waitlists, active groups, pending attendance, and push tokens"
           />
           <DeletionRow
             label="Scheduled deletion"
@@ -56,7 +56,7 @@ export default function AccountPendingDeletionScreen() {
           />
           <DeletionRow
             label="Retained context"
-            value="Crew messages remain without your identity"
+            value="Group messages remain without your identity"
           />
         </View>
         <InlineNotice message="There is no in-app cancel control. If the request was a mistake, use the verified campus support channel before the seven-day window ends. No support contact is configured in this build." />
@@ -83,31 +83,30 @@ function DeletionRow({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   mark: {
-    width: 94,
-    height: 94,
+    minWidth: 150,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderRadius: 47,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md,
     marginTop: tokens.space.lg
   },
   markText: {
     color: '#7C2421',
-    fontSize: 38,
-    lineHeight: 40,
-    fontWeight: tokens.weight.black
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: tokens.weight.bold
   },
   markLabel: {
     color: '#7C2421',
-    fontSize: 9,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
   },
   title: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   copy: {
@@ -122,7 +121,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 420,
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     paddingHorizontal: tokens.space.md,
     marginTop: tokens.space.lg
   },
@@ -133,15 +132,13 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 0.7,
-    textTransform: 'uppercase'
+    fontWeight: tokens.weight.bold
   },
   rowValue: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   button: { minWidth: 240, marginTop: tokens.space.md }
 });
