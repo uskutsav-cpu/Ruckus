@@ -142,7 +142,7 @@ export default function GroupChatScreen() {
       }
     >
       <BackButton
-        label="Crew lobby"
+        label="Group lobby"
         onPress={() =>
           router.replace({ pathname: '/group/[id]', params: { id: groupId } })
         }
@@ -234,7 +234,7 @@ export default function GroupChatScreen() {
             <View>
               <Pressable
                 accessibilityRole="text"
-                accessibilityLabel={`${mine ? 'You' : item.senderId ? (memberNames.get(item.senderId) ?? 'Crew member') : 'Crew member'} said ${item.body}. ${format(new Date(item.createdAt), 'h:mm a')}`}
+                accessibilityLabel={`${mine ? 'You' : item.senderId ? (memberNames.get(item.senderId) ?? 'Group member') : 'Group member'} said ${item.body}. ${format(new Date(item.createdAt), 'h:mm a')}`}
                 accessibilityHint={
                   mine ? undefined : 'Long-press to report this message privately'
                 }
@@ -257,8 +257,8 @@ export default function GroupChatScreen() {
                   <View style={styles.senderRow}>
                     <Text style={[styles.sender, { color: theme.textMuted }]}>
                       {item.senderId
-                        ? (memberNames.get(item.senderId) ?? 'Crew member')
-                        : 'Crew member'}
+                        ? (memberNames.get(item.senderId) ?? 'Group member')
+                        : 'Group member'}
                     </Text>
                   </View>
                 ) : null}

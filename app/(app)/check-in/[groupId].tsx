@@ -132,7 +132,7 @@ export default function ScanCheckinScreen() {
         title="Preparing the camera"
         subtitle="Checking camera permission."
       >
-        <BackButton label="Crew lobby" onPress={backToLobby} />
+        <BackButton label="Group lobby" onPress={backToLobby} />
         <LoadingSkeleton style={styles.permissionSkeleton} />
       </AppScreen>
     );
@@ -145,7 +145,7 @@ export default function ScanCheckinScreen() {
         title="Camera access needed"
         subtitle="Ruckus uses the camera only to scan the host’s short-lived QR code."
       >
-        <BackButton label="Crew lobby" onPress={backToLobby} />
+        <BackButton label="Group lobby" onPress={backToLobby} />
         <View
           style={[
             styles.permissionCard,
@@ -165,7 +165,7 @@ export default function ScanCheckinScreen() {
           </Text>
           <PrimaryButton
             label={permission.canAskAgain ? 'Allow camera' : 'Open system settings'}
-            leadingIcon="↗"
+            leadingIcon={permission.canAskAgain ? 'camera' : 'settings'}
             onPress={() =>
               permission.canAskAgain
                 ? void requestPermission()
@@ -180,7 +180,7 @@ export default function ScanCheckinScreen() {
 
   return (
     <AppScreen scroll={false} contentStyle={styles.screen}>
-      <BackButton label="Crew lobby" onPress={backToLobby} />
+      <BackButton label="Group lobby" onPress={backToLobby} />
       <View style={styles.heading}>
         <StatusPill label={isDemo ? 'Demo scanner' : 'Secure check-in'} tone="success" />
         <Text style={[styles.title, { color: theme.text }]}>Scan the host’s QR code</Text>

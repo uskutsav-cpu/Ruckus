@@ -84,7 +84,7 @@ export default function HostCheckinScreen() {
 
   return (
     <AppScreen>
-      <BackButton label="Crew lobby" onPress={backToLobby} />
+      <BackButton label="Group lobby" onPress={backToLobby} />
       <StatusPill
         label={isDemo ? 'Demo QR · not live' : 'Host check-in'}
         tone={isDemo ? 'accent' : 'success'}

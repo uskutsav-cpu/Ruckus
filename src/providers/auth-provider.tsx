@@ -52,6 +52,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const demoSessionKey = 'campus-clash.demo-session';
+const phonePreviewParam = 'phonePreview';
 
 const demoProfile: ProfileRow = {
   id: '10000000-0000-4000-8000-000000000001',
@@ -71,6 +72,15 @@ const demoProfile: ProfileRow = {
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString()
 };
+
+function isOnboardingPhonePreview(): boolean {
+  if (!__DEV__ || env.backendMode !== 'demo' || typeof window === 'undefined') {
+    return false;
+  }
+  return (
+    new URLSearchParams(window.location.search).get(phonePreviewParam) === 'onboarding'
+  );
+}
 
 function toAuthUser(
   user: { id: string; email?: string; email_confirmed_at?: string | null } | null
@@ -151,6 +161,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
 
     if (env.backendMode === 'demo') {
+      if (isOnboardingPhonePreview()) {
+        void Promise.resolve().then(() => {
+          if (!active) return;
+          setIsDemo(true);
+          setUser({
+            id: demoProfile.id,
+            email: demoProfile.university_email,
+            emailConfirmedAt: demoProfile.email_domain_verified_at
+          });
+          setProfile({ ...demoProfile, onboarding_completed_at: null });
+          setIsLoading(false);
+        });
+        return () => {
+          active = false;
+        };
+      }
       void AsyncStorage.getItem(demoSessionKey).then((value) => {
         if (!active) return;
         if (value === 'active') {

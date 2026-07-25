@@ -10,7 +10,12 @@ const demoGroupId = '50000000-0000-4000-8000-000000000001';
 const startsAt = new Date(Date.now() + 26 * 60 * 60_000);
 startsAt.setMinutes(0, 0, 0);
 
-let demoConfirmed = false;
+const startsConfirmed =
+  __DEV__ &&
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('phonePreview') === 'confirmed';
+
+let demoConfirmed = startsConfirmed;
 let demoLeft = false;
 const demoMessages: ChatMessage[] = [
   {

@@ -10,6 +10,7 @@ dist/
 supabase/.branches/
 supabase/.temp/
 work/
+outputs/
 *.jks
 *.p8
 *.p12
