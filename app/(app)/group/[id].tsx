@@ -4,6 +4,7 @@ import { format, formatDistanceToNowStrict } from 'date-fns';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
 import { BackButton } from '@/components/ui/back-button';
 import { ErrorState } from '@/components/ui/error-state';
@@ -39,18 +40,18 @@ function useCountdown(deadline?: string): string {
 
 function statusForGroup(group: GroupLobby) {
   if (group.status === 'confirmed') {
-    return { label: 'CREW CONFIRMED', tone: 'success' as const };
+    return { label: 'Confirmed', tone: 'success' as const };
   }
   if (group.status === 'pending_confirmation') {
-    return { label: 'CONFIRMATION OPEN', tone: 'warning' as const };
+    return { label: 'Confirmation open', tone: 'warning' as const };
   }
   if (group.status === 'completed') {
-    return { label: 'ACTIVITY COMPLETE', tone: 'neutral' as const };
+    return { label: 'Completed', tone: 'neutral' as const };
   }
   if (group.status === 'cancelled') {
-    return { label: 'GROUP CANCELLED', tone: 'warning' as const };
+    return { label: 'Cancelled', tone: 'warning' as const };
   }
-  return { label: 'CREW FORMING', tone: 'accent' as const };
+  return { label: 'Forming', tone: 'accent' as const };
 }
 
 export default function GroupLobbyScreen() {
@@ -76,15 +77,15 @@ export default function GroupLobbyScreen() {
     [lobby.data?.members, user?.id]
   );
 
-  if (lobby.isLoading) return <LoadingScreen label="Opening your crew…" />;
+  if (lobby.isLoading) return <LoadingScreen label="Opening group…" />;
   if (lobby.isError || !lobby.data) {
     return (
       <AppScreen>
         <ErrorState
           icon="×"
-          title="This lobby isn’t available"
+          title="This group isn’t available"
           message="You may have been removed, the group may have expired, or your connection was interrupted."
-          actionLabel="Back to crews"
+          actionLabel="Back to groups"
           onAction={() => router.replace('/groups')}
         />
       </AppScreen>
@@ -128,7 +129,7 @@ export default function GroupLobbyScreen() {
 
   return (
     <AppScreen>
-      <BackButton label="All crews" onPress={() => router.replace('/groups')} />
+      <BackButton label="All groups" onPress={() => router.replace('/groups')} />
 
       {network.isConnected === false ? (
         <InlineNotice
@@ -138,14 +139,7 @@ export default function GroupLobbyScreen() {
         />
       ) : null}
 
-      <View
-        style={[
-          styles.hero,
-          { backgroundColor: theme.surfaceElevated, borderColor: theme.border },
-          tokens.shadow.card
-        ]}
-      >
-        <View style={styles.heroAccent} />
+      <View style={styles.hero}>
         <StatusPill label={status.label} tone={status.tone} />
         <Text style={[styles.title, { color: theme.text }]}>{group.title}</Text>
         <Text style={[styles.when, { color: theme.textMuted }]}>
@@ -175,7 +169,7 @@ export default function GroupLobbyScreen() {
             styles.confirmCard,
             {
               backgroundColor: theme.surfaceElevated,
-              borderColor: canConfirm ? tokens.color.coral : theme.border
+              borderColor: canConfirm ? theme.warning : theme.border
             }
           ]}
         >
@@ -220,8 +214,7 @@ export default function GroupLobbyScreen() {
             ))}
           </View>
           <Text style={[styles.confirmBody, { color: theme.textMuted }]}>
-            The public venue unlocks only after enough real members confirm. Ruckus never
-            reveals a private home or live location.
+            The meeting venue appears after the group reaches its confirmation threshold.
           </Text>
           {canConfirm ? (
             <PrimaryButton
@@ -236,8 +229,8 @@ export default function GroupLobbyScreen() {
             <StatusPill
               label={
                 currentMember?.confirmation === 'confirmed'
-                  ? 'YOU’RE CONFIRMED'
-                  : 'RESPONSE CLOSED'
+                  ? 'You confirmed'
+                  : 'Response closed'
               }
               tone={currentMember?.confirmation === 'confirmed' ? 'success' : 'neutral'}
               style={styles.confirmedPill}
@@ -255,8 +248,8 @@ export default function GroupLobbyScreen() {
 
       <View style={styles.sectionHeader}>
         <View>
-          <Text style={[styles.sectionEyebrow, { color: theme.accent }]}>
-            PRIVATE CREW
+          <Text style={[styles.sectionEyebrow, { color: theme.textMuted }]}>
+            Group members
           </Text>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             {group.members.length} members
@@ -321,7 +314,7 @@ export default function GroupLobbyScreen() {
                   {member.displayName}
                 </Text>
                 {member.isHost ? (
-                  <Text style={[styles.host, { color: theme.accent }]}>HOST</Text>
+                  <Text style={[styles.host, { color: theme.textMuted }]}>Host</Text>
                 ) : null}
               </View>
               <Text
@@ -338,7 +331,7 @@ export default function GroupLobbyScreen() {
                 ]}
               >
                 {member.confirmation === 'confirmed'
-                  ? '✓ Attending'
+                  ? 'Attending'
                   : member.confirmation === 'declined'
                     ? 'Not attending'
                     : member.confirmation === 'expired'
@@ -354,8 +347,7 @@ export default function GroupLobbyScreen() {
         style={[
           styles.venue,
           {
-            backgroundColor: group.venue ? theme.accentMuted : theme.surfaceMuted,
-            borderColor: group.venue ? theme.accent : theme.border
+            backgroundColor: theme.surfaceMuted
           }
         ]}
       >
@@ -366,16 +358,18 @@ export default function GroupLobbyScreen() {
               { backgroundColor: group.venue ? theme.primary : theme.surfaceStrong }
             ]}
           >
-            <Text style={[styles.venueIconText, { color: theme.onPrimary }]}>
-              {group.venue ? '⌖' : '×'}
-            </Text>
+            <AppIcon
+              color={group.venue ? theme.primary : theme.textMuted}
+              name={group.venue ? 'location' : 'clock'}
+              size={20}
+            />
           </View>
           <View style={styles.venueTitleWrap}>
-            <Text style={[styles.sectionEyebrow, { color: theme.accent }]}>
-              PUBLIC MEETING SPOT
+            <Text style={[styles.sectionEyebrow, { color: theme.textMuted }]}>
+              Meeting venue
             </Text>
             <Text style={[styles.venueTitle, { color: theme.text }]}>
-              {group.venue ? 'Venue revealed' : 'Locked until confirmation'}
+              {group.venue ? 'Venue available' : 'Pending confirmation'}
             </Text>
           </View>
         </View>
@@ -395,8 +389,8 @@ export default function GroupLobbyScreen() {
           </>
         ) : (
           <Text style={[styles.venueBody, { color: theme.textMuted }]}>
-            The exact venue is withheld until the group reaches its real confirmation
-            threshold. Approved venues are public and staffed.
+            The exact venue appears after the group reaches its confirmation threshold.
+            Approved venues are public and staffed.
           </Text>
         )}
       </View>
@@ -404,8 +398,8 @@ export default function GroupLobbyScreen() {
       {!isInactive ? (
         <View style={styles.actions}>
           <PrimaryButton
-            label="Open crew chat"
-            leadingIcon="↗"
+            label="Open group chat"
+            leadingIcon="chat"
             onPress={() =>
               router.push({ pathname: '/group/[id]/chat', params: { id: group.id } })
             }
@@ -483,43 +477,30 @@ export default function GroupLobbyScreen() {
 
 const styles = StyleSheet.create({
   hero: {
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.space.lg,
     marginBottom: tokens.space.lg
-  },
-  heroAccent: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 88,
-    height: 8,
-    borderBottomLeftRadius: tokens.radius.pill,
-    backgroundColor: tokens.color.ruckus
   },
   title: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.6
   },
   when: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.body,
     lineHeight: tokens.lineHeight.body,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   distance: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.medium
   },
   confirmCard: {
-    borderWidth: 2,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.space.lg,
+    borderWidth: 1,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md,
     marginBottom: tokens.space.xl
   },
   confirmTop: {
@@ -529,11 +510,11 @@ const styles = StyleSheet.create({
     gap: tokens.space.md
   },
   confirmCopyWrap: { flex: 1 },
-  confirmTitle: { fontSize: 22, fontWeight: tokens.weight.black },
+  confirmTitle: { fontSize: 20, fontWeight: tokens.weight.bold },
   countdown: {
     marginTop: tokens.space.xs,
     fontSize: 17,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   confirmCount: {
     minWidth: 76,
@@ -541,8 +522,11 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.md,
     padding: tokens.space.sm
   },
-  confirmCountValue: { fontSize: 18, fontWeight: tokens.weight.black },
-  confirmCountLabel: { fontSize: 9, fontWeight: tokens.weight.black },
+  confirmCountValue: { fontSize: 18, fontWeight: tokens.weight.bold },
+  confirmCountLabel: {
+    fontSize: tokens.type.micro,
+    fontWeight: tokens.weight.medium
+  },
   segments: {
     flexDirection: 'row',
     gap: tokens.space.xs,
@@ -553,7 +537,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   confirmButton: { marginTop: tokens.space.md },
   confirmedPill: { marginTop: tokens.space.md },
@@ -564,24 +548,22 @@ const styles = StyleSheet.create({
   },
   sectionEyebrow: {
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.1
+    fontWeight: tokens.weight.medium
   },
   sectionTitle: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.heading,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.5
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.3
   },
   sectionMeta: { fontSize: tokens.type.caption, fontWeight: tokens.weight.heavy },
-  memberGrid: { gap: tokens.space.sm, marginTop: tokens.space.md },
+  memberGrid: { marginTop: tokens.space.sm },
   member: {
     minHeight: 70,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: tokens.radius.md,
-    padding: tokens.space.sm
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: tokens.space.sm
   },
   avatar: {
     width: 48,
@@ -590,29 +572,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  avatarText: { fontSize: 18, fontWeight: tokens.weight.black },
+  avatarText: { fontSize: 18, fontWeight: tokens.weight.bold },
   memberCopy: { flex: 1, marginLeft: tokens.space.md },
   memberNameRow: { flexDirection: 'row', alignItems: 'center' },
   memberName: {
     flexShrink: 1,
     fontSize: 15,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   host: {
     marginLeft: tokens.space.sm,
-    fontSize: 9,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
   },
   memberStatus: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   venue: {
-    borderWidth: 1,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.space.lg,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md,
     marginTop: tokens.space.xl
   },
   venueHeading: { flexDirection: 'row', alignItems: 'center' },
@@ -623,23 +603,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  venueIconText: { fontSize: 18, fontWeight: tokens.weight.black },
   venueTitleWrap: { flex: 1, marginLeft: tokens.space.md },
   venueTitle: {
     marginTop: tokens.space.xs,
     fontSize: 17,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   venueName: {
     marginTop: tokens.space.lg,
     fontSize: 19,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   venueBody: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   actions: { gap: tokens.space.sm, marginTop: tokens.space.xl },
   safetyActions: {

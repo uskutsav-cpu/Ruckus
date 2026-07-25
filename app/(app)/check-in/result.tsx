@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatusPill } from '@/components/ui/status-pill';
@@ -37,7 +38,7 @@ export default function CheckinResultScreen() {
     <AppScreen scroll={false}>
       <View style={styles.content}>
         <StatusPill
-          label={isDemo ? 'DEMO RESULT · NOT RECORDED' : 'VERIFIED RESULT'}
+          label={isDemo ? 'Demo result · not recorded' : 'Verified'}
           tone={isDemo ? 'accent' : 'success'}
         />
         <View
@@ -48,27 +49,22 @@ export default function CheckinResultScreen() {
             }
           ]}
         >
-          <Text
-            style={[styles.iconText, { color: isDemo ? theme.accent : theme.success }]}
-          >
-            ✓
-          </Text>
+          <AppIcon
+            color={isDemo ? theme.primary : theme.success}
+            name="check"
+            size={36}
+          />
         </View>
         <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
         <Text style={[styles.copy, { color: theme.textMuted }]}>{copy}</Text>
-        <View
-          style={[
-            styles.xpCard,
-            { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
-          ]}
-        >
+        <View style={[styles.xpCard, { borderTopColor: theme.border }]}>
           <Text style={[styles.xp, { color: theme.text }]}>+{xp} XP</Text>
           <Text style={[styles.xpLabel, { color: theme.textMuted }]}>
             {isDemo
-              ? 'preview reward only'
+              ? 'Preview only'
               : already
-                ? 'previously awarded'
-                : 'verified attendance'}
+                ? 'Previously awarded'
+                : 'Verified attendance'}
           </Text>
         </View>
         <PrimaryButton
@@ -106,15 +102,14 @@ const styles = StyleSheet.create({
     height: 86,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 43,
+    borderRadius: tokens.radius.lg,
     marginTop: tokens.space.lg
   },
-  iconText: { fontSize: 50, fontWeight: tokens.weight.black },
   title: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   copy: {
@@ -127,18 +122,16 @@ const styles = StyleSheet.create({
   xpCard: {
     alignItems: 'center',
     minWidth: 218,
-    borderWidth: 1,
-    borderRadius: tokens.radius.lg,
-    paddingHorizontal: tokens.space.xxl,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: tokens.space.xl,
     paddingVertical: tokens.space.lg,
     marginTop: tokens.space.xl
   },
-  xp: { fontSize: 36, fontWeight: tokens.weight.black, letterSpacing: -1 },
+  xp: { fontSize: 32, fontWeight: tokens.weight.bold, letterSpacing: -0.6 },
   xpLabel: {
     marginTop: 3,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.heavy,
-    textTransform: 'uppercase'
+    fontWeight: tokens.weight.medium
   },
   button: { minWidth: 220, marginTop: tokens.space.xl },
   ratingButton: { minWidth: 220, marginTop: tokens.space.sm }

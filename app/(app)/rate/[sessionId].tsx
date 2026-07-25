@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { AppIcon } from '@/components/ui/app-icon';
 import { BackButton } from '@/components/ui/back-button';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -55,14 +56,11 @@ export default function RateActivityScreen() {
               { backgroundColor: isDemo ? theme.accentMuted : tokens.color.ruckusSoft }
             ]}
           >
-            <Text
-              style={[
-                styles.completeIconText,
-                { color: isDemo ? theme.accent : theme.success }
-              ]}
-            >
-              ★
-            </Text>
+            <AppIcon
+              name="star"
+              size={34}
+              color={isDemo ? theme.accent : theme.success}
+            />
           </View>
           <Text style={[styles.completeTitle, { color: theme.text }]}>
             {isDemo ? 'Feedback preview complete' : 'Thanks for the feedback'}
@@ -86,12 +84,12 @@ export default function RateActivityScreen() {
     <AppScreen>
       <BackButton label="Back" onPress={() => router.back()} />
       <StatusPill
-        label={isDemo ? 'DEMO FEEDBACK' : 'POST-EVENT FEEDBACK'}
+        label={isDemo ? 'Demo feedback' : 'Post-event feedback'}
         tone={isDemo ? 'accent' : 'neutral'}
       />
       <Text style={[styles.title, { color: theme.text }]}>How was the activity?</Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-        Your rating goes to campus operations. It never rates individual crew members.
+        Your rating goes to campus operations, not individual group members.
       </Text>
       {isDemo ? (
         <InlineNotice message="This preview accepts local input only. It does not submit feedback or award XP." />
@@ -110,14 +108,11 @@ export default function RateActivityScreen() {
             onPress={() => setRating(value)}
             style={styles.starButton}
           >
-            <Text
-              style={[
-                styles.star,
-                { color: value <= rating ? tokens.color.amber : theme.border }
-              ]}
-            >
-              ★
-            </Text>
+            <AppIcon
+              name="star"
+              size={32}
+              color={value <= rating ? tokens.color.amber : theme.border}
+            />
           </Pressable>
         ))}
       </View>
@@ -131,7 +126,7 @@ export default function RateActivityScreen() {
         style={styles.feedback}
       />
       <PrimaryButton
-        label={isDemo ? 'Preview submission' : 'Submit rating · +10 XP'}
+        label={isDemo ? 'Preview submission' : 'Submit rating'}
         loading={submitting}
         disabled={!rating}
         onPress={() => void submit()}
@@ -148,7 +143,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     letterSpacing: -1
   },
   subtitle: {
@@ -169,7 +164,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  star: { fontSize: 39 },
   feedback: { minHeight: 150, paddingTop: tokens.space.md, textAlignVertical: 'top' },
   submit: { marginTop: tokens.space.lg },
   complete: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -181,11 +175,10 @@ const styles = StyleSheet.create({
     borderRadius: 43,
     marginTop: tokens.space.lg
   },
-  completeIconText: { fontSize: 48, fontWeight: tokens.weight.black },
   completeTitle: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   completeCopy: {

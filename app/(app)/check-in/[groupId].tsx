@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
 import { BackButton } from '@/components/ui/back-button';
 import { InlineNotice } from '@/components/ui/inline-notice';
@@ -127,9 +128,9 @@ export default function ScanCheckinScreen() {
   if (!permission) {
     return (
       <AppScreen
-        eyebrow="Secure check-in"
-        title="Preparing your camera."
-        subtitle="Checking device permission before the scanner opens."
+        eyebrow="Check-in"
+        title="Preparing the camera"
+        subtitle="Checking camera permission."
       >
         <BackButton label="Crew lobby" onPress={backToLobby} />
         <LoadingSkeleton style={styles.permissionSkeleton} />
@@ -140,9 +141,9 @@ export default function ScanCheckinScreen() {
   if (!permission.granted) {
     return (
       <AppScreen
-        eyebrow="Secure check-in"
-        title="Camera access is needed."
-        subtitle="Ruckus uses the camera only to scan the host’s short-lived QR. No photo or video is saved."
+        eyebrow="Check-in"
+        title="Camera access needed"
+        subtitle="Ruckus uses the camera only to scan the host’s short-lived QR code."
       >
         <BackButton label="Crew lobby" onPress={backToLobby} />
         <View
@@ -152,16 +153,14 @@ export default function ScanCheckinScreen() {
           ]}
         >
           <View style={[styles.cameraMark, { backgroundColor: theme.accentMuted }]}>
-            <Text style={[styles.cameraMarkText, { color: theme.text }]}>⌁</Text>
+            <AppIcon color={theme.primary} name="qrCode" size={30} />
           </View>
           <Text style={[styles.permissionTitle, { color: theme.text }]}>
-            {permission.canAskAgain
-              ? 'Allow one-purpose camera access'
-              : 'Camera access is blocked'}
+            {permission.canAskAgain ? 'Allow camera access' : 'Camera access is blocked'}
           </Text>
           <Text style={[styles.permissionCopy, { color: theme.textMuted }]}>
             {permission.canAskAgain
-              ? 'You stay in control, and Ruckus never stores the camera feed.'
+              ? 'Ruckus does not save photos, video, or the camera feed.'
               : 'Re-enable camera access in system settings, then return here to scan.'}
           </Text>
           <PrimaryButton
@@ -183,11 +182,11 @@ export default function ScanCheckinScreen() {
     <AppScreen scroll={false} contentStyle={styles.screen}>
       <BackButton label="Crew lobby" onPress={backToLobby} />
       <View style={styles.heading}>
-        <StatusPill label={isDemo ? 'DEMO SCANNER' : 'SECURE CHECK-IN'} tone="success" />
-        <Text style={[styles.title, { color: theme.text }]}>Scan the host’s QR.</Text>
+        <StatusPill label={isDemo ? 'Demo scanner' : 'Secure check-in'} tone="success" />
+        <Text style={[styles.title, { color: theme.text }]}>Scan the host’s QR code</Text>
         <Text numberOfLines={2} style={[styles.context, { color: theme.textMuted }]}>
           {lobby.data?.title ?? 'Your confirmed activity'} · The code rotates quickly and
-          works only for this crew.
+          works only for this group.
         </Text>
       </View>
 
@@ -263,12 +262,12 @@ const styles = StyleSheet.create({
   permissionSkeleton: {
     flex: 1,
     minHeight: 360,
-    borderRadius: tokens.radius.xl
+    borderRadius: tokens.radius.lg
   },
   permissionCard: {
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: tokens.radius.xl,
+    borderRadius: tokens.radius.lg,
     padding: tokens.space.xl
   },
   cameraMark: {
@@ -278,11 +277,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.lg
   },
-  cameraMarkText: { fontSize: 32, fontWeight: tokens.weight.black },
   permissionTitle: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.heading,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   permissionCopy: {
@@ -290,7 +288,7 @@ const styles = StyleSheet.create({
     maxWidth: 330,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium,
+    fontWeight: tokens.weight.regular,
     textAlign: 'center'
   },
   permissionButton: { width: '100%', marginTop: tokens.space.lg },
@@ -299,20 +297,20 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.6
   },
   context: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   cameraFrame: {
     flex: 1,
     overflow: 'hidden',
-    borderWidth: 3,
-    borderRadius: tokens.radius.xl,
+    borderWidth: 2,
+    borderRadius: tokens.radius.lg,
     backgroundColor: tokens.color.ink
   },
   target: {
@@ -348,7 +346,7 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     color: tokens.color.white,
     fontSize: 20,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   processingCopy: {
     marginTop: tokens.space.sm,
@@ -356,14 +354,14 @@ const styles = StyleSheet.create({
     color: '#B6BBC4',
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.medium,
+    fontWeight: tokens.weight.regular,
     textAlign: 'center'
   },
   hint: {
     marginTop: tokens.space.md,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.medium,
+    fontWeight: tokens.weight.regular,
     textAlign: 'center'
   }
 });

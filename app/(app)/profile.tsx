@@ -3,6 +3,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AppIcon, type AppIconName } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
 import { BackButton } from '@/components/ui/back-button';
 import { ErrorState } from '@/components/ui/error-state';
@@ -25,14 +26,14 @@ const reasonLabels: Record<XpReason, string> = {
   admin_adjustment: 'Campus team adjustment'
 };
 
-const reasonMarks: Record<XpReason, string> = {
-  attendance_confirmed: '✓',
-  verified_checkin: '⌁',
-  post_event_rating: '★',
-  host_completion: 'H',
-  no_show: '!',
-  late_cancellation: '−',
-  admin_adjustment: '±'
+const reasonMarks: Record<XpReason, AppIconName> = {
+  attendance_confirmed: 'check',
+  verified_checkin: 'qrCode',
+  post_event_rating: 'star',
+  host_completion: 'people',
+  no_show: 'warning',
+  late_cancellation: 'warning',
+  admin_adjustment: 'settings'
 };
 
 export default function ProfileScreen() {
@@ -45,8 +46,8 @@ export default function ProfileScreen() {
       <AppScreen>
         <ErrorState
           icon="↻"
-          title="Your profile took a timeout"
-          message="Your account and XP remain protected. Try loading it again."
+          title="Profile unavailable"
+          message="Your account and XP are unchanged. Try again."
           actionLabel="Try again"
           onAction={() => void dashboard.refetch()}
         />
@@ -68,15 +69,15 @@ export default function ProfileScreen() {
 
   return (
     <AppScreen
-      eyebrow="Verified participation"
-      title="Your Ruckus profile."
-      subtitle="Built around showing up—not followers, likes, or popularity."
+      eyebrow="Account"
+      title="Profile"
+      subtitle="Your attendance, reliability, and recent activity."
     >
       <View style={styles.topActions}>
         <BackButton label="Discover" onPress={() => router.replace('/deck')} />
         <SecondaryButton
           label="Settings"
-          leadingIcon="↗"
+          leadingIcon="settings"
           onPress={() => router.push('/settings')}
           style={styles.settingsButton}
         />
@@ -86,13 +87,7 @@ export default function ProfileScreen() {
         <ListCardSkeleton count={3} />
       ) : (
         <>
-          <View
-            style={[
-              styles.identity,
-              { backgroundColor: theme.surfaceElevated, borderColor: theme.border },
-              tokens.shadow.card
-            ]}
-          >
+          <View style={[styles.identity, { borderColor: theme.border }]}>
             <View style={styles.identityTop}>
               {data.avatarUrl ? (
                 <Image
@@ -110,9 +105,9 @@ export default function ProfileScreen() {
                 </View>
               )}
               <View style={styles.identityCopy}>
-                <StatusPill label="VERIFIED STUDENT" tone="success" />
+                <StatusPill label="Verified student" tone="success" />
                 <Text numberOfLines={2} style={[styles.name, { color: theme.text }]}>
-                  {profile?.display_name ?? 'Ruckus player'}
+                  {profile?.display_name ?? 'Ruckus member'}
                 </Text>
                 <Text style={[styles.campus, { color: theme.textMuted }]}>
                   {data.campusName}
@@ -127,46 +122,45 @@ export default function ProfileScreen() {
             ) : null}
             <SecondaryButton
               label="Edit profile"
-              leadingIcon="↗"
+              leadingIcon="forward"
               onPress={() => router.push('/profile/edit')}
               style={styles.edit}
             />
           </View>
 
-          <View
-            style={[
-              styles.levelCard,
-              { backgroundColor: tokens.color.ink, borderColor: theme.border }
-            ]}
-          >
+          <View style={[styles.levelCard, { backgroundColor: theme.surfaceMuted }]}>
             <View style={styles.levelTop}>
               <View>
-                <Text style={styles.levelEyebrow}>PARTICIPATION LEVEL</Text>
-                <Text style={styles.levelValue}>LEVEL {level}</Text>
+                <Text style={[styles.levelEyebrow, { color: theme.textMuted }]}>
+                  XP progress
+                </Text>
+                <Text style={[styles.levelValue, { color: theme.text }]}>
+                  Level {level}
+                </Text>
               </View>
               <View style={styles.xpBadge}>
-                <Text style={styles.xpValue}>{xpTotal}</Text>
-                <Text style={styles.xpLabel}>TOTAL XP</Text>
+                <Text style={[styles.xpValue, { color: theme.text }]}>{xpTotal}</Text>
+                <Text style={[styles.xpLabel, { color: theme.textMuted }]}>Total XP</Text>
               </View>
             </View>
             <View
               accessibilityLabel={`${Math.round(levelProgress * 100)} percent toward level ${level + 1}`}
-              style={styles.progressTrack}
+              style={[styles.progressTrack, { backgroundColor: theme.surfaceStrong }]}
             >
-              <View style={[styles.progressFill, { width: `${levelProgress * 100}%` }]} />
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${levelProgress * 100}%`, backgroundColor: theme.primary }
+                ]}
+              />
             </View>
-            <Text style={styles.levelNote}>
+            <Text style={[styles.levelNote, { color: theme.textMuted }]}>
               {Math.max(level * 250 - xpTotal, 0)} XP to Level {level + 1}
             </Text>
           </View>
 
           <View style={styles.metrics}>
-            <View
-              style={[
-                styles.metric,
-                { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
-              ]}
-            >
+            <View style={[styles.metric, { borderColor: theme.border }]}>
               <Text style={[styles.metricValue, { color: theme.text }]}>
                 {verifiedCheckins}
               </Text>
@@ -174,12 +168,7 @@ export default function ProfileScreen() {
                 Recent verified check-ins
               </Text>
             </View>
-            <View
-              style={[
-                styles.metric,
-                { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
-              ]}
-            >
+            <View style={[styles.metric, { borderColor: theme.border }]}>
               <Text
                 style={[
                   styles.metricValue,
@@ -198,17 +187,17 @@ export default function ProfileScreen() {
 
           <View style={styles.quickActions}>
             <ProfileAction
-              mark="#"
+              mark="trophy"
               label="Leaderboard"
               onPress={() => router.push('/leaderboard')}
             />
             <ProfileAction
-              mark="●"
+              mark="people"
               label="Your crews"
               onPress={() => router.push('/groups')}
             />
             <ProfileAction
-              mark="!"
+              mark="safety"
               label="Safety"
               onPress={() => router.push('/safety')}
             />
@@ -216,15 +205,15 @@ export default function ProfileScreen() {
 
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={[styles.sectionEyebrow, { color: theme.accent }]}>
-                XP HISTORY
+              <Text style={[styles.sectionEyebrow, { color: theme.textMuted }]}>
+                XP history
               </Text>
               <Text style={[styles.sectionTitle, { color: theme.text }]}>
                 Recent activity
               </Text>
             </View>
             <Text style={[styles.trust, { color: theme.textMuted }]}>
-              Server verified
+              Verified entries
             </Text>
           </View>
 
@@ -262,14 +251,11 @@ export default function ProfileScreen() {
                       }
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.reasonMarkText,
-                        { color: entry.amount >= 0 ? '#335400' : '#8B2522' }
-                      ]}
-                    >
-                      {reasonMarks[entry.reason]}
-                    </Text>
+                    <AppIcon
+                      color={entry.amount >= 0 ? theme.success : theme.danger}
+                      name={reasonMarks[entry.reason]}
+                      size={18}
+                    />
                   </View>
                   <View style={styles.ledgerCopy}>
                     <Text style={[styles.ledgerReason, { color: theme.text }]}>
@@ -296,7 +282,7 @@ export default function ProfileScreen() {
           ) : (
             <View style={[styles.emptyLedger, { backgroundColor: theme.surfaceMuted }]}>
               <Text style={[styles.emptyTitle, { color: theme.text }]}>
-                Your XP story starts when you show up.
+                No XP activity yet
               </Text>
               <Text style={[styles.emptyCopy, { color: theme.textMuted }]}>
                 Verified check-ins and trusted activity actions will appear here.
@@ -314,7 +300,7 @@ function ProfileAction({
   label,
   onPress
 }: {
-  mark: string;
+  mark: AppIconName;
   label: string;
   onPress: () => void;
 }) {
@@ -333,8 +319,9 @@ function ProfileAction({
         }
       ]}
     >
-      <Text style={[styles.actionMark, { color: theme.accent }]}>{mark}</Text>
+      <AppIcon color={theme.textMuted} name={mark} size={20} />
       <Text style={[styles.actionText, { color: theme.text }]}>{label}</Text>
+      <AppIcon color={theme.textSubtle} name="forward" size={16} />
     </Pressable>
   );
 }
@@ -348,8 +335,8 @@ const styles = StyleSheet.create({
   settingsButton: { minWidth: 132 },
   identity: {
     borderWidth: 1,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.space.lg
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md
   },
   identityTop: { flexDirection: 'row', alignItems: 'center' },
   avatar: {
@@ -360,32 +347,31 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: tokens.radius.lg
   },
-  initial: { fontSize: 38, fontWeight: tokens.weight.black },
+  initial: { fontSize: 38, fontWeight: tokens.weight.bold },
   identityCopy: { flex: 1, marginLeft: tokens.space.md },
   name: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.heading,
     lineHeight: tokens.lineHeight.heading,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.6
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.3
   },
   campus: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   bio: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   edit: { marginTop: tokens.space.lg },
   levelCard: {
-    borderWidth: 1,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.space.lg,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md,
     marginTop: tokens.space.lg
   },
   levelTop: {
@@ -394,47 +380,38 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   levelEyebrow: {
-    color: tokens.color.ruckus,
-    fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.1
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
   },
   levelValue: {
     marginTop: tokens.space.xs,
-    color: tokens.color.white,
     fontSize: 26,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.6
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.3
   },
   xpBadge: { alignItems: 'flex-end' },
   xpValue: {
-    color: tokens.color.white,
     fontSize: 28,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   xpLabel: {
-    color: '#B6BBC4',
-    fontSize: 9,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 0.9
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
   },
   progressTrack: {
     height: 9,
     overflow: 'hidden',
     borderRadius: tokens.radius.pill,
-    backgroundColor: '#30333C',
     marginTop: tokens.space.lg
   },
   progressFill: {
     height: '100%',
-    borderRadius: tokens.radius.pill,
-    backgroundColor: tokens.color.ruckus
+    borderRadius: tokens.radius.pill
   },
   levelNote: {
     marginTop: tokens.space.sm,
-    color: '#B6BBC4',
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.regular
   },
   metrics: {
     flexDirection: 'row',
@@ -449,33 +426,28 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
-  metricValue: { fontSize: 28, fontWeight: tokens.weight.black },
+  metricValue: { fontSize: 28, fontWeight: tokens.weight.bold },
   metricLabel: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   quickActions: {
-    flexDirection: 'row',
-    gap: tokens.space.sm,
     marginTop: tokens.space.md
   },
   action: {
-    minHeight: 92,
-    flex: 1,
+    minHeight: 56,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: tokens.radius.md,
-    padding: tokens.space.sm
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: tokens.space.sm
   },
-  actionMark: { fontSize: 20, fontWeight: tokens.weight.black },
   actionText: {
-    marginTop: tokens.space.sm,
-    fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black,
-    textAlign: 'center'
+    flex: 1,
+    marginLeft: tokens.space.md,
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.medium
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -485,19 +457,18 @@ const styles = StyleSheet.create({
   },
   sectionEyebrow: {
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.1
+    fontWeight: tokens.weight.medium
   },
   sectionTitle: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.heading,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
-  trust: { fontSize: tokens.type.micro, fontWeight: tokens.weight.heavy },
+  trust: { fontSize: tokens.type.caption, fontWeight: tokens.weight.medium },
   ledger: {
     overflow: 'hidden',
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     paddingHorizontal: tokens.space.md,
     marginTop: tokens.space.md
   },
@@ -513,25 +484,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  reasonMarkText: { fontSize: 16, fontWeight: tokens.weight.black },
   ledgerCopy: { flex: 1, marginLeft: tokens.space.md },
-  ledgerReason: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  ledgerReason: { fontSize: tokens.type.label, fontWeight: tokens.weight.medium },
   ledgerTime: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.regular
   },
-  ledgerAmount: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  ledgerAmount: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   emptyLedger: {
     borderRadius: tokens.radius.lg,
     padding: tokens.space.lg,
     marginTop: tokens.space.md
   },
-  emptyTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  emptyTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   emptyCopy: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   }
 });

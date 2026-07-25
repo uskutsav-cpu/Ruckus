@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
 import { BackButton } from '@/components/ui/back-button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -23,9 +24,9 @@ export default function PendingMatchesScreen() {
 
   return (
     <AppScreen
-      eyebrow="Waitlists"
-      title="You’re in the mix."
-      subtitle="These picks are waiting for enough compatible students to form a safe public meetup."
+      eyebrow="Your activities"
+      title="Pending activities"
+      subtitle="We’ll notify you when a group is ready."
     >
       <BackButton label="Your crews" onPress={() => router.replace('/groups')} />
 
@@ -42,8 +43,8 @@ export default function PendingMatchesScreen() {
       ) : pending.isError ? (
         <ErrorState
           icon="↻"
-          title="Waitlists took a timeout"
-          message="Your existing picks are still recorded. Reconnect and try again."
+          title="Pending activities are unavailable"
+          message="Your existing choices are still recorded. Try again when you reconnect."
           actionLabel="Try again"
           onAction={() => void pending.refetch()}
         />
@@ -58,8 +59,7 @@ export default function PendingMatchesScreen() {
                   {
                     backgroundColor: theme.surfaceElevated,
                     borderColor: theme.border
-                  },
-                  tokens.shadow.floating
+                  }
                 ]}
               >
                 <Image
@@ -69,7 +69,7 @@ export default function PendingMatchesScreen() {
                   style={styles.image}
                 />
                 <View style={styles.cardBody}>
-                  <StatusPill label="WAITING FOR A CREW" tone="warning" />
+                  <StatusPill label="Waiting for a group" tone="warning" />
                   <Text
                     numberOfLines={2}
                     style={[styles.cardTitle, { color: theme.text }]}
@@ -77,13 +77,15 @@ export default function PendingMatchesScreen() {
                     {entry.title}
                   </Text>
                   <View style={styles.metadataRow}>
-                    <Text style={[styles.metadataIcon, { color: theme.accent }]}>◷</Text>
+                    <View style={styles.metadataIcon}>
+                      <AppIcon color={theme.textMuted} name="clock" size={14} />
+                    </View>
                     <Text style={[styles.metadata, { color: theme.textMuted }]}>
                       {format(new Date(entry.startsAt), 'EEE, MMM d · h:mm a')}
                     </Text>
                   </View>
                   <Text style={[styles.joined, { color: theme.text }]}>
-                    Joined{' '}
+                    Added{' '}
                     {formatDistanceToNowStrict(new Date(entry.joinedAt), {
                       addSuffix: true
                     })}
@@ -106,9 +108,8 @@ export default function PendingMatchesScreen() {
               What happens next
             </Text>
             <Text style={[styles.policyBody, { color: theme.textMuted }]}>
-              We’ll notify you if a crew forms. Waitlist picks cannot be cancelled from
-              this screen; if a group unlocks, the lobby shows the existing leave policy
-              before you decide.
+              We’ll notify you if a group forms. If it does, you can review the group and
+              confirmation deadline before deciding.
             </Text>
           </View>
           <SecondaryButton
@@ -122,8 +123,8 @@ export default function PendingMatchesScreen() {
         <EmptyState
           icon="✓"
           title="Nothing pending"
-          message="You’re caught up. Swipe into another plan when you’re ready."
-          actionLabel="Open the deck"
+          message="Join an activity and it will appear here while a group forms."
+          actionLabel="Browse activities"
           onAction={() => router.replace('/deck')}
         />
       )}
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     overflow: 'hidden',
     borderWidth: 1,
-    borderRadius: tokens.radius.lg
+    borderRadius: tokens.radius.md
   },
   image: { width: 118, minHeight: 164, backgroundColor: tokens.color.inkSoft },
   cardBody: { flex: 1, padding: tokens.space.md },
@@ -146,8 +147,8 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.sm,
     fontSize: 20,
     lineHeight: 23,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.45
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.3
   },
   metadataRow: {
     flexDirection: 'row',
@@ -155,19 +156,17 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.sm
   },
   metadataIcon: {
-    marginRight: 6,
-    fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black
+    marginRight: 6
   },
   metadata: {
     flex: 1,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   joined: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.medium
   },
   honest: {
     marginTop: tokens.space.xs,
@@ -175,17 +174,16 @@ const styles = StyleSheet.create({
     fontWeight: tokens.weight.medium
   },
   policy: {
-    borderWidth: 1,
     borderRadius: tokens.radius.md,
     padding: tokens.space.md,
     marginTop: tokens.space.lg
   },
-  policyTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  policyTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   policyBody: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   browse: { marginTop: tokens.space.md }
 });

@@ -26,6 +26,7 @@ const symbols = {
     web: 'qr_code_scanner'
   },
   trophy: { ios: 'trophy', android: 'trophy', web: 'trophy' },
+  star: { ios: 'star', android: 'star', web: 'star' },
   safety: { ios: 'shield', android: 'shield', web: 'shield' },
   rules: { ios: 'checklist', android: 'gavel', web: 'gavel' },
   info: { ios: 'info.circle', android: 'info', web: 'info' },

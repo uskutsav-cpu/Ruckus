@@ -9,7 +9,6 @@ import { BackButton } from '@/components/ui/back-button';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
-import { StatusPill } from '@/components/ui/status-pill';
 import { TextField } from '@/components/ui/text-field';
 import { onboardingSchema } from '@/features/auth/auth-schema';
 import { uploadAvatar } from '@/features/profile/profile-service';
@@ -93,9 +92,9 @@ export default function EditProfileScreen() {
 
   return (
     <AppScreen
-      eyebrow="Player card"
+      eyebrow="Account"
       title="Edit profile"
-      subtitle="Your display name, photo, bio, year, and interests appear only in the group contexts that require them."
+      subtitle="Update the details shared with your activity groups."
       footer={
         <View style={styles.footer}>
           <PrimaryButton
@@ -135,21 +134,16 @@ export default function EditProfileScreen() {
           </View>
         )}
         <View style={styles.photoCopy}>
-          <StatusPill
-            label={isDemo ? 'DEMO PREVIEW' : 'OPTIONAL PHOTO'}
-            tone={isDemo ? 'accent' : 'neutral'}
-          />
-          <Text style={[styles.photoTitle, { color: theme.text }]}>
-            Make your crew card recognizable
-          </Text>
+          <Text style={[styles.photoTitle, { color: theme.text }]}>Profile photo</Text>
           <Text style={[styles.photoHelp, { color: theme.textMuted }]}>
-            Square JPG or PNG, up to 5 MB. Demo selections stay on this device only.
+            Square JPG or PNG, up to 5 MB.
+            {isDemo ? ' Demo selections stay on this device.' : ''}
           </Text>
         </View>
       </View>
       <SecondaryButton
-        label={photo ? 'Choose a different photo' : 'Choose optional photo'}
-        leadingIcon="↗"
+        label={photo ? 'Choose a different photo' : 'Choose photo'}
+        leadingIcon="camera"
         onPress={() => void pickPhoto()}
         style={styles.photoButton}
       />
@@ -196,7 +190,6 @@ export default function EditProfileScreen() {
                 }
               ]}
             >
-              <Text style={styles.chipEmoji}>{interest.emoji}</Text>
               <Text
                 style={[
                   styles.chipText,
@@ -219,7 +212,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.md
   },
   avatar: {
@@ -228,14 +221,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    borderRadius: tokens.radius.lg
+    borderRadius: tokens.radius.md
   },
-  initial: { fontSize: 34, fontWeight: tokens.weight.black },
+  initial: { fontSize: 34, fontWeight: tokens.weight.bold },
   photoCopy: { flex: 1, marginLeft: tokens.space.md },
   photoTitle: {
-    marginTop: tokens.space.sm,
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   photoHelp: {
     marginTop: tokens.space.xs,
@@ -248,7 +240,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: tokens.space.lg,
     fontSize: 17,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   chips: {
     flexDirection: 'row',
@@ -261,11 +253,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: tokens.radius.pill,
+    borderRadius: tokens.radius.sm,
     paddingHorizontal: 13
   },
-  chipEmoji: { marginRight: 6, fontSize: 18 },
-  chipText: { fontSize: 13, fontWeight: tokens.weight.heavy },
+  chipText: { fontSize: 13, fontWeight: tokens.weight.bold },
   footer: { flexDirection: 'row', gap: tokens.space.sm },
   footerButton: { flex: 1 }
 });

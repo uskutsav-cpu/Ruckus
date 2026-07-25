@@ -13,13 +13,13 @@ import {
 } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
 import { BackButton } from '@/components/ui/back-button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { InlineNotice } from '@/components/ui/inline-notice';
 import { LoadingScreen } from '@/components/ui/loading-screen';
-import { StatusPill } from '@/components/ui/status-pill';
 import type { ChatMessage, OutboxMessage } from '@/features/groups/group-types';
 import { useChat, useGroupLobby } from '@/features/groups/use-groups';
 import { useAuth } from '@/providers/auth-provider';
@@ -104,7 +104,7 @@ export default function GroupChatScreen() {
               onSubmitEditing={send}
               placeholder={online ? 'Message your crew' : 'Reconnect to send'}
               placeholderTextColor={theme.textSubtle}
-              selectionColor={theme.accent}
+              selectionColor={theme.primary}
               editable={online}
               maxLength={1000}
               multiline
@@ -134,7 +134,7 @@ export default function GroupChatScreen() {
               {chat.isSending ? (
                 <ActivityIndicator color={theme.onPrimary} />
               ) : (
-                <Text style={[styles.sendText, { color: theme.onPrimary }]}>↑</Text>
+                <AppIcon color={theme.onPrimary} name="forward" size={20} />
               )}
             </Pressable>
           </View>
@@ -148,18 +148,12 @@ export default function GroupChatScreen() {
         }
       />
 
-      <View
-        style={[
-          styles.context,
-          { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
-        ]}
-      >
-        <StatusPill label="PRIVATE CREW CHAT" tone="success" />
+      <View style={[styles.context, { borderBottomColor: theme.border }]}>
         <Text numberOfLines={2} style={[styles.title, { color: theme.text }]}>
           {lobby.data.title}
         </Text>
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-          {lobby.data.members.length} members · Only active crew members can read this
+          Private group chat · {lobby.data.members.length} members
         </Text>
       </View>
 
@@ -203,9 +197,9 @@ export default function GroupChatScreen() {
         }
         ListEmptyComponent={
           <EmptyState
-            icon="↗"
-            title="Start the crew chat"
-            message="Say hello or coordinate what to bring. Keep every meetup at the revealed public venue."
+            icon="chat"
+            title="No messages yet"
+            message="Say hello or coordinate what to bring."
           />
         }
         renderItem={({ item, index }) => {
@@ -218,7 +212,9 @@ export default function GroupChatScreen() {
             return (
               <View>
                 <View style={[styles.system, { backgroundColor: theme.surfaceMuted }]}>
-                  <Text style={[styles.systemMark, { color: theme.accent }]}>R</Text>
+                  <View style={styles.systemMark}>
+                    <AppIcon color={theme.textMuted} name="info" size={15} />
+                  </View>
                   <Text style={[styles.systemText, { color: theme.textMuted }]}>
                     {item.body}
                   </Text>
@@ -259,21 +255,7 @@ export default function GroupChatScreen() {
               >
                 {!mine ? (
                   <View style={styles.senderRow}>
-                    <View
-                      style={[
-                        styles.senderAvatar,
-                        { backgroundColor: theme.accentMuted }
-                      ]}
-                    >
-                      <Text style={[styles.senderInitial, { color: theme.text }]}>
-                        {item.senderId
-                          ? (memberNames.get(item.senderId) ?? 'C')
-                              .slice(0, 1)
-                              .toUpperCase()
-                          : 'C'}
-                      </Text>
-                    </View>
-                    <Text style={[styles.sender, { color: theme.accent }]}>
+                    <Text style={[styles.sender, { color: theme.textMuted }]}>
                       {item.senderId
                         ? (memberNames.get(item.senderId) ?? 'Crew member')
                         : 'Crew member'}
@@ -347,17 +329,15 @@ export default function GroupChatScreen() {
 const styles = StyleSheet.create({
   screen: { paddingBottom: 0 },
   context: {
-    borderWidth: 1,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.space.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingBottom: tokens.space.md,
     marginBottom: tokens.space.md
   },
   title: {
-    marginTop: tokens.space.sm,
     fontSize: tokens.type.heading,
     lineHeight: tokens.lineHeight.heading,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.6
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.3
   },
   subtitle: {
     marginTop: tokens.space.xs,
@@ -375,7 +355,7 @@ const styles = StyleSheet.create({
   loadingOlderText: {
     marginLeft: tokens.space.sm,
     fontSize: tokens.type.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
   system: {
     maxWidth: '92%',
@@ -387,41 +367,26 @@ const styles = StyleSheet.create({
     paddingVertical: tokens.space.sm,
     marginVertical: tokens.space.sm
   },
-  systemMark: {
-    marginRight: tokens.space.sm,
-    fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
-  },
+  systemMark: { marginRight: tokens.space.sm },
   systemText: {
     flex: 1,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.regular
   },
   dateDivider: {
     alignSelf: 'center',
     marginVertical: tokens.space.md,
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase'
+    fontWeight: tokens.weight.medium
   },
   messageRow: { maxWidth: '84%', marginVertical: 6 },
   mineRow: { alignSelf: 'flex-end', alignItems: 'flex-end' },
   theirRow: { alignSelf: 'flex-start', alignItems: 'flex-start' },
   senderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
-  senderAvatar: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: tokens.radius.pill
-  },
-  senderInitial: { fontSize: 9, fontWeight: tokens.weight.black },
   sender: {
-    marginLeft: 6,
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.medium
   },
   bubble: {
     borderWidth: 1,
@@ -443,7 +408,7 @@ const styles = StyleSheet.create({
   body: {
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   metadata: {
     flexDirection: 'row',
@@ -451,8 +416,8 @@ const styles = StyleSheet.create({
     gap: tokens.space.sm,
     marginTop: 4
   },
-  time: { fontSize: 10, fontWeight: tokens.weight.heavy },
-  delivery: { fontSize: 10, fontWeight: tokens.weight.black },
+  time: { fontSize: 10, fontWeight: tokens.weight.medium },
+  delivery: { fontSize: 10, fontWeight: tokens.weight.bold },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -462,19 +427,18 @@ const styles = StyleSheet.create({
     minHeight: 48,
     maxHeight: 120,
     flex: 1,
-    borderWidth: 1.5,
-    borderRadius: tokens.radius.md,
+    borderWidth: 1,
+    borderRadius: tokens.radius.sm,
     paddingHorizontal: tokens.space.md,
     paddingVertical: 12,
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   send: {
     width: 48,
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.md
-  },
-  sendText: { fontSize: 24, fontWeight: tokens.weight.black }
+    borderRadius: tokens.radius.sm
+  }
 });

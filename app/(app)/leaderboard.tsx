@@ -8,7 +8,6 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { ListCardSkeleton } from '@/components/ui/loading-skeleton';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { StatusPill } from '@/components/ui/status-pill';
 import type {
   LeaderboardEntry,
   LeaderboardPeriod
@@ -34,9 +33,9 @@ export default function LeaderboardScreen() {
 
   return (
     <AppScreen
-      eyebrow="Verified participation"
-      title="Campus leaderboard."
-      subtitle="XP reflects trusted activity actions—not popularity, appearance, followers, or private messages."
+      eyebrow="Optional"
+      title="Leaderboard"
+      subtitle="XP from verified activity participation."
     >
       <BackButton label="Your profile" onPress={() => router.back()} />
       <SegmentedControl
@@ -50,23 +49,32 @@ export default function LeaderboardScreen() {
         <View
           style={[
             styles.yourRank,
-            { backgroundColor: tokens.color.ink, borderColor: theme.border }
+            { backgroundColor: theme.surfaceMuted, borderColor: theme.border }
           ]}
         >
           <View>
-            <Text style={styles.yourRankLabel}>YOUR POSITION</Text>
-            <Text style={styles.yourRankValue}>#{currentUser.rank}</Text>
+            <Text style={[styles.yourRankLabel, { color: theme.textMuted }]}>
+              Your position
+            </Text>
+            <Text style={[styles.yourRankValue, { color: theme.text }]}>
+              #{currentUser.rank}
+            </Text>
           </View>
           <View style={styles.yourXp}>
-            <Text style={styles.yourXpValue}>{currentUser.xp}</Text>
-            <Text style={styles.yourXpLabel}>XP THIS PERIOD</Text>
+            <Text style={[styles.yourXpValue, { color: theme.text }]}>
+              {currentUser.xp}
+            </Text>
+            <Text style={[styles.yourXpLabel, { color: theme.textMuted }]}>
+              XP this period
+            </Text>
           </View>
         </View>
       ) : null}
 
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Top players</Text>
-        <StatusPill label="SERVER RANKED" tone="success" />
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>
+          Participation this period
+        </Text>
       </View>
 
       {leaderboard.isLoading ? (
@@ -100,7 +108,7 @@ export default function LeaderboardScreen() {
         <EmptyState
           icon="#"
           title="No XP in this period"
-          message="The rankings fill up when verified students attend and complete trusted activity actions."
+          message="Rankings appear after verified activity participation."
         />
       )}
 
@@ -120,16 +128,6 @@ function LeaderboardRow({
   showDivider: boolean;
 }) {
   const { theme } = useTheme();
-  const topThree = entry.rank <= 3;
-  const rankColor =
-    entry.rank === 1
-      ? tokens.color.ruckus
-      : entry.rank === 2
-        ? tokens.color.cyan
-        : entry.rank === 3
-          ? tokens.color.violetLight
-          : theme.surfaceMuted;
-
   return (
     <View
       accessibilityRole="text"
@@ -143,12 +141,8 @@ function LeaderboardRow({
         entry.isCurrentUser && { backgroundColor: theme.accentMuted }
       ]}
     >
-      <View style={[styles.rank, { backgroundColor: rankColor }]}>
-        <Text
-          style={[styles.rankText, { color: topThree ? tokens.color.ink : theme.text }]}
-        >
-          {entry.rank}
-        </Text>
+      <View style={[styles.rank, { backgroundColor: theme.surfaceMuted }]}>
+        <Text style={[styles.rankText, { color: theme.text }]}>{entry.rank}</Text>
       </View>
       <View style={[styles.avatar, { backgroundColor: theme.surfaceMuted }]}>
         <Text style={[styles.avatarText, { color: theme.text }]}>
@@ -171,39 +165,33 @@ function LeaderboardRow({
 
 const styles = StyleSheet.create({
   yourRank: {
-    minHeight: 116,
+    minHeight: 104,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderRadius: tokens.radius.xl,
+    borderRadius: tokens.radius.md,
     padding: tokens.space.lg,
     marginTop: tokens.space.md
   },
   yourRankLabel: {
-    color: tokens.color.ruckus,
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 1.1
+    fontWeight: tokens.weight.bold
   },
   yourRankValue: {
     marginTop: tokens.space.xs,
-    color: tokens.color.white,
-    fontSize: 40,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1.2
+    fontSize: 36,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -1
   },
   yourXp: { alignItems: 'flex-end' },
   yourXpValue: {
-    color: tokens.color.white,
     fontSize: 28,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   yourXpLabel: {
-    color: '#B6BBC4',
-    fontSize: 9,
-    fontWeight: tokens.weight.black,
-    letterSpacing: 0.8
+    fontSize: tokens.type.micro,
+    fontWeight: tokens.weight.bold
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -212,11 +200,11 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.xl,
     marginBottom: tokens.space.md
   },
-  sectionTitle: { fontSize: tokens.type.heading, fontWeight: tokens.weight.black },
+  sectionTitle: { fontSize: tokens.type.heading, fontWeight: tokens.weight.bold },
   list: {
     overflow: 'hidden',
     borderWidth: 1,
-    borderRadius: tokens.radius.lg
+    borderRadius: tokens.radius.md
   },
   row: {
     minHeight: 78,
@@ -231,24 +219,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: tokens.radius.sm
   },
-  rankText: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  rankText: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   avatar: {
     width: 42,
     height: 42,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.pill,
+    borderRadius: tokens.radius.sm,
     marginLeft: tokens.space.sm
   },
-  avatarText: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  avatarText: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   person: { flex: 1, marginLeft: tokens.space.md },
-  name: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  name: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   caption: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.micro,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.medium
   },
-  xp: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  xp: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   note: {
     marginTop: tokens.space.md,
     fontSize: tokens.type.micro,

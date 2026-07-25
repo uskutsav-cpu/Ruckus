@@ -86,13 +86,13 @@ export default function HostCheckinScreen() {
     <AppScreen>
       <BackButton label="Crew lobby" onPress={backToLobby} />
       <StatusPill
-        label={isDemo ? 'DEMO QR · NOT LIVE' : 'HOST-ONLY LIVE QR'}
+        label={isDemo ? 'Demo QR · not live' : 'Host check-in'}
         tone={isDemo ? 'accent' : 'success'}
       />
-      <Text style={[styles.title, { color: theme.text }]}>Scan together, on site.</Text>
+      <Text style={[styles.title, { color: theme.text }]}>Group check-in</Text>
       <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-        {lobby.data?.title ?? 'Your confirmed activity'} · A new short-lived code replaces
-        the previous one.
+        {lobby.data?.title ?? 'Your confirmed activity'} · This code refreshes
+        automatically.
       </Text>
 
       {network.isConnected === false ? (
@@ -195,20 +195,20 @@ const styles = StyleSheet.create({
     marginTop: tokens.space.md,
     fontSize: tokens.type.title,
     lineHeight: tokens.lineHeight.title,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -1
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.6
   },
   subtitle: {
     marginTop: tokens.space.sm,
     marginBottom: tokens.space.lg,
     fontSize: tokens.type.label,
     lineHeight: 21,
-    fontWeight: tokens.weight.medium
+    fontWeight: tokens.weight.regular
   },
   qrCard: {
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: tokens.radius.xl,
+    borderRadius: tokens.radius.lg,
     padding: tokens.space.xl
   },
   qr: {
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   timer: {
     marginTop: tokens.space.md,
     fontSize: tokens.type.label,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.bold
   },
   progressTrack: {
     width: 180,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: tokens.type.heading,
-    fontWeight: tokens.weight.black,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   error: {
@@ -252,6 +252,6 @@ const styles = StyleSheet.create({
   },
   retry: { minWidth: 180, marginTop: tokens.space.lg },
   safety: { borderRadius: tokens.radius.md, padding: tokens.space.lg, marginTop: 20 },
-  safetyTitle: { fontSize: 16, fontWeight: tokens.weight.black },
+  safetyTitle: { fontSize: 16, fontWeight: tokens.weight.bold },
   safetyCopy: { marginTop: 5, fontSize: 13, lineHeight: 19 }
 });

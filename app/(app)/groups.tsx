@@ -3,8 +3,8 @@ import { format, formatDistanceToNowStrict } from 'date-fns';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
-import { AvatarStack } from '@/components/ui/avatar-stack';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { InlineNotice } from '@/components/ui/inline-notice';
@@ -23,18 +23,18 @@ function groupStatus(group: GroupLobby, currentUserId?: string) {
     group.status === 'pending_confirmation' &&
     currentMember?.confirmation !== 'confirmed'
   ) {
-    return { label: 'CONFIRM NOW', tone: 'warning' as const };
+    return { label: 'Confirm attendance', tone: 'warning' as const };
   }
   if (group.status === 'confirmed') {
-    return { label: 'CREW CONFIRMED', tone: 'success' as const };
+    return { label: 'Confirmed', tone: 'success' as const };
   }
   if (group.status === 'completed') {
-    return { label: 'COMPLETED', tone: 'neutral' as const };
+    return { label: 'Completed', tone: 'neutral' as const };
   }
   if (group.status === 'cancelled') {
-    return { label: 'CANCELLED', tone: 'warning' as const };
+    return { label: 'Cancelled', tone: 'warning' as const };
   }
-  return { label: 'FORMING', tone: 'accent' as const };
+  return { label: 'Forming', tone: 'accent' as const };
 }
 
 export default function GroupsScreen() {
@@ -45,9 +45,9 @@ export default function GroupsScreen() {
 
   return (
     <AppScreen
-      eyebrow="Your plans"
-      title="Your crews."
-      subtitle="Confirm attendance, coordinate privately, and meet at approved public venues."
+      eyebrow="Your activities"
+      title="Groups"
+      subtitle="Confirm attendance, coordinate with members, and review meeting details."
     >
       <View style={styles.navigation}>
         <SecondaryButton
@@ -77,8 +77,8 @@ export default function GroupsScreen() {
       ) : groups.isError ? (
         <ErrorState
           icon="↻"
-          title="Your crews didn’t load"
-          message="Membership and confirmations remain protected. Reconnect and try again."
+          title="Groups are unavailable"
+          message="Your memberships and confirmations are unchanged. Try again when you reconnect."
           actionLabel="Try again"
           onAction={() => void groups.refetch()}
         />
@@ -106,17 +106,14 @@ export default function GroupsScreen() {
                   styles.card,
                   {
                     backgroundColor: theme.surfaceElevated,
-                    borderColor: needsResponse ? tokens.color.coral : theme.border,
+                    borderColor: needsResponse ? theme.warning : theme.border,
                     opacity: pressed ? 0.76 : 1
-                  },
-                  tokens.shadow.floating
+                  }
                 ]}
               >
                 <View style={styles.cardTop}>
                   <StatusPill label={status.label} tone={status.tone} />
-                  <Text aria-hidden style={[styles.arrow, { color: theme.text }]}>
-                    ↗
-                  </Text>
+                  <AppIcon color={theme.textMuted} name="forward" size={18} />
                 </View>
                 <Text numberOfLines={2} style={[styles.cardTitle, { color: theme.text }]}>
                   {group.title}
@@ -129,18 +126,19 @@ export default function GroupsScreen() {
                 </Text>
 
                 <View style={styles.crewRow}>
-                  <AvatarStack
-                    members={group.members.map((member) => ({
-                      id: member.id,
-                      label: member.displayName
-                    }))}
-                  />
+                  <View
+                    style={[styles.memberIcon, { backgroundColor: theme.surfaceMuted }]}
+                  >
+                    <AppIcon color={theme.textMuted} name="people" size={20} />
+                  </View>
                   <View style={styles.progressCopy}>
                     <Text style={[styles.progressValue, { color: theme.text }]}>
                       {confirmedCount}/{group.members.length} confirmed
                     </Text>
                     <Text style={[styles.progressLabel, { color: theme.textMuted }]}>
-                      {group.venue ? 'Public venue revealed' : 'Venue stays locked'}
+                      {group.venue
+                        ? 'Meeting venue available'
+                        : 'Venue pending confirmation'}
                     </Text>
                   </View>
                 </View>
@@ -162,10 +160,8 @@ export default function GroupsScreen() {
                         { color: needsResponse ? '#8B2522' : theme.text }
                       ]}
                     >
-                      {needsResponse
-                        ? 'Your response is needed · '
-                        : 'You’re confirmed · '}
-                      deadline{' '}
+                      {needsResponse ? 'Your response is needed · ' : 'You confirmed · '}
+                      closes{' '}
                       {formatDistanceToNowStrict(new Date(group.confirmationDeadline), {
                         addSuffix: true
                       })}
@@ -179,8 +175,8 @@ export default function GroupsScreen() {
       ) : (
         <EmptyState
           icon="↗"
-          title="No crews yet"
-          message="Swipe right on an activity. When enough compatible students join, your private crew appears here."
+          title="No groups yet"
+          message="Join an activity. When a group forms, it will appear here."
           actionLabel="Browse activities"
           onAction={() => router.replace('/deck')}
         />
@@ -196,38 +192,44 @@ const styles = StyleSheet.create({
     marginBottom: tokens.space.lg
   },
   navButton: { flex: 1 },
-  list: { gap: tokens.space.md },
+  list: { gap: tokens.space.sm },
   card: {
     borderWidth: 1,
-    borderRadius: tokens.radius.lg,
-    padding: tokens.space.lg
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md
   },
   cardTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
   },
-  arrow: { fontSize: 21, fontWeight: tokens.weight.black },
   cardTitle: {
     marginTop: tokens.space.md,
     fontSize: tokens.type.heading,
     lineHeight: tokens.lineHeight.heading,
-    fontWeight: tokens.weight.black,
-    letterSpacing: -0.7
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.4
   },
   when: {
     marginTop: tokens.space.sm,
     fontSize: tokens.type.label,
     lineHeight: 20,
-    fontWeight: tokens.weight.heavy
+    fontWeight: tokens.weight.regular
   },
   crewRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: tokens.space.lg
   },
+  memberIcon: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.sm
+  },
   progressCopy: { flex: 1, marginLeft: tokens.space.md },
-  progressValue: { fontSize: tokens.type.label, fontWeight: tokens.weight.black },
+  progressValue: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
   progressLabel: {
     marginTop: tokens.space.xs,
     fontSize: tokens.type.caption,
@@ -242,6 +244,6 @@ const styles = StyleSheet.create({
   deadlineText: {
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption,
-    fontWeight: tokens.weight.black
+    fontWeight: tokens.weight.medium
   }
 });
