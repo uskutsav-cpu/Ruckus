@@ -1,12 +1,13 @@
 import { z } from 'zod';
 
-export type AppEnvironment = 'development' | 'preview' | 'production';
+export type AppEnvironment = 'development' | 'staging' | 'production';
 export type BackendMode = 'connected' | 'demo' | 'configuration-error';
 
 export type RawClientEnvironment = {
   EXPO_PUBLIC_APP_ENV?: string | undefined;
   EXPO_PUBLIC_SUPABASE_URL?: string | undefined;
   EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string | undefined;
+  EXPO_PUBLIC_SUPABASE_PROJECT_REF?: string | undefined;
   EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN?: string | undefined;
   EXPO_PUBLIC_EAS_PROJECT_ID?: string | undefined;
   EXPO_PUBLIC_SENTRY_DSN?: string | undefined;
@@ -20,6 +21,7 @@ export type ClientEnv = {
   configurationError: string | null;
   supabaseUrl: string | undefined;
   supabasePublishableKey: string | undefined;
+  supabaseProjectRef: string | undefined;
   universityEmailDomain: string;
   easProjectId: string | undefined;
   sentryDsn: string | undefined;
@@ -32,12 +34,13 @@ export class PublicEnvironmentError extends Error {
   }
 }
 
-const appEnvironmentSchema = z.enum(['development', 'preview', 'production']);
+const appEnvironmentSchema = z.enum(['development', 'staging', 'production']);
 const emailDomainSchema = z
   .string()
   .min(3)
   .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i);
 const uuidSchema = z.uuid();
+const hostedProjectRefSchema = z.string().regex(/^[a-z0-9]{20}$/);
 
 function optionalValue(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
@@ -58,7 +61,10 @@ function validPublicUrl(value: string): boolean {
 function configurationFailure(
   appEnvironment: AppEnvironment,
   message: string,
-  shared: Pick<ClientEnv, 'universityEmailDomain' | 'easProjectId' | 'sentryDsn'>
+  shared: Pick<
+    ClientEnv,
+    'supabaseProjectRef' | 'universityEmailDomain' | 'easProjectId' | 'sentryDsn'
+  >
 ): ClientEnv {
   const explanation = `Backend configuration error: ${message}`;
   if (appEnvironment !== 'development') {
@@ -83,16 +89,22 @@ export function resolveClientEnvironment(raw: RawClientEnvironment): ClientEnv {
   const appEnvironmentResult = appEnvironmentSchema.safeParse(appEnvironmentValue);
   if (!appEnvironmentResult.success) {
     throw new PublicEnvironmentError(
-      'EXPO_PUBLIC_APP_ENV must be development, preview, or production.'
+      'EXPO_PUBLIC_APP_ENV must be development, staging, or production.'
     );
   }
   const appEnvironment = appEnvironmentResult.data;
 
+  const supabaseProjectRef = optionalValue(raw.EXPO_PUBLIC_SUPABASE_PROJECT_REF);
   const universityEmailDomain =
     optionalValue(raw.EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN) ?? 'example.edu';
   const easProjectId = optionalValue(raw.EXPO_PUBLIC_EAS_PROJECT_ID);
   const sentryDsn = optionalValue(raw.EXPO_PUBLIC_SENTRY_DSN);
-  const shared = { universityEmailDomain, easProjectId, sentryDsn };
+  const shared = {
+    supabaseProjectRef,
+    universityEmailDomain,
+    easProjectId,
+    sentryDsn
+  };
 
   if (!emailDomainSchema.safeParse(universityEmailDomain).success) {
     return configurationFailure(
@@ -112,6 +124,37 @@ export function resolveClientEnvironment(raw: RawClientEnvironment): ClientEnv {
     return configurationFailure(
       appEnvironment,
       'EXPO_PUBLIC_SENTRY_DSN must be a valid HTTP(S) URL when provided',
+      shared
+    );
+  }
+  if (
+    supabaseProjectRef &&
+    !hostedProjectRefSchema.safeParse(supabaseProjectRef).success
+  ) {
+    return configurationFailure(
+      appEnvironment,
+      'EXPO_PUBLIC_SUPABASE_PROJECT_REF must be a 20-character lowercase project ref',
+      shared
+    );
+  }
+  if (appEnvironment !== 'development' && !supabaseProjectRef) {
+    return configurationFailure(
+      appEnvironment,
+      'EXPO_PUBLIC_SUPABASE_PROJECT_REF is missing',
+      shared
+    );
+  }
+  if (appEnvironment !== 'development' && !easProjectId) {
+    return configurationFailure(
+      appEnvironment,
+      'EXPO_PUBLIC_EAS_PROJECT_ID is missing',
+      shared
+    );
+  }
+  if (appEnvironment === 'staging' && universityEmailDomain !== 'utexas.edu') {
+    return configurationFailure(
+      appEnvironment,
+      'staging requires EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN=utexas.edu',
       shared
     );
   }
@@ -153,6 +196,13 @@ export function resolveClientEnvironment(raw: RawClientEnvironment): ClientEnv {
       shared
     );
   }
+  if (supabaseProjectRef && supabaseUrl !== `https://${supabaseProjectRef}.supabase.co`) {
+    return configurationFailure(
+      appEnvironment,
+      'EXPO_PUBLIC_SUPABASE_URL does not match EXPO_PUBLIC_SUPABASE_PROJECT_REF',
+      shared
+    );
+  }
   if (!supabasePublishableKey) {
     return configurationFailure(
       appEnvironment,
@@ -184,6 +234,7 @@ export const env = resolveClientEnvironment({
   EXPO_PUBLIC_APP_ENV: process.env.EXPO_PUBLIC_APP_ENV,
   EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
   EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  EXPO_PUBLIC_SUPABASE_PROJECT_REF: process.env.EXPO_PUBLIC_SUPABASE_PROJECT_REF,
   EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN: process.env.EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN,
   EXPO_PUBLIC_EAS_PROJECT_ID: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
   EXPO_PUBLIC_SENTRY_DSN: process.env.EXPO_PUBLIC_SENTRY_DSN

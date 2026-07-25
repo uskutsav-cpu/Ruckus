@@ -9,24 +9,31 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
+      "environment": "development",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "development"
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "RUCKUS_BUILD_TARGET": "development"
       }
     },
-    "preview": {
+    "staging-development": {
       "node": "22.13.0",
+      "developmentClient": true,
       "distribution": "internal",
-      "channel": "preview",
+      "channel": "staging",
+      "environment": "preview",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "preview"
+        "EXPO_PUBLIC_APP_ENV": "staging",
+        "RUCKUS_BUILD_TARGET": "staging"
       }
     },
     "production": {
       "node": "22.13.0",
       "autoIncrement": true,
       "channel": "production",
+      "environment": "production",
       "env": {
-        "EXPO_PUBLIC_APP_ENV": "production"
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "RUCKUS_BUILD_TARGET": "production"
       }
     }
   },

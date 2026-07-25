@@ -1,22 +1,26 @@
 # End-to-end smoke test
 
-Run this checklist on both an iOS development build and an Android development build.
-Use a disposable local or staging Supabase project—not production.
+Run this checklist on both an iOS staging development build and an Android staging
+development build. Use the dedicated staging Supabase project—not production. Record
+an item as passed only when it was performed on the stated physical device.
 
 ## Prepare
 
-1. Apply migrations and seed data with `npm run db:reset`.
+1. Follow `docs/STAGING_RELEASE.md` to link the dedicated staging project, apply
+   migrations, and apply only `supabase/staging/seed.sql`.
 2. Deploy all functions listed in `docs/OPERATIONS.md`.
 3. Configure the check-in pepper, cron secret, Expo project ID, and optional Expo push
    access token.
-4. Build with `eas build --profile development --platform ios` and repeat for Android.
+4. Build with `eas build --profile staging-development --platform ios` and repeat for
+   Android.
 5. Install both builds on physical devices. Push registration and camera behavior
    cannot be accepted using Expo Go; Android remote push also requires a development
    build.
 
 ## New-account path
 
-1. Register a new `@example.edu` account; confirm that another domain is rejected.
+1. Register a new controlled `@utexas.edu` account; confirm that another domain is
+   rejected.
 2. Verify the email link returns to the app.
 3. Confirm the 18+ and safety attestation.
 4. Finish all three onboarding steps with 3–5 interests.

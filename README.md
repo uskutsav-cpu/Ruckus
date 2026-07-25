@@ -82,13 +82,20 @@ Build profiles are EAS-compatible:
 
 ```sh
 eas build --profile development --platform all
-eas build --profile preview --platform all
-eas build --profile production --platform all
+eas build --profile staging-development --platform ios
+eas build --profile staging-development --platform android
 ```
 
-Set EAS environment variables for the four `EXPO_PUBLIC_*` values before remote builds.
+The staging profile is an internal development-client build backed by the EAS
+`preview` environment-variable set. It sets the app runtime to `staging`, displays a
+non-production marker, and fails unless the Supabase URL and project ref match. Follow
+the ordered deployment and device checklist in
+[`docs/STAGING_RELEASE.md`](docs/STAGING_RELEASE.md) before starting either cloud
+build.
+
 Keep the check-in pepper, cron secret, Expo push access token, and Supabase service key
-out of the mobile environment.
+out of the mobile environment. Production store builds are intentionally outside the
+staging procedure.
 
 ## Project map
 

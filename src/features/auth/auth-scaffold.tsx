@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { AppScreen } from '@/components/ui/app-screen';
 import { ProgressIndicator } from '@/components/ui/progress-indicator';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { env } from '@/lib/env';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
@@ -32,6 +33,13 @@ export function AuthScaffold({
           <Text style={styles.markText}>R</Text>
         </View>
         <Text style={[styles.wordmark, { color: theme.text }]}>RUCKUS</Text>
+        {env.appEnvironment === 'staging' ? (
+          <View style={[styles.stagingBadge, { borderColor: theme.border }]}>
+            <Text style={[styles.stagingBadgeText, { color: theme.textMuted }]}>
+              STAGING
+            </Text>
+          </View>
+        ) : null}
       </View>
       {progress ? (
         <View style={styles.progress}>
@@ -68,6 +76,18 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: tokens.weight.bold,
     letterSpacing: 1.5
+  },
+  stagingBadge: {
+    marginLeft: tokens.space.sm,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: tokens.radius.pill
+  },
+  stagingBadgeText: {
+    fontSize: 9,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: 1
   },
   progress: { marginBottom: tokens.space.lg },
   form: { paddingBottom: tokens.space.lg }

@@ -4,9 +4,10 @@
 
 Mobile-safe variables:
 
-- `EXPO_PUBLIC_APP_ENV`: `development`, `preview`, or `production`
+- `EXPO_PUBLIC_APP_ENV`: `development`, `staging`, or `production`
 - `EXPO_PUBLIC_SUPABASE_URL`
 - `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `EXPO_PUBLIC_SUPABASE_PROJECT_REF`
 - `EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN`
 - `EXPO_PUBLIC_EAS_PROJECT_ID`
 - optional `EXPO_PUBLIC_SENTRY_DSN`
@@ -26,24 +27,36 @@ deployed functions.
   mode. No Supabase client is constructed, and backend-only actions remain unavailable.
 - Connected development requires both a valid HTTP(S) Supabase URL and a publishable
   client key. A partial or malformed pair displays an actionable setup screen.
-- EAS preview and production profiles set `EXPO_PUBLIC_APP_ENV` explicitly. Their
-  config evaluation fails when either credential is missing or malformed, so those
-  builds cannot silently ship demo mode.
+- EAS staging-development and production profiles set `EXPO_PUBLIC_APP_ENV` and a
+  matching non-public build target explicitly. Their config evaluation fails when
+  the hosted Supabase URL/project ref, publishable key, university domain, EAS project
+  ID, or build target is missing or inconsistent. These builds cannot silently ship
+  demo mode or select the other hosted environment.
+- Staging is additionally pinned to `utexas.edu` for the initial UT Austin pilot and
+  visibly labels authentication and protected-app screens as staging.
 
-Configure EAS environment variables for both preview and production:
+The `staging-development` build profile reads EAS variables from the canonical
+`preview` environment set while setting the in-app runtime to `staging`. Configure
+these public client values only after the staging project and EAS project exist:
 
 ```sh
 eas env:create --environment preview --name EXPO_PUBLIC_SUPABASE_URL
 eas env:create --environment preview --name EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-eas env:create --environment production --name EXPO_PUBLIC_SUPABASE_URL
-eas env:create --environment production --name EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+eas env:create --environment preview --name EXPO_PUBLIC_SUPABASE_PROJECT_REF
+eas env:create --environment preview --name EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN
+eas env:create --environment preview --name EXPO_PUBLIC_EAS_PROJECT_ID
 ```
 
 Use only the project URL and publishable/anonymous client key. Never place a
 service-role key, database password, check-in pepper, or cron secret in an
-`EXPO_PUBLIC_*` variable.
+`EXPO_PUBLIC_*` variable. Configure production in the separate EAS `production`
+environment only when a production release is explicitly authorized.
 
 ## Deploy
+
+For the first staging deployment, follow `docs/STAGING_RELEASE.md` so the linked
+project ref is verified before every remote operation. Never include the local
+`supabase/seed.sql` in a hosted push: it contains deterministic local Auth users.
 
 ```sh
 npx supabase db push

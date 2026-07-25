@@ -7,9 +7,17 @@ import {
 
 const validEnvironment: RawClientEnvironment = {
   EXPO_PUBLIC_APP_ENV: 'development',
-  EXPO_PUBLIC_SUPABASE_URL: 'https://example-project.supabase.co',
+  EXPO_PUBLIC_SUPABASE_URL: 'https://abcdefghijklmnopqrst.supabase.co',
   EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test_key_with_safe_length',
+  EXPO_PUBLIC_SUPABASE_PROJECT_REF: 'abcdefghijklmnopqrst',
   EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN: 'example.edu'
+};
+
+const validStagingEnvironment: RawClientEnvironment = {
+  ...validEnvironment,
+  EXPO_PUBLIC_APP_ENV: 'staging',
+  EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN: 'utexas.edu',
+  EXPO_PUBLIC_EAS_PROJECT_ID: '7fd3c48e-8375-4f65-86c4-57e5ad6bb274'
 };
 
 describe('public environment configuration', () => {
@@ -62,7 +70,7 @@ describe('public environment configuration', () => {
     expect(factory).not.toHaveBeenCalled();
   });
 
-  it.each(['preview', 'production'] as const)(
+  it.each(['staging', 'production'] as const)(
     'fails %s validation when credentials are missing',
     (appEnvironment) => {
       expect(() =>
@@ -70,4 +78,37 @@ describe('public environment configuration', () => {
       ).toThrow(PublicEnvironmentError);
     }
   );
+
+  it('accepts a complete UT Austin staging environment', () => {
+    expect(resolveClientEnvironment(validStagingEnvironment).backendMode).toBe(
+      'connected'
+    );
+  });
+
+  it('rejects a hosted URL that does not match its project ref', () => {
+    expect(() =>
+      resolveClientEnvironment({
+        ...validStagingEnvironment,
+        EXPO_PUBLIC_SUPABASE_URL: 'https://zyxwvutsrqponmlkjihg.supabase.co'
+      })
+    ).toThrow(/does not match EXPO_PUBLIC_SUPABASE_PROJECT_REF/);
+  });
+
+  it('rejects staging configured for a non-pilot email domain', () => {
+    expect(() =>
+      resolveClientEnvironment({
+        ...validStagingEnvironment,
+        EXPO_PUBLIC_UNIVERSITY_EMAIL_DOMAIN: 'example.edu'
+      })
+    ).toThrow(/staging requires.*utexas\.edu/);
+  });
+
+  it('rejects staging without an EAS project ID', () => {
+    expect(() =>
+      resolveClientEnvironment({
+        ...validStagingEnvironment,
+        EXPO_PUBLIC_EAS_PROJECT_ID: undefined
+      })
+    ).toThrow(/EXPO_PUBLIC_EAS_PROJECT_ID is missing/);
+  });
 });

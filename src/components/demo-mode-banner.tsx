@@ -3,8 +3,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
-export function DemoModeBanner() {
+type NonProductionBannerProps = {
+  mode?: 'demo' | 'staging';
+};
+
+export function DemoModeBanner({ mode = 'demo' }: NonProductionBannerProps) {
   const { theme } = useTheme();
+  const isStaging = mode === 'staging';
 
   return (
     <View
@@ -14,9 +19,13 @@ export function DemoModeBanner() {
         { backgroundColor: theme.surfaceMuted, borderBottomColor: theme.border }
       ]}
     >
-      <Text style={[styles.label, { color: theme.text }]}>Demo</Text>
+      <Text style={[styles.label, { color: theme.text }]}>
+        {isStaging ? 'Staging' : 'Demo'}
+      </Text>
       <Text numberOfLines={2} style={[styles.copy, { color: theme.text }]}>
-        Preview data. No account changes.
+        {isStaging
+          ? 'Connected test data. Not production.'
+          : 'Preview data. No account changes.'}
       </Text>
     </View>
   );

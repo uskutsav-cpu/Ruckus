@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DemoModeBanner } from '@/components/demo-mode-banner';
+import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
 
@@ -12,10 +13,15 @@ export default function AppLayout() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [demoBannerHeight, setDemoBannerHeight] = useState(42);
+  const bannerMode = isDemo
+    ? 'demo'
+    : env.appEnvironment === 'staging'
+      ? 'staging'
+      : null;
 
   return (
     <View style={[styles.root, { backgroundColor: theme.background }]}>
-      {isDemo ? (
+      {bannerMode ? (
         <SafeAreaView
           edges={['top']}
           onLayout={(event) => {
@@ -28,10 +34,12 @@ export default function AppLayout() {
           pointerEvents="none"
           style={[styles.demoOverlay, { backgroundColor: theme.accentMuted }]}
         >
-          <DemoModeBanner />
+          <DemoModeBanner mode={bannerMode} />
         </SafeAreaView>
       ) : null}
-      <View style={[styles.stack, isDemo ? { marginTop: demoBannerHeight } : undefined]}>
+      <View
+        style={[styles.stack, bannerMode ? { marginTop: demoBannerHeight } : undefined]}
+      >
         <Stack
           screenOptions={{
             headerShown: false,

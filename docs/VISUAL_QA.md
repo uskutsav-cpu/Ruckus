@@ -149,7 +149,7 @@ For every row, check both appearance columns and repeat at least once with large
 - [ ] Loading skeletons reserve final layout dimensions without visible jump.
 - [ ] Empty states explain the next useful action without fabricated counts or people.
 - [ ] Retry buttons recover after connectivity returns.
-- [ ] Production/preview configuration failures stop at build/config validation and do
+- [ ] Production/staging configuration failures stop at build/config validation and do
       not expose demo entry.
 
 ### Permissions and native integrations

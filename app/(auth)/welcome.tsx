@@ -50,6 +50,11 @@ export default function WelcomeScreen() {
                 <Text style={styles.markText}>R</Text>
               </View>
               <Text style={styles.wordmark}>Ruckus</Text>
+              {env.appEnvironment === 'staging' ? (
+                <View style={styles.stagingBadge}>
+                  <Text style={styles.stagingBadgeText}>STAGING</Text>
+                </View>
+              ) : null}
             </View>
             <View>
               <Text style={styles.title}>Find something to do.</Text>
@@ -126,6 +131,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: tokens.weight.bold,
     letterSpacing: -0.2
+  },
+  stagingBadge: {
+    marginLeft: tokens.space.sm,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.68)',
+    borderRadius: tokens.radius.pill,
+    backgroundColor: 'rgba(9,10,13,0.34)'
+  },
+  stagingBadgeText: {
+    color: tokens.color.white,
+    fontSize: 9,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: 1
   },
   title: {
     maxWidth: 340,

@@ -2,8 +2,12 @@ import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-const sessionId = '40000000-0000-4000-8000-000000000001';
-const password = 'CampusClash1!';
+const isLocalTarget = ['127.0.0.1', 'localhost'].includes(new URL(url).hostname);
+const sessionId =
+  process.env.MATCHING_TEST_SESSION_ID ??
+  (isLocalTarget ? '40000000-0000-4000-8000-000000000001' : undefined);
+const password =
+  process.env.MATCHING_TEST_PASSWORD ?? (isLocalTarget ? 'CampusClash1!' : undefined);
 
 if (!publishableKey) {
   throw new Error(
@@ -11,12 +15,17 @@ if (!publishableKey) {
   );
 }
 
-const emails = [
-  'demo1@example.edu',
-  'demo2@example.edu',
-  'demo3@example.edu',
-  'demo4@example.edu'
-];
+const emails = process.env.MATCHING_TEST_EMAILS
+  ? process.env.MATCHING_TEST_EMAILS.split(',').map((email) => email.trim())
+  : isLocalTarget
+    ? ['demo1@example.edu', 'demo2@example.edu', 'demo3@example.edu', 'demo4@example.edu']
+    : [];
+
+if (!sessionId || !password || emails.length !== 4 || emails.some((email) => !email)) {
+  throw new Error(
+    'Hosted matching checks require MATCHING_TEST_SESSION_ID, MATCHING_TEST_PASSWORD, and exactly four comma-separated MATCHING_TEST_EMAILS. Keep these values in an ignored local environment file.'
+  );
+}
 
 const clients = await Promise.all(
   emails.map(async (email) => {
