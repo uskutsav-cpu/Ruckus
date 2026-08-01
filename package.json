@@ -21,6 +21,7 @@
     "test:db": "supabase test db",
     "test:matching": "node scripts/test-matching-concurrency.mjs",
     "test:event-capacity": "node scripts/test-event-capacity-concurrency.mjs",
+    "test:social-concurrency": "node scripts/test-social-concurrency.mjs",
     "test:functions": "deno check --config supabase/functions/deno.json supabase/functions/*/index.ts",
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "audit:production": "npm audit --omit=dev --audit-level=high",

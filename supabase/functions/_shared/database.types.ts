@@ -1416,6 +1416,100 @@ export type Database = {
           }
         ];
       };
+      friend_requests: {
+        Row: {
+          addressee_id: string;
+          created_at: string;
+          id: string;
+          requester_id: string;
+          responded_at: string | null;
+          status: Database['public']['Enums']['friend_request_status'];
+          updated_at: string;
+          user_high_id: string | null;
+          user_low_id: string | null;
+        };
+        Insert: {
+          addressee_id: string;
+          created_at?: string;
+          id?: string;
+          requester_id: string;
+          responded_at?: string | null;
+          status?: Database['public']['Enums']['friend_request_status'];
+          updated_at?: string;
+          user_high_id?: string | null;
+          user_low_id?: string | null;
+        };
+        Update: {
+          addressee_id?: string;
+          created_at?: string;
+          id?: string;
+          requester_id?: string;
+          responded_at?: string | null;
+          status?: Database['public']['Enums']['friend_request_status'];
+          updated_at?: string;
+          user_high_id?: string | null;
+          user_low_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'friend_requests_addressee_id_fkey';
+            columns: ['addressee_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friend_requests_requester_id_fkey';
+            columns: ['requester_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      friendships: {
+        Row: {
+          accepted_request_id: string | null;
+          created_at: string;
+          user_high_id: string;
+          user_low_id: string;
+        };
+        Insert: {
+          accepted_request_id?: string | null;
+          created_at?: string;
+          user_high_id: string;
+          user_low_id: string;
+        };
+        Update: {
+          accepted_request_id?: string | null;
+          created_at?: string;
+          user_high_id?: string;
+          user_low_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'friendships_accepted_request_id_fkey';
+            columns: ['accepted_request_id'];
+            isOneToOne: false;
+            referencedRelation: 'friend_requests';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friendships_user_high_id_fkey';
+            columns: ['user_high_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friendships_user_low_id_fkey';
+            columns: ['user_low_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       group_members: {
         Row: {
           created_at: string;
@@ -2252,47 +2346,62 @@ export type Database = {
       profile_preferences: {
         Row: {
           accessibility_notes: string | null;
+          allow_friend_requests: boolean;
           announcement_notifications: boolean;
+          attendance_visibility: Database['public']['Enums']['attendance_visibility'];
           chat_notifications: boolean;
           created_at: string;
           discovery_preferences: Json;
           event_reminders: boolean;
+          follow_policy: Database['public']['Enums']['follow_policy'];
           leaderboard_visible: boolean;
           notification_previews: boolean;
           profile_id: string;
+          profile_visibility: Database['public']['Enums']['profile_visibility'];
           reduced_motion: boolean;
           show_attended_history: boolean;
           show_hosted_history: boolean;
+          show_in_social_suggestions: boolean;
           updated_at: string;
         };
         Insert: {
           accessibility_notes?: string | null;
+          allow_friend_requests?: boolean;
           announcement_notifications?: boolean;
+          attendance_visibility?: Database['public']['Enums']['attendance_visibility'];
           chat_notifications?: boolean;
           created_at?: string;
           discovery_preferences?: Json;
           event_reminders?: boolean;
+          follow_policy?: Database['public']['Enums']['follow_policy'];
           leaderboard_visible?: boolean;
           notification_previews?: boolean;
           profile_id: string;
+          profile_visibility?: Database['public']['Enums']['profile_visibility'];
           reduced_motion?: boolean;
           show_attended_history?: boolean;
           show_hosted_history?: boolean;
+          show_in_social_suggestions?: boolean;
           updated_at?: string;
         };
         Update: {
           accessibility_notes?: string | null;
+          allow_friend_requests?: boolean;
           announcement_notifications?: boolean;
+          attendance_visibility?: Database['public']['Enums']['attendance_visibility'];
           chat_notifications?: boolean;
           created_at?: string;
           discovery_preferences?: Json;
           event_reminders?: boolean;
+          follow_policy?: Database['public']['Enums']['follow_policy'];
           leaderboard_visible?: boolean;
           notification_previews?: boolean;
           profile_id?: string;
+          profile_visibility?: Database['public']['Enums']['profile_visibility'];
           reduced_motion?: boolean;
           show_attended_history?: boolean;
           show_hosted_history?: boolean;
+          show_in_social_suggestions?: boolean;
           updated_at?: string;
         };
         Relationships: [
@@ -2708,6 +2817,48 @@ export type Database = {
           }
         ];
       };
+      social_audit_log: {
+        Row: {
+          action: string;
+          actor_id: string | null;
+          created_at: string;
+          id: string;
+          metadata: Json;
+          target_profile_id: string | null;
+        };
+        Insert: {
+          action: string;
+          actor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          target_profile_id?: string | null;
+        };
+        Update: {
+          action?: string;
+          actor_id?: string | null;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          target_profile_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'social_audit_log_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'social_audit_log_target_profile_id_fkey';
+            columns: ['target_profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       swipes: {
         Row: {
           activity_session_id: string;
@@ -2822,6 +2973,51 @@ export type Database = {
           {
             foreignKeyName: 'user_badges_profile_id_fkey';
             columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      user_follows: {
+        Row: {
+          accepted_at: string | null;
+          created_at: string;
+          followed_id: string;
+          follower_id: string;
+          requested_at: string;
+          status: Database['public']['Enums']['follow_status'];
+          updated_at: string;
+        };
+        Insert: {
+          accepted_at?: string | null;
+          created_at?: string;
+          followed_id: string;
+          follower_id: string;
+          requested_at?: string;
+          status: Database['public']['Enums']['follow_status'];
+          updated_at?: string;
+        };
+        Update: {
+          accepted_at?: string | null;
+          created_at?: string;
+          followed_id?: string;
+          follower_id?: string;
+          requested_at?: string;
+          status?: Database['public']['Enums']['follow_status'];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_follows_followed_id_fkey';
+            columns: ['followed_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_follows_follower_id_fkey';
+            columns: ['follower_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
@@ -3119,6 +3315,7 @@ export type Database = {
         Args: { cancellation_reason?: string; target_event_id: string };
         Returns: Json;
       };
+      cancel_friend_request: { Args: { request_id: string }; Returns: boolean };
       change_organization_member_role: {
         Args: {
           target_organization_id: string;
@@ -3218,6 +3415,10 @@ export type Database = {
         Args: { target_group_id: string };
         Returns: Json;
       };
+      follow_user: {
+        Args: { target_profile_id: string };
+        Returns: Database['public']['Enums']['follow_status'];
+      };
       get_event_attendees: { Args: { target_event_id: string }; Returns: Json };
       get_event_detail: { Args: { target_event_id: string }; Returns: Json };
       get_event_feed: {
@@ -3240,6 +3441,10 @@ export type Database = {
           page_size?: number;
           target_event_id: string;
         };
+        Returns: Json;
+      };
+      get_friends_attending: {
+        Args: { page_size?: number; target_event_id: string };
         Returns: Json;
       };
       get_group_lobby: { Args: { target_group_id: string }; Returns: Json };
@@ -3267,6 +3472,25 @@ export type Database = {
       get_my_organizations: { Args: never; Returns: Json };
       get_organization_dashboard: {
         Args: { target_organization_id: string };
+        Returns: Json;
+      };
+      get_social_connections: {
+        Args: {
+          before_created_at?: string;
+          before_profile_id?: string;
+          connection_kind: string;
+          page_size?: number;
+        };
+        Returns: Json;
+      };
+      get_social_overview: { Args: never; Returns: Json };
+      get_social_profile: { Args: { target_profile_id: string }; Returns: Json };
+      get_social_suggestions: {
+        Args: {
+          cursor_profile_id?: string;
+          cursor_score?: number;
+          page_size?: number;
+        };
         Returns: Json;
       };
       get_xp_total: { Args: { target_profile_id?: string }; Returns: number };
@@ -3325,6 +3549,7 @@ export type Database = {
         };
         Returns: string;
       };
+      remove_friend: { Args: { target_profile_id: string }; Returns: boolean };
       remove_organization_member: {
         Args: { target_organization_id: string; target_profile_id: string };
         Returns: undefined;
@@ -3379,6 +3604,14 @@ export type Database = {
       };
       request_account_deletion: { Args: never; Returns: undefined };
       request_data_export: { Args: never; Returns: Json };
+      respond_to_follow_request: {
+        Args: { accept_request: boolean; requester_profile_id: string };
+        Returns: string;
+      };
+      respond_to_friend_request: {
+        Args: { accept_request: boolean; request_id: string };
+        Returns: Database['public']['Enums']['friend_request_status'];
+      };
       respond_to_organization_invitation: {
         Args: { accept_invitation: boolean; target_organization_id: string };
         Returns: Database['public']['Enums']['organization_membership_status'];
@@ -3389,6 +3622,10 @@ export type Database = {
           review_reason?: string;
           target_rsvp_id: string;
         };
+        Returns: Json;
+      };
+      send_friend_request: {
+        Args: { target_profile_id: string };
         Returns: Json;
       };
       set_event_message_reaction: {
@@ -3407,6 +3644,16 @@ export type Database = {
         };
         Returns: undefined;
       };
+      set_social_preferences: {
+        Args: {
+          new_allow_friend_requests: boolean;
+          new_attendance_visibility: Database['public']['Enums']['attendance_visibility'];
+          new_follow_policy: Database['public']['Enums']['follow_policy'];
+          new_profile_visibility: Database['public']['Enums']['profile_visibility'];
+          new_show_in_social_suggestions: boolean;
+        };
+        Returns: Json;
+      };
       submit_event_rating: {
         Args: {
           feedback_value?: string;
@@ -3423,6 +3670,8 @@ export type Database = {
         };
         Returns: string;
       };
+      unblock_user: { Args: { target_profile_id: string }; Returns: boolean };
+      unfollow_user: { Args: { target_profile_id: string }; Returns: boolean };
       update_moderation_case: {
         Args: {
           next_status: Database['public']['Enums']['moderation_case_status'];
@@ -3434,6 +3683,7 @@ export type Database = {
       };
     };
     Enums: {
+      attendance_visibility: 'friends' | 'confirmed_attendees' | 'private';
       confirmation_status: 'pending' | 'confirmed' | 'declined' | 'expired';
       data_request_status: 'requested' | 'processing' | 'ready' | 'expired' | 'cancelled';
       event_decision: 'passed' | 'saved';
@@ -3442,6 +3692,9 @@ export type Database = {
       event_status:
         'draft' | 'published' | 'cancelled' | 'completed' | 'archived' | 'removed';
       event_visibility: 'campus' | 'public' | 'private';
+      follow_policy: 'public' | 'approval' | 'disabled';
+      follow_status: 'pending' | 'active';
+      friend_request_status: 'pending' | 'accepted' | 'declined' | 'cancelled';
       group_member_status: 'invited' | 'active' | 'left' | 'removed';
       group_status:
         'forming' | 'pending_confirmation' | 'confirmed' | 'cancelled' | 'completed';
@@ -3461,6 +3714,7 @@ export type Database = {
       organization_role: 'owner' | 'admin' | 'event_manager' | 'moderator' | 'viewer';
       partnership_lead_status:
         'submitted' | 'reviewing' | 'contacted' | 'closed' | 'spam';
+      profile_visibility: 'campus' | 'friends' | 'private';
       referral_code_kind: 'user' | 'ambassador' | 'organization';
       referral_status: 'attributed' | 'qualified' | 'rewarded' | 'rejected';
       report_status: 'submitted' | 'under_review' | 'resolved' | 'dismissed';
@@ -3609,6 +3863,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      attendance_visibility: ['friends', 'confirmed_attendees', 'private'],
       confirmation_status: ['pending', 'confirmed', 'declined', 'expired'],
       data_request_status: ['requested', 'processing', 'ready', 'expired', 'cancelled'],
       event_decision: ['passed', 'saved'],
@@ -3623,6 +3878,9 @@ export const Constants = {
         'removed'
       ],
       event_visibility: ['campus', 'public', 'private'],
+      follow_policy: ['public', 'approval', 'disabled'],
+      follow_status: ['pending', 'active'],
+      friend_request_status: ['pending', 'accepted', 'declined', 'cancelled'],
       group_member_status: ['invited', 'active', 'left', 'removed'],
       group_status: [
         'forming',
@@ -3647,6 +3905,7 @@ export const Constants = {
       organization_membership_status: ['invited', 'active', 'removed'],
       organization_role: ['owner', 'admin', 'event_manager', 'moderator', 'viewer'],
       partnership_lead_status: ['submitted', 'reviewing', 'contacted', 'closed', 'spam'],
+      profile_visibility: ['campus', 'friends', 'private'],
       referral_code_kind: ['user', 'ambassador', 'organization'],
       referral_status: ['attributed', 'qualified', 'rewarded', 'rejected'],
       report_status: ['submitted', 'under_review', 'resolved', 'dismissed'],

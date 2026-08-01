@@ -59,6 +59,7 @@ jobs:
       - run: npm run test:db
       - run: npm run test:event-capacity
       - run: npm run test:matching
+      - run: npm run test:social-concurrency
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup

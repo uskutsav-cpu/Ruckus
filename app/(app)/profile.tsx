@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -231,6 +231,11 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.quickActions}>
+            <ProfileAction
+              mark="people"
+              label="Connections"
+              onPress={() => router.push('/social' as Href)}
+            />
             <ProfileAction
               mark="trophy"
               label="Leaderboard"

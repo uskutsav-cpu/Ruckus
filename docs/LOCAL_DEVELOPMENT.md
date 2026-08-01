@@ -17,6 +17,6 @@ empty, development is an intentional labeled demo. Partial values are rejected.
 be pushed to a hosted database.
 
 Use `npm run start:go`, `npm run ios`, or `npm run android`. Validate with
-`npm run verify`, `npm run test:db`, both concurrency scripts, and Expo exports. If the
+`npm run verify`, `npm run test:db`, all three concurrency scripts, and Expo exports. If the
 local Supabase stack is resource-constrained, omit nonessential Studio/analytics/media
 containers, but keep database, Auth, REST, and gateway running.

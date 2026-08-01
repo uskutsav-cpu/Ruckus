@@ -92,6 +92,7 @@ npm run db:reset
 npm run test:db
 npm run test:event-capacity
 npm run test:matching
+npm run test:social-concurrency
 npx expo export --platform web --output-dir dist/web
 npx expo export --platform ios --output-dir dist/ios
 npx expo export --platform android --output-dir dist/android
