@@ -133,6 +133,7 @@ export default function CreateEventScreen() {
         organizationName:
           selectedOrganization?.name ?? profile?.display_name ?? 'Campus host',
         organizationVerified: selectedOrganization?.isVerified ?? false,
+        organizationFollowed: false,
         startsAt: input.startsAt,
         endsAt: input.endsAt,
         timezone: input.timezone,
@@ -147,7 +148,8 @@ export default function CreateEventScreen() {
         accessibilityInformation: input.accessibilityInformation || null,
         costInformation: input.costInformation || null,
         cancellationPolicy: input.cancellationPolicy || null,
-        recommendationScore: 0
+        friendsAttendingCount: 0,
+        recommendationReasons: ['New on Ruckus']
       }
     : null;
 

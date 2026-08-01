@@ -20,11 +20,14 @@ import {
   fetchEventFeed,
   fetchEventMessages,
   fetchMyEvents,
+  fetchOrganizationFollowState,
   joinEvent,
+  recordEventInteraction,
   reviewEventRsvp,
   sendEventMessage,
   setEventMessageReaction,
-  setEventDecision
+  setEventDecision,
+  setOrganizationFollow
 } from '@/features/events/event-service';
 import type {
   CreateEventInput,
@@ -54,6 +57,39 @@ export function useEventDetail(eventId: string) {
     queryFn: () => fetchEventDetail(eventId, isDemo),
     enabled: Boolean(eventId)
   });
+}
+
+export function useRecordEventInteraction(eventId: string) {
+  const { isDemo } = useAuth();
+  return useMutation({
+    mutationFn: (kind: 'shared' | 'invited_friend') =>
+      recordEventInteraction(eventId, kind, isDemo)
+  });
+}
+
+export function useOrganizationFollow(organizationId: string | null) {
+  const { isDemo, user } = useAuth();
+  const queryClient = useQueryClient();
+  const state = useQuery({
+    queryKey: ['organization-follow', organizationId, user?.id, isDemo],
+    queryFn: () => fetchOrganizationFollowState(organizationId!, isDemo),
+    enabled: Boolean(user && organizationId)
+  });
+  const mutation = useMutation({
+    mutationFn: (follow: boolean) => {
+      if (!organizationId) throw new Error('ORGANIZATION_REQUIRED');
+      return setOrganizationFollow(organizationId, follow, isDemo);
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ['organization-follow', organizationId]
+        }),
+        queryClient.invalidateQueries({ queryKey: ['event-feed'] })
+      ]);
+    }
+  });
+  return { ...state, mutation };
 }
 
 function useInvalidateEvents(eventId?: string) {

@@ -750,6 +750,62 @@ export type Database = {
           }
         ];
       };
+      event_collaborative_signals: {
+        Row: {
+          cohort_size: number;
+          computed_at: string;
+          event_id: string;
+          expires_at: string;
+          signal_strength: number;
+          similar_event_id: string;
+        };
+        Insert: {
+          cohort_size: number;
+          computed_at?: string;
+          event_id: string;
+          expires_at?: string;
+          signal_strength: number;
+          similar_event_id: string;
+        };
+        Update: {
+          cohort_size?: number;
+          computed_at?: string;
+          event_id?: string;
+          expires_at?: string;
+          signal_strength?: number;
+          similar_event_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_collaborative_signals_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_collaborative_signals_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_collaborative_signals_similar_event_id_fkey';
+            columns: ['similar_event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_collaborative_signals_similar_event_id_fkey';
+            columns: ['similar_event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       event_discovery_decisions: {
         Row: {
           created_at: string;
@@ -792,6 +848,66 @@ export type Database = {
             columns: ['profile_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      event_embedding_jobs: {
+        Row: {
+          attempts: number;
+          available_at: string;
+          content_digest: string;
+          created_at: string;
+          event_id: string;
+          id: string;
+          last_error_code: string | null;
+          model_version: string;
+          processed_at: string | null;
+          provider: string;
+          status: string;
+          updated_at: string;
+        };
+        Insert: {
+          attempts?: number;
+          available_at?: string;
+          content_digest: string;
+          created_at?: string;
+          event_id: string;
+          id?: string;
+          last_error_code?: string | null;
+          model_version: string;
+          processed_at?: string | null;
+          provider: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Update: {
+          attempts?: number;
+          available_at?: string;
+          content_digest?: string;
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+          last_error_code?: string | null;
+          model_version?: string;
+          processed_at?: string | null;
+          provider?: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_embedding_jobs_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_embedding_jobs_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
             referencedColumns: ['id'];
           }
         ];
@@ -2043,6 +2159,46 @@ export type Database = {
           }
         ];
       };
+      organization_follows: {
+        Row: {
+          created_at: string;
+          organization_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          organization_id: string;
+          profile_id: string;
+        };
+        Update: {
+          created_at?: string;
+          organization_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'organization_follows_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organization_follows_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_organization_profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organization_follows_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       organization_members: {
         Row: {
           accepted_at: string | null;
@@ -2566,6 +2722,129 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: 'push_tokens_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      recommendation_feature_flags: {
+        Row: {
+          campus_id: string;
+          collaborative_enabled: boolean;
+          embedding_model_version: string | null;
+          embedding_provider: string | null;
+          embeddings_enabled: boolean;
+          max_daily_embedding_jobs: number;
+          updated_at: string;
+        };
+        Insert: {
+          campus_id: string;
+          collaborative_enabled?: boolean;
+          embedding_model_version?: string | null;
+          embedding_provider?: string | null;
+          embeddings_enabled?: boolean;
+          max_daily_embedding_jobs?: number;
+          updated_at?: string;
+        };
+        Update: {
+          campus_id?: string;
+          collaborative_enabled?: boolean;
+          embedding_model_version?: string | null;
+          embedding_provider?: string | null;
+          embeddings_enabled?: boolean;
+          max_daily_embedding_jobs?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recommendation_feature_flags_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: true;
+            referencedRelation: 'campuses';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      recommendation_interactions: {
+        Row: {
+          campus_id: string;
+          created_at: string;
+          deduplication_key: string;
+          event_id: string | null;
+          expires_at: string;
+          id: string;
+          kind: Database['public']['Enums']['recommendation_interaction_kind'];
+          occurred_at: string;
+          organization_id: string | null;
+          profile_id: string;
+          surface: string;
+        };
+        Insert: {
+          campus_id: string;
+          created_at?: string;
+          deduplication_key: string;
+          event_id?: string | null;
+          expires_at?: string;
+          id?: string;
+          kind: Database['public']['Enums']['recommendation_interaction_kind'];
+          occurred_at?: string;
+          organization_id?: string | null;
+          profile_id: string;
+          surface?: string;
+        };
+        Update: {
+          campus_id?: string;
+          created_at?: string;
+          deduplication_key?: string;
+          event_id?: string | null;
+          expires_at?: string;
+          id?: string;
+          kind?: Database['public']['Enums']['recommendation_interaction_kind'];
+          occurred_at?: string;
+          organization_id?: string | null;
+          profile_id?: string;
+          surface?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recommendation_interactions_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: false;
+            referencedRelation: 'campuses';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recommendation_interactions_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recommendation_interactions_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recommendation_interactions_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recommendation_interactions_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_organization_profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recommendation_interactions_profile_id_fkey';
             columns: ['profile_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
@@ -3348,6 +3627,10 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      cleanup_recommendation_data: {
+        Args: { batch_size?: number };
+        Returns: number;
+      };
       complete_onboarding: {
         Args: {
           bio_value: string;
@@ -3415,6 +3698,10 @@ export type Database = {
         Args: { target_group_id: string };
         Returns: Json;
       };
+      follow_organization: {
+        Args: { target_organization_id: string };
+        Returns: boolean;
+      };
       follow_user: {
         Args: { target_profile_id: string };
         Returns: Database['public']['Enums']['follow_status'];
@@ -3424,9 +3711,7 @@ export type Database = {
       get_event_feed: {
         Args: {
           category_filter?: string;
-          cursor_id?: string;
-          cursor_score?: number;
-          cursor_starts_at?: string;
+          cursor_token?: string;
           ends_before?: string;
           page_size?: number;
           search_text?: string;
@@ -3516,6 +3801,10 @@ export type Database = {
         Args: { target_event_id: string };
         Returns: boolean;
       };
+      is_organization_followed: {
+        Args: { target_organization_id: string };
+        Returns: boolean;
+      };
       join_event: {
         Args: { request_key?: string; target_event_id: string };
         Returns: Json;
@@ -3529,9 +3818,22 @@ export type Database = {
         Returns: Json;
       };
       publish_event: { Args: { target_event_id: string }; Returns: undefined };
+      queue_event_embedding_jobs: { Args: never; Returns: number };
       record_activity_pass: {
         Args: { target_session_id: string };
         Returns: Json;
+      };
+      record_event_impressions: {
+        Args: { interaction_surface?: string; target_event_ids: string[] };
+        Returns: number;
+      };
+      record_event_interaction: {
+        Args: {
+          interaction_kind: Database['public']['Enums']['recommendation_interaction_kind'];
+          interaction_surface?: string;
+          target_event_id: string;
+        };
+        Returns: undefined;
       };
       redeem_checkin_token_digest: {
         Args: { digest_value: string };
@@ -3541,6 +3843,7 @@ export type Database = {
         Args: { target_digest: string };
         Returns: Json;
       };
+      refresh_event_collaborative_signals: { Args: never; Returns: number };
       register_push_token: {
         Args: {
           device_value: string;
@@ -3671,6 +3974,10 @@ export type Database = {
         Returns: string;
       };
       unblock_user: { Args: { target_profile_id: string }; Returns: boolean };
+      unfollow_organization: {
+        Args: { target_organization_id: string };
+        Returns: boolean;
+      };
       unfollow_user: { Args: { target_profile_id: string }; Returns: boolean };
       update_moderation_case: {
         Args: {
@@ -3715,6 +4022,19 @@ export type Database = {
       partnership_lead_status:
         'submitted' | 'reviewing' | 'contacted' | 'closed' | 'spam';
       profile_visibility: 'campus' | 'friends' | 'private';
+      recommendation_interaction_kind:
+        | 'impression'
+        | 'details_opened'
+        | 'passed'
+        | 'saved'
+        | 'joined'
+        | 'waitlisted'
+        | 'cancelled'
+        | 'checked_in'
+        | 'rated'
+        | 'shared'
+        | 'invited_friend'
+        | 'followed_organizer';
       referral_code_kind: 'user' | 'ambassador' | 'organization';
       referral_status: 'attributed' | 'qualified' | 'rewarded' | 'rejected';
       report_status: 'submitted' | 'under_review' | 'resolved' | 'dismissed';
@@ -3906,6 +4226,20 @@ export const Constants = {
       organization_role: ['owner', 'admin', 'event_manager', 'moderator', 'viewer'],
       partnership_lead_status: ['submitted', 'reviewing', 'contacted', 'closed', 'spam'],
       profile_visibility: ['campus', 'friends', 'private'],
+      recommendation_interaction_kind: [
+        'impression',
+        'details_opened',
+        'passed',
+        'saved',
+        'joined',
+        'waitlisted',
+        'cancelled',
+        'checked_in',
+        'rated',
+        'shared',
+        'invited_friend',
+        'followed_organizer'
+      ],
       referral_code_kind: ['user', 'ambassador', 'organization'],
       referral_status: ['attributed', 'qualified', 'rewarded', 'rejected'],
       report_status: ['submitted', 'under_review', 'resolved', 'dismissed'],

@@ -84,5 +84,8 @@ verify_jwt = false
 [functions.process-push-receipts]
 verify_jwt = false
 
+[functions.recommendation-maintenance]
+verify_jwt = false
+
 [functions.partnership-lead]
 verify_jwt = false

@@ -21,6 +21,7 @@ export const demoEvents: EventSummary[] = [
     organizationId: '60000000-0000-4000-8000-000000000001',
     organizationName: 'Campus Outdoors Club',
     organizationVerified: false,
+    organizationFollowed: false,
     startsAt: futureIso(2, 18),
     endsAt: futureIso(2, 20),
     timezone: 'America/Chicago',
@@ -35,7 +36,8 @@ export const demoEvents: EventSummary[] = [
     accessibilityInformation: 'Paved route from the east entrance.',
     costInformation: 'Free',
     cancellationPolicy: 'Cancel before the event so another student can join.',
-    recommendationScore: 61
+    friendsAttendingCount: 2,
+    recommendationReasons: ['Two friends are going', 'Matches your outdoor interests']
   },
   {
     id: '70000000-0000-4000-8000-000000000002',
@@ -50,6 +52,7 @@ export const demoEvents: EventSummary[] = [
     organizationId: '60000000-0000-4000-8000-000000000001',
     organizationName: 'Campus Outdoors Club',
     organizationVerified: false,
+    organizationFollowed: false,
     startsAt: futureIso(4, 19),
     endsAt: futureIso(4, 21),
     timezone: 'America/Chicago',
@@ -64,7 +67,8 @@ export const demoEvents: EventSummary[] = [
     accessibilityInformation: 'Elevator access is available from the north entrance.',
     costInformation: 'Free',
     cancellationPolicy: 'Please cancel at least two hours before the start time.',
-    recommendationScore: 54
+    friendsAttendingCount: 0,
+    recommendationReasons: ['Similar to events you attended']
   },
   {
     id: '70000000-0000-4000-8000-000000000003',
@@ -78,6 +82,7 @@ export const demoEvents: EventSummary[] = [
     organizationId: null,
     organizationName: 'Student Arts Council',
     organizationVerified: true,
+    organizationFollowed: false,
     startsAt: futureIso(6, 20),
     endsAt: futureIso(6, 22),
     timezone: 'America/Chicago',
@@ -92,7 +97,8 @@ export const demoEvents: EventSummary[] = [
     accessibilityInformation: 'Step-free courtyard entrance and reserved seating area.',
     costInformation: 'Free',
     cancellationPolicy: 'Leave the waitlist anytime.',
-    recommendationScore: 43
+    friendsAttendingCount: 0,
+    recommendationReasons: ['Popular at your campus', 'Something different for you']
   }
 ];
 

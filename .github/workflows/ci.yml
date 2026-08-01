@@ -25,6 +25,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
+      - run: npm run test:recommendations
       - run: npm run scan:secrets
       - run: npm run audit:production
       - run: npx expo export --platform web --output-dir dist/web

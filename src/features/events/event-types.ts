@@ -14,6 +14,7 @@ export type EventSummary = {
   organizationId: string | null;
   organizationName: string | null;
   organizationVerified: boolean;
+  organizationFollowed: boolean;
   startsAt: string;
   endsAt: string;
   timezone: string;
@@ -28,7 +29,8 @@ export type EventSummary = {
   accessibilityInformation: string | null;
   costInformation: string | null;
   cancellationPolicy: string | null;
-  recommendationScore: number;
+  friendsAttendingCount: number;
+  recommendationReasons: string[];
 };
 
 export type OwnRsvp = {
@@ -38,7 +40,10 @@ export type OwnRsvp = {
   joinedAt: string;
 };
 
-export type EventDetail = EventSummary & {
+export type EventDetail = Omit<
+  EventSummary,
+  'organizationFollowed' | 'friendsAttendingCount' | 'recommendationReasons'
+> & {
   minAge: number;
   eligibilityRequirements: string | null;
   safetyRules: string | null;
@@ -50,11 +55,7 @@ export type EventDetail = EventSummary & {
   chatEnabled: boolean;
 };
 
-export type EventFeedCursor = {
-  score: number;
-  startsAt: string;
-  id: string;
-};
+export type EventFeedCursor = string;
 
 export type EventFeedPage = {
   items: EventSummary[];
