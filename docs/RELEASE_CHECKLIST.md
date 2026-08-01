@@ -10,8 +10,8 @@
 - [x] Web, iOS, and Android exports; Expo Doctor
 - [x] Dependency audit reviewed (no blind force upgrade)
 - [x] Working tree and complete Git history secret/PII scan
-- [ ] CI configuration validated; generated types and lockfile current
-- [ ] Final diff/status and non-destructive merge to `main`
+- [x] CI configuration validated; generated types and lockfile current
+- [x] Final diff/status and non-destructive merge to `main`
 
 ## Product/security review
 
