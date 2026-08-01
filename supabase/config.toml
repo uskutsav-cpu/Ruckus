@@ -34,9 +34,10 @@ file_size_limit = "10MiB"
 
 [auth]
 enabled = true
-site_url = "campusclash://auth/callback"
+site_url = "ruckus://auth/callback"
 additional_redirect_urls = [
   "exp://127.0.0.1:8081/--/auth/callback",
+  "ruckus://auth/callback",
   "campusclash://auth/callback"
 ]
 jwt_expiry = 3600
@@ -81,4 +82,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.process-push-receipts]
+verify_jwt = false
+
+[functions.partnership-lead]
 verify_jwt = false

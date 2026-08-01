@@ -1,5 +1,5 @@
 -- Local-only deterministic demo data.
--- Test password for every seeded account: CampusClash1!
+-- Local-only test password for every seeded account: RuckusLocal1!
 
 insert into public.campuses (
   id,
@@ -50,7 +50,7 @@ select
   'authenticated',
   'authenticated',
   seeded.email,
-  extensions.crypt('CampusClash1!', extensions.gen_salt('bf')),
+  extensions.crypt('RuckusLocal1!', extensions.gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}'::jsonb,
   jsonb_build_object('display_name', seeded.display_name),
@@ -150,6 +150,21 @@ set
   onboarding_completed_at = now(),
   bio = 'Always down for a new campus adventure.',
   graduation_year = 2028
+where id between
+  '10000000-0000-4000-8000-000000000001'
+  and '10000000-0000-4000-8000-000000000008';
+
+update public.profiles
+set username = case id
+  when '10000000-0000-4000-8000-000000000001' then 'maya_demo'
+  when '10000000-0000-4000-8000-000000000002' then 'jordan_demo'
+  when '10000000-0000-4000-8000-000000000003' then 'avery_demo'
+  when '10000000-0000-4000-8000-000000000004' then 'sam_demo'
+  when '10000000-0000-4000-8000-000000000005' then 'priya_demo'
+  when '10000000-0000-4000-8000-000000000006' then 'leo_demo'
+  when '10000000-0000-4000-8000-000000000007' then 'casey_host'
+  when '10000000-0000-4000-8000-000000000008' then 'campus_safety_demo'
+end
 where id between
   '10000000-0000-4000-8000-000000000001'
   and '10000000-0000-4000-8000-000000000008';
@@ -381,3 +396,145 @@ set starts_at = excluded.starts_at,
     checkin_opens_at = excluded.checkin_opens_at,
     checkin_closes_at = excluded.checkin_closes_at,
     status = 'scheduled';
+
+-- Event-first demo records. Claims are scoped to the seed session so trusted
+-- ownership triggers exercise the same actor checks used by the application.
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"10000000-0000-4000-8000-000000000007","role":"authenticated"}',
+  false
+);
+select set_config(
+  'request.jwt.claim.sub',
+  '10000000-0000-4000-8000-000000000007',
+  false
+);
+
+insert into public.legal_acceptances (profile_id, document_type, document_version)
+values
+  ('10000000-0000-4000-8000-000000000007', 'terms', 'beta-2026-08'),
+  ('10000000-0000-4000-8000-000000000007', 'privacy', 'beta-2026-08'),
+  ('10000000-0000-4000-8000-000000000007', 'community_guidelines', 'beta-2026-08')
+on conflict do nothing;
+
+insert into public.organizations (
+  id,
+  campus_id,
+  slug,
+  name,
+  description,
+  website_url,
+  is_verified,
+  created_by
+)
+values (
+  '60000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000001',
+  'demo-campus-outdoors',
+  'Campus Outdoors Club',
+  'A demo organization for local development. No real partnership is implied.',
+  null,
+  false,
+  '10000000-0000-4000-8000-000000000007'
+)
+on conflict (id) do update
+set name = excluded.name,
+    description = excluded.description;
+
+insert into public.events (
+  id,
+  campus_id,
+  organization_id,
+  created_by,
+  slug,
+  title,
+  description,
+  category,
+  starts_at,
+  ends_at,
+  timezone,
+  venue_name,
+  location_description,
+  capacity,
+  waitlist_enabled,
+  approval_required,
+  visibility,
+  min_age,
+  accessibility_information,
+  cost_information,
+  cancellation_policy,
+  safety_rules,
+  status,
+  checkin_opens_at,
+  checkin_closes_at
+)
+values
+  (
+    '70000000-0000-4000-8000-000000000001',
+    '00000000-0000-4000-8000-000000000001',
+    '60000000-0000-4000-8000-000000000001',
+    '10000000-0000-4000-8000-000000000007',
+    'sunset-campus-picnic-demo',
+    'Sunset Campus Picnic',
+    'Bring a blanket and meet new people at a low-key sunset picnic hosted by the demo outdoors club.',
+    'Outdoor',
+    date_trunc('day', now()) + interval '2 days 18 hours',
+    date_trunc('day', now()) + interval '2 days 20 hours',
+    'America/Chicago',
+    'South Lawn',
+    'Meet by the public fountain. Exact live location is never collected.',
+    2,
+    true,
+    false,
+    'public',
+    18,
+    'Paved route from the east entrance; seating is limited, so bring a chair if useful.',
+    'Free',
+    'Cancel before the event so the next person can be promoted from the waitlist.',
+    'Meet in public, follow organizer instructions, and use the in-app report and block tools if needed.',
+    'draft',
+    date_trunc('day', now()) + interval '2 days 17 hours 45 minutes',
+    date_trunc('day', now()) + interval '2 days 18 hours 30 minutes'
+  ),
+  (
+    '70000000-0000-4000-8000-000000000002',
+    '00000000-0000-4000-8000-000000000001',
+    '60000000-0000-4000-8000-000000000001',
+    '10000000-0000-4000-8000-000000000007',
+    'board-game-night-demo',
+    'Board Game Night',
+    'Learn a new tabletop game with a small group. Beginners are welcome and supplies are provided.',
+    'Games',
+    date_trunc('day', now()) + interval '4 days 19 hours',
+    date_trunc('day', now()) + interval '4 days 21 hours',
+    'America/Chicago',
+    'Student Union Commons',
+    'Use the north entrance and follow signs for the commons.',
+    24,
+    true,
+    true,
+    'campus',
+    18,
+    'Elevator access is available from the north entrance.',
+    'Free',
+    'Please cancel at least two hours before the start time.',
+    'Be respectful, keep walkways clear, and report harassment through Ruckus.',
+    'draft',
+    date_trunc('day', now()) + interval '4 days 18 hours 45 minutes',
+    date_trunc('day', now()) + interval '4 days 19 hours 30 minutes'
+  )
+on conflict (id) do update
+set starts_at = excluded.starts_at,
+    ends_at = excluded.ends_at,
+    checkin_opens_at = excluded.checkin_opens_at,
+    checkin_closes_at = excluded.checkin_closes_at,
+    status = 'draft',
+    published_at = null,
+    cancelled_at = null,
+    completed_at = null;
+
+select public.publish_event('70000000-0000-4000-8000-000000000001');
+select public.publish_event('70000000-0000-4000-8000-000000000002');
+
+select set_config('request.jwt.claims', '{}', false);
+select set_config('request.jwt.claim.sub', '', false);

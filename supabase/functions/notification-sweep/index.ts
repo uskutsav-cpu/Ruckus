@@ -1,4 +1,5 @@
 import { withSupabase } from '@supabase/server';
+import type { Database } from '../_shared/database.types.ts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { jsonError } from '../_shared/http.ts';
@@ -13,6 +14,75 @@ type Candidate = {
   body: string;
   url: string;
 };
+
+type EventNotificationJob = {
+  id: string;
+  profile_id: string;
+  event_id: string | null;
+  kind: string;
+  attempts: number;
+  payload: Record<string, unknown>;
+};
+
+function eventJobCopy(
+  kind: string,
+  eventTitle: string
+): {
+  category: 'transactional' | 'activity';
+  title: string;
+  body: string;
+} {
+  switch (kind) {
+    case 'rsvp_confirmed':
+      return {
+        category: 'transactional',
+        title: 'You’re confirmed',
+        body: `${eventTitle} is in My Events and its attendee chat is ready.`
+      };
+    case 'rsvp_waitlisted':
+      return {
+        category: 'transactional',
+        title: 'You’re on the waitlist',
+        body: `Ruckus will let you know if a spot opens for ${eventTitle}.`
+      };
+    case 'rsvp_pending':
+      return {
+        category: 'transactional',
+        title: 'Request sent',
+        body: `The host will review your request for ${eventTitle}.`
+      };
+    case 'rsvp_rejected':
+      return {
+        category: 'transactional',
+        title: 'RSVP update',
+        body: `Your request for ${eventTitle} was not approved.`
+      };
+    case 'waitlist_promoted':
+      return {
+        category: 'transactional',
+        title: 'A spot opened',
+        body: `You’re now confirmed for ${eventTitle}.`
+      };
+    case 'event_cancelled':
+      return {
+        category: 'transactional',
+        title: 'Event cancelled',
+        body: `${eventTitle} was cancelled. Open Ruckus for the current status.`
+      };
+    case 'event_announcement':
+      return {
+        category: 'activity',
+        title: `Update from ${eventTitle}`,
+        body: 'The host posted an announcement. Open the private event space to read it.'
+      };
+    default:
+      return {
+        category: 'activity',
+        title: 'Event update',
+        body: `${eventTitle} has a new status update.`
+      };
+  }
+}
 
 async function claimDispatch(
   admin: SupabaseClient,
@@ -29,7 +99,7 @@ async function claimDispatch(
 }
 
 export default {
-  fetch: withSupabase({ auth: 'none' }, async (request, context) => {
+  fetch: withSupabase<Database>({ auth: 'none' }, async (request, context) => {
     if (request.method !== 'POST') {
       return jsonError('Method not allowed.', 405, 'METHOD_NOT_ALLOWED');
     }
@@ -117,6 +187,68 @@ export default {
     }
 
     let dispatched = 0;
+
+    const { data: claimedJobs, error: claimError } = await context.supabaseAdmin.rpc(
+      'claim_notification_jobs',
+      { max_jobs: 50 }
+    );
+    if (claimError) {
+      return jsonError('Notification job claim failed.', 500, 'JOB_CLAIM_FAILED');
+    }
+    const eventJobs = (claimedJobs ?? []) as EventNotificationJob[];
+    const eventIds = [
+      ...new Set(eventJobs.flatMap((job) => (job.event_id ? [job.event_id] : [])))
+    ];
+    const { data: eventRows, error: eventError } = eventIds.length
+      ? await context.supabaseAdmin.from('events').select('id,title').in('id', eventIds)
+      : { data: [], error: null };
+    if (eventError) {
+      return jsonError('Notification event lookup failed.', 500, 'EVENT_LOOKUP_FAILED');
+    }
+    const eventTitles = new Map(
+      (eventRows ?? []).map((event) => [event.id, event.title])
+    );
+
+    for (const job of eventJobs) {
+      try {
+        const eventTitle = job.event_id
+          ? (eventTitles.get(job.event_id) ?? 'Your event')
+          : 'Your event';
+        const copy = eventJobCopy(job.kind, eventTitle);
+        await sendPushToProfiles(context.supabaseAdmin, {
+          profileIds: [job.profile_id],
+          category: copy.category,
+          title: copy.title,
+          body: copy.body,
+          url: job.event_id ? `/event/${job.event_id}` : '/my-events',
+          event: job.kind
+        });
+        await context.supabaseAdmin
+          .from('notification_jobs')
+          .update({
+            status: 'sent',
+            processed_at: new Date().toISOString(),
+            last_error_code: null
+          })
+          .eq('id', job.id)
+          .eq('status', 'processing');
+        dispatched += 1;
+      } catch (error) {
+        const permanent = job.attempts >= 5;
+        await context.supabaseAdmin
+          .from('notification_jobs')
+          .update({
+            status: permanent ? 'failed' : 'pending',
+            scheduled_for: new Date(
+              Date.now() + Math.max(1, job.attempts) * 5 * 60_000
+            ).toISOString(),
+            last_error_code: error instanceof Error ? error.name.slice(0, 80) : 'UNKNOWN'
+          })
+          .eq('id', job.id)
+          .eq('status', 'processing');
+      }
+    }
+
     for (const candidate of candidates) {
       if (!(await claimDispatch(context.supabaseAdmin, candidate))) continue;
       const { data: members } = await context.supabaseAdmin
@@ -150,8 +282,11 @@ export default {
         .insert({ event_type: 'xp_awarded', source_id: entry.id })
         .select('id')
         .maybeSingle();
-      if (claimed.error?.code === '23505' || !claimed.data) continue;
-      if (claimed.error) throw claimed.error;
+      if (claimed.error) {
+        if (claimed.error.code === '23505') continue;
+        throw claimed.error;
+      }
+      if (!claimed.data) continue;
       await sendPushToProfiles(context.supabaseAdmin, {
         profileIds: [entry.profile_id],
         category: 'transactional',

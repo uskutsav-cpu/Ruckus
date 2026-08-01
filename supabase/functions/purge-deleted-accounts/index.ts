@@ -1,4 +1,5 @@
 import { withSupabase } from '@supabase/server';
+import type { Database } from '../_shared/database.types.ts';
 
 import { jsonError } from '../_shared/http.ts';
 import { isAuthorizedCronRequest } from '../_shared/internal.ts';
@@ -7,7 +8,7 @@ const retentionDays = 7;
 const batchSize = 50;
 
 export default {
-  fetch: withSupabase({ auth: 'none' }, async (request, context) => {
+  fetch: withSupabase<Database>({ auth: 'none' }, async (request, context) => {
     if (request.method !== 'POST') {
       return jsonError('Method not allowed.', 405, 'METHOD_NOT_ALLOWED');
     }

@@ -1,13 +1,18 @@
+import { execFileSync } from 'node:child_process';
 import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
-const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
 const isLocalTarget = ['127.0.0.1', 'localhost'].includes(new URL(url).hostname);
+const localStatus = isLocalTarget
+  ? execFileSync('npx', ['supabase', 'status', '-o', 'env'], { encoding: 'utf8' })
+  : '';
+const localKey = localStatus.match(/^(?:PUBLISHABLE_KEY|ANON_KEY)="?([^"\n]+)"?$/m)?.[1];
+const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY ?? localKey;
 const sessionId =
   process.env.MATCHING_TEST_SESSION_ID ??
   (isLocalTarget ? '40000000-0000-4000-8000-000000000001' : undefined);
 const password =
-  process.env.MATCHING_TEST_PASSWORD ?? (isLocalTarget ? 'CampusClash1!' : undefined);
+  process.env.MATCHING_TEST_PASSWORD ?? (isLocalTarget ? 'RuckusLocal1!' : undefined);
 
 if (!publishableKey) {
   throw new Error(

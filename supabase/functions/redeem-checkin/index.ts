@@ -1,4 +1,5 @@
 import { withSupabase } from '@supabase/server';
+import type { Database } from '../_shared/database.types.ts';
 
 import {
   checkinPepper,
@@ -8,7 +9,7 @@ import {
 import { jsonError } from '../_shared/http.ts';
 
 export default {
-  fetch: withSupabase({ auth: 'user' }, async (request, context) => {
+  fetch: withSupabase<Database>({ auth: 'user' }, async (request, context) => {
     if (request.method !== 'POST') {
       return jsonError('Method not allowed.', 405, 'METHOD_NOT_ALLOWED');
     }

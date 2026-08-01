@@ -1,10 +1,11 @@
 import { withSupabase } from '@supabase/server';
+import type { Database } from '../_shared/database.types.ts';
 
 import { isUuid, jsonError } from '../_shared/http.ts';
 import { sendPushToProfiles } from '../_shared/push.ts';
 
 export default {
-  fetch: withSupabase({ auth: 'user' }, async (request, context) => {
+  fetch: withSupabase<Database>({ auth: 'user' }, async (request, context) => {
     if (request.method !== 'POST') {
       return jsonError('Method not allowed.', 405, 'METHOD_NOT_ALLOWED');
     }
@@ -23,7 +24,7 @@ export default {
         context.supabase.auth.getUser(),
         context.supabase
           .from('messages')
-          .select('id, group_id, sender_id, body')
+          .select('id, group_id, sender_id')
           .eq('id', body.messageId)
           .single()
       ]);
@@ -50,7 +51,7 @@ export default {
       profileIds: (members ?? []).map((member) => member.profile_id),
       category: 'chat',
       title: 'New crew message',
-      body: message.body.length > 90 ? `${message.body.slice(0, 87)}…` : message.body,
+      body: 'Open Ruckus to read it.',
       url: `/group/${message.group_id}/chat`,
       event: 'chat_message',
       groupId: message.group_id
