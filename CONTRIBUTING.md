@@ -29,3 +29,9 @@ npx expo export --platform all --output-dir dist
 See `docs/E2E_SMOKE.md`. Never weaken RLS to unblock client code. Add a pgTAP denial
 case for every new exposed table or privileged mutation, keep Edge Functions free of
 PII and token logging, and use a descriptive commit after a green milestone.
+
+Use additive migrations; do not rewrite deployed history. Regenerate database and
+typed-route declarations after schema/route changes. Public contributions must not add
+real accounts, campus claims, passwords, support addresses, legal approval, or vendor
+credentials. The project is all-rights-reserved unless the owner explicitly adopts a
+license; contribution acceptance does not itself change that status.

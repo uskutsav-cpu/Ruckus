@@ -1,77 +1,44 @@
 # Architecture
 
-Ruckus uses a typed Expo Router client and a Supabase backend. The client is
-untrusted: authorization, matching, group assignment, check-in, XP, and administrative
-operations are enforced in Postgres functions and Edge Functions.
+Ruckus is a typed Expo Router client over a Supabase trust boundary. `app/` composes
+public/auth/onboarding/protected routes; `src/features/` owns typed reads and mutations;
+`src/domain/` owns deterministic rules; `src/lib/` owns validated infrastructure;
+`supabase/` is authoritative for authorization and multi-row correctness.
 
-## Boundaries
+## Event transaction
 
-- `app/` owns navigation and screen composition.
-- `src/features/` owns feature queries and mutations.
-- `src/domain/` contains deterministic rules with no React or Supabase dependency.
-- `src/lib/` owns infrastructure adapters and validated configuration.
-- `supabase/` is the source of truth for data integrity and authorization.
+Discover reads a privacy-safe scored feed. Join calls `join_event`, which authenticates,
+checks campus/profile/event/block eligibility, obtains an event advisory lock, locks
+RSVP state, assigns confirmed/pending/waitlisted without exceeding capacity, records
+history, grants chat only when confirmed, and queues a deduplicated notification.
+Cancellation performs the inverse and promotes the earliest valid waitlist member in
+the same transaction.
 
-Client writes are limited by RLS. Multi-row operations execute in one Postgres
-transaction behind narrow RPC functions. Edge Functions authenticate callers and
-coordinate trusted side effects such as Expo push delivery; the service-role key never
-ships in the application.
+## Read models and Realtime
 
-## Data and trust flow
+Dedicated functions/views expose public pages, discovery, event detail, organizer
+attendees, organization dashboard, chat messages, and moderation queue. They omit or
+redact sensitive columns. Event Realtime uses private `event:<uuid>` topics and repeats
+confirmed-attendee/host authorization. Database history remains authoritative;
+broadcast only triggers refetch and never grants access.
 
-### Activity discovery
+## Server operations
 
-`activity_feed` omits venue columns and filters to the signed-in user's campus,
-onboarding state, future swipe window, and unswiped sessions. The table privilege on
-`activity_sessions` also excludes venue columns, so a client cannot bypass the view
-with a different select.
+Postgres owns RSVP, organization roles, check-in, XP, referrals, account requests,
+moderation, and notification claiming. Edge Functions own raw QR hashing, push vendor
+calls/receipts, scheduled sweeps, partnership abuse controls, and deletion purge. The
+mobile client uses only public project configuration; service credentials and peppers
+remain server-only.
 
-### Matching
+Check-in QR values are random and short-lived. Only peppered digests reach Postgres;
+redemption locks the token and atomically writes the unique attendance and XP facts.
+Referral qualification is triggered only from verified event check-in.
 
-`process_swipe_and_match` owns the right-swipe, waitlist, and group transaction:
+## Secondary subsystem
 
-1. Validate authentication, email-domain access, age attestation, onboarding, campus,
-   and session timing.
-2. Acquire a transaction advisory lock for the activity session.
-3. Select compatible campus waiters while excluding blocks and overlapping groups.
-4. Lock every provisional member profile in UUID order.
-5. Re-check overlap after the locks, then create the group, memberships, and
-   confirmation rows and mark waitlist rows matched.
+Ruckus Crews preserves the earlier overlap-safe small-group matcher. It uses session
+advisory locks and ordered profile locks to prevent concurrent double assignment. It is
+an optional activity feature, not the primary event RSVP/chat path.
 
-The session lock prevents two groups consuming the same waitlist rows. Ordered profile
-locks prevent two concurrent requests for different, overlapping sessions from
-assigning the same student twice.
-
-### Check-in and XP
-
-The QR contains a random, short-lived value. An Edge Function peppers and hashes it;
-only the digest reaches `checkin_tokens`. Redemption hashes the scanned value and calls
-`redeem_checkin_token_digest`, which locks the token, validates membership,
-confirmation and event time, then inserts the unique check-in and append-only XP row in
-one transaction. Duplicate scans return the existing check-in and zero new XP.
-
-### Realtime
-
-Persisted messages use Postgres Changes with message-table RLS. Broadcast and Presence
-use private `group:<uuid>` channels authorized by policies on `realtime.messages`.
-Only active group members can subscribe or publish.
-
-### Notifications
-
-The client stores only Expo push tokens through `register_push_token`, keyed by a
-random device ID in Secure Store. Notification categories are server-synced. Edge
-Functions resolve eligible recipients, filter preferences, send through Expo, and
-invalidate immediate `DeviceNotRegistered` tickets. Accepted ticket IDs enter a
-service-only receipt queue; a scheduled worker processes delayed receipts and
-invalidates stale devices. A cron-secret-authenticated sweep claims
-unique dispatch markers before deadline, venue, check-in, event-start, and XP pushes.
-Mobile notification routes pass an explicit local-route allowlist before navigation.
-
-### Reporting, blocking, and deletion
-
-Reports are inserted under RLS or the message-report RPC and are readable only by
-admins. `block_user` withdraws waitlists and shared active participation; lobby,
-matching, avatar, and leaderboard reads repeat the block check. Account deletion first
-disables participation and push delivery. A daily internal Edge Function removes
-avatar objects and hard-deletes the Auth user after seven days, letting foreign keys
-delete owned rows and anonymize retained group messages.
+See `docs/DATABASE.md`, `docs/RLS_AUTHORIZATION_MATRIX.md`, `docs/THREAT_MODEL.md`, and
+`docs/NOTIFICATIONS.md` for detailed contracts.

@@ -18,8 +18,9 @@ npx expo start --clear
 ```
 
 Open the QR code in Expo Go, or press `i`, `a`, or `w` for an available simulator,
-emulator, or web browser. Choose **Explore the demo** on the welcome screen. The
-persistent **DEMO PREVIEW** banner must remain visible throughout protected routes.
+emulator, or web browser. Choose **Try the demo** on the welcome screen. The persistent
+**Demo · Preview data. No account changes.** banner must remain visible throughout
+protected routes.
 
 The demo includes stable activities, a pending activity, one crew, member cards,
 private-chat examples, a local rotating QR, profile/XP history, and all three
@@ -182,7 +183,17 @@ preferences, immediate deletion sign-out, and the seven-day purge.
 
 ## Current manual verification status
 
-No screen or physical-device check in this document has been manually verified as part
-of the static implementation pass. Successful lint, TypeScript, unit tests, config
-validation, and platform exports establish build integrity only. A release owner must
-complete and record this checklist before describing the app as production-ready.
+No physical-device box in this document has been manually verified. On 2026-08-01 an
+automated in-app-browser pass inspected the exported web bundle at 390 × 844 and
+1280 × 800 in light and dark themes. It exercised welcome/demo entry, discovery,
+confirmed RSVP feedback, My Events, event detail, attendee-chat entry and send,
+organization list, event creation, settings/theme changes, account deletion review,
+public landing, public event sharing, and partnership intake. Direct route loads and
+the browser console were checked; that pass found and fixed web theme switching, demo
+chat retention, and an event-card accessibility date label. Synthetic-data screenshots
+are checked into `docs/screenshots/`.
+
+That browser pass is useful web evidence, but it does not verify native rendering,
+touch gestures, keyboards, camera, calendar permissions, notifications, haptics,
+screen readers, signed builds, or physical-device behavior. A release owner must still
+complete and record the applicable matrix before describing the app as store-ready.

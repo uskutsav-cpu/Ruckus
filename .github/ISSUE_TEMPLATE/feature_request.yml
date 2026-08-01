@@ -1,0 +1,20 @@
+name: Feature request
+description: Propose a scoped product improvement.
+title: '[Feature]: '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Student or organizer problem
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome and accessibility alternative
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Privacy, safety, authorization, and abuse considerations
