@@ -3,21 +3,29 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
+  type StyleProp,
   type ViewStyle
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
-type PrimaryButtonProps = {
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+
+export type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: ButtonVariant;
   accessibilityHint?: string;
-  style?: ViewStyle;
+  accessibilityLabel?: string;
+  leadingIcon?: string;
+  haptic?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function PrimaryButton({
@@ -27,6 +35,9 @@ export function PrimaryButton({
   loading = false,
   variant = 'primary',
   accessibilityHint,
+  accessibilityLabel,
+  leadingIcon,
+  haptic = true,
   style
 }: PrimaryButtonProps) {
   const { theme } = useTheme();
@@ -35,71 +46,87 @@ export function PrimaryButton({
     variant === 'danger'
       ? theme.danger
       : variant === 'secondary'
-        ? theme.surfaceMuted
-        : variant === 'ghost'
-          ? 'transparent'
-          : theme.primary;
+        ? theme.surfaceElevated
+        : 'transparent';
   const textColor =
-    isPrimary || variant === 'danger'
-      ? '#FFFFFF'
+    variant === 'danger'
+      ? tokens.color.white
+      : isPrimary
+        ? theme.onPrimary
+        : variant === 'ghost'
+          ? theme.text
+          : theme.text;
+  const borderColor =
+    variant === 'secondary'
+      ? theme.border
       : variant === 'ghost'
-        ? theme.primary
-        : theme.text;
+        ? 'transparent'
+        : background;
+
+  const handlePress = () => {
+    if (haptic) void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
+  };
 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled, busy: loading }}
+      accessibilityState={{ disabled: disabled || loading, busy: loading }}
       disabled={disabled || loading}
-      onPress={onPress}
+      onPress={handlePress}
       style={({ pressed }) => [
         styles.pressable,
-        { opacity: disabled ? 0.45 : pressed ? 0.82 : 1 },
+        {
+          backgroundColor: isPrimary ? theme.primary : background,
+          borderColor,
+          opacity: disabled ? 0.42 : 1,
+          transform: [{ scale: pressed ? 0.99 : 1 }]
+        },
         style
       ]}
     >
-      {isPrimary ? (
-        <LinearGradient
-          colors={[tokens.color.violet, '#5B21B6', tokens.color.coral]}
-          end={{ x: 1, y: 1 }}
-          style={styles.fill}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
+      <View style={styles.fill}>
+        {loading ? (
+          <ActivityIndicator color={textColor} />
+        ) : (
+          <>
+            {leadingIcon ? (
+              <View style={styles.icon}>
+                <AppIcon color={textColor} name={leadingIcon} size={18} />
+              </View>
+            ) : null}
             <Text style={[styles.label, { color: textColor }]}>{label}</Text>
-          )}
-        </LinearGradient>
-      ) : (
-        <Text
-          style={[
-            styles.fill,
-            styles.label,
-            { backgroundColor: background, color: textColor }
-          ]}
-        >
-          {loading ? 'Working…' : label}
-        </Text>
-      )}
+          </>
+        )}
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   pressable: {
-    minHeight: 54,
+    minHeight: tokens.layout.actionHeight,
     overflow: 'hidden',
-    borderRadius: tokens.radius.md
+    borderWidth: 1,
+    borderRadius: tokens.radius.sm
   },
   fill: {
-    minHeight: 54,
+    minHeight: tokens.layout.actionHeight - 2,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    textAlign: 'center',
-    textAlignVertical: 'center',
     paddingHorizontal: tokens.space.lg,
-    paddingVertical: tokens.space.md
+    paddingVertical: 12
   },
-  label: { fontSize: 16, fontWeight: '800', overflow: 'hidden' }
+  icon: {
+    marginRight: tokens.space.sm,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  label: {
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.bold
+  }
 });

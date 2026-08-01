@@ -1,11 +1,25 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { format } from 'date-fns';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { format, isSameDay } from 'date-fns';
+import * as Haptics from 'expo-haptics';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 
+import { AppIcon } from '@/components/ui/app-icon';
 import { AppScreen } from '@/components/ui/app-screen';
+import { BackButton } from '@/components/ui/back-button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { LoadingScreen } from '@/components/ui/loading-screen';
-import { StatePanel } from '@/components/ui/state-panel';
 import type { ChatMessage, OutboxMessage } from '@/features/groups/group-types';
 import { useChat, useGroupLobby } from '@/features/groups/use-groups';
 import { useAuth } from '@/providers/auth-provider';
@@ -16,11 +30,21 @@ function isOutbox(message: ChatMessage | OutboxMessage): message is OutboxMessag
   return 'delivery' in message;
 }
 
+function sendErrorMessage(error: unknown): string | null {
+  if (!error) return null;
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.toLowerCase().includes('rate')) {
+    return 'You’re sending too quickly. Pause for a moment, then retry.';
+  }
+  return 'That message didn’t send. Tap its failed status to retry.';
+}
+
 export default function GroupChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const groupId = Array.isArray(id) ? id[0] : id;
   const { user } = useAuth();
   const { theme } = useTheme();
+  const network = useNetInfo();
   const lobby = useGroupLobby(groupId ?? '');
   const chat = useChat(groupId ?? '');
   const [draft, setDraft] = useState('');
@@ -33,13 +57,13 @@ export default function GroupChatScreen() {
   );
 
   if (chat.isLoading || lobby.isLoading) return <LoadingScreen label="Joining chat…" />;
-  if (!groupId || chat.isError || lobby.isError) {
+  if (!groupId || chat.isError || lobby.isError || !lobby.data) {
     return (
       <AppScreen>
-        <StatePanel
-          icon="💬"
-          title="Chat unavailable"
-          message="Only active crew members can open this private chat."
+        <ErrorState
+          icon="×"
+          title="Private chat unavailable"
+          message="Only active group members can open this conversation. Your previous messages remain protected."
           actionLabel="Back to groups"
           onAction={() => router.replace('/groups')}
         />
@@ -47,8 +71,13 @@ export default function GroupChatScreen() {
     );
   }
 
+  const online = network.isConnected !== false;
+  const canSend = Boolean(draft.trim() && online && !chat.isSending);
+  const mutationMessage = sendErrorMessage(chat.sendError);
+
   const send = () => {
-    if (!draft.trim()) return;
+    if (!canSend) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     chat.send(draft);
     setDraft('');
   };
@@ -56,188 +85,339 @@ export default function GroupChatScreen() {
   return (
     <AppScreen
       scroll={false}
-      eyebrow="Private crew chat"
-      title={lobby.data?.title ?? 'Group chat'}
-      subtitle="Long-press a message to report it. Your report is never posted to the chat."
+      contentStyle={styles.screen}
       footer={
-        <View style={styles.composer}>
-          <TextInput
-            accessibilityLabel="Message"
-            value={draft}
-            onChangeText={setDraft}
-            onSubmitEditing={send}
-            placeholder="Message your crew"
-            placeholderTextColor={theme.textMuted}
-            maxLength={1000}
-            multiline
-            style={[
-              styles.input,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-                color: theme.text
+        <View>
+          {mutationMessage ? (
+            <InlineNotice tone="error" icon="!" message={mutationMessage} />
+          ) : null}
+          <View style={styles.composer}>
+            <TextInput
+              accessibilityLabel="Message your group"
+              accessibilityHint={
+                online
+                  ? 'Messages are visible only to active group members'
+                  : 'Reconnect before sending'
               }
-            ]}
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Send message"
-            disabled={!draft.trim()}
-            onPress={send}
-            style={[
-              styles.send,
-              {
-                backgroundColor: theme.primary,
-                opacity: draft.trim() ? 1 : 0.4
-              }
-            ]}
-          >
-            <Text style={styles.sendText}>↑</Text>
-          </Pressable>
+              value={draft}
+              onChangeText={setDraft}
+              onSubmitEditing={send}
+              placeholder={online ? 'Message your group' : 'Reconnect to send'}
+              placeholderTextColor={theme.textSubtle}
+              selectionColor={theme.primary}
+              editable={online}
+              maxLength={1000}
+              multiline
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.surfaceElevated,
+                  borderColor: theme.border,
+                  color: theme.text
+                }
+              ]}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Send message"
+              accessibilityState={{ disabled: !canSend }}
+              disabled={!canSend}
+              onPress={send}
+              style={({ pressed }) => [
+                styles.send,
+                {
+                  backgroundColor: theme.primary,
+                  opacity: canSend ? (pressed ? 0.7 : 1) : 0.36
+                }
+              ]}
+            >
+              {chat.isSending ? (
+                <ActivityIndicator color={theme.onPrimary} />
+              ) : (
+                <AppIcon color={theme.onPrimary} name="forward" size={20} />
+              )}
+            </Pressable>
+          </View>
         </View>
       }
     >
-      <Pressable
-        accessibilityRole="button"
+      <BackButton
+        label="Group lobby"
         onPress={() =>
           router.replace({ pathname: '/group/[id]', params: { id: groupId } })
         }
-        style={[styles.back, { backgroundColor: theme.surfaceMuted }]}
-      >
-        <Text style={[styles.backText, { color: theme.text }]}>← Lobby</Text>
-      </Pressable>
+      />
+
+      <View style={[styles.context, { borderBottomColor: theme.border }]}>
+        <Text numberOfLines={2} style={[styles.title, { color: theme.text }]}>
+          {lobby.data.title}
+        </Text>
+        <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+          Private group chat · {lobby.data.members.length} members
+        </Text>
+      </View>
+
+      {!online ? (
+        <InlineNotice
+          icon="↯"
+          tone="offline"
+          message="Offline — saved messages remain visible, but sending and loading older messages are paused."
+        />
+      ) : (
+        <InlineNotice
+          icon="!"
+          message="Long-press someone else’s message to report it privately."
+        />
+      )}
+
       <FlatList
+        accessibilityRole="list"
         inverted
         data={chat.data}
         keyExtractor={(message) => message.id}
+        keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
+        onEndReachedThreshold={0.35}
         onEndReached={() => {
-          if (chat.hasNextPage && !chat.isFetchingNextPage) {
+          if (online && chat.hasNextPage && !chat.isFetchingNextPage) {
             void chat.fetchNextPage();
           }
         }}
-        renderItem={({ item }) => {
+        ListFooterComponent={
+          chat.isFetchingNextPage ? (
+            <View style={styles.loadingOlder}>
+              <ActivityIndicator color={theme.accent} />
+              <Text style={[styles.loadingOlderText, { color: theme.textMuted }]}>
+                Loading earlier messages…
+              </Text>
+            </View>
+          ) : null
+        }
+        ListEmptyComponent={
+          <EmptyState
+            icon="chat"
+            title="No messages yet"
+            message="Say hello or coordinate what to bring."
+          />
+        }
+        renderItem={({ item, index }) => {
+          const nextMessage = chat.data[index + 1];
+          const showDate =
+            !nextMessage ||
+            !isSameDay(new Date(item.createdAt), new Date(nextMessage.createdAt));
+
           if (item.kind === 'system') {
             return (
-              <View style={[styles.system, { backgroundColor: theme.surfaceMuted }]}>
-                <Text style={[styles.systemText, { color: theme.textMuted }]}>
-                  {item.body}
-                </Text>
+              <View>
+                <View style={[styles.system, { backgroundColor: theme.surfaceMuted }]}>
+                  <View style={styles.systemMark}>
+                    <AppIcon color={theme.textMuted} name="info" size={15} />
+                  </View>
+                  <Text style={[styles.systemText, { color: theme.textMuted }]}>
+                    {item.body}
+                  </Text>
+                </View>
+                {showDate ? (
+                  <Text style={[styles.dateDivider, { color: theme.textSubtle }]}>
+                    {format(new Date(item.createdAt), 'EEEE, MMM d')}
+                  </Text>
+                ) : null}
               </View>
             );
           }
+
           const mine = item.senderId === user?.id;
           const pending = isOutbox(item);
           return (
-            <Pressable
-              accessibilityRole="text"
-              accessibilityHint={mine ? undefined : 'Long-press to report this message'}
-              onLongPress={
-                mine
-                  ? undefined
-                  : () =>
-                      router.push({
-                        pathname: '/report',
-                        params: {
-                          messageId: item.id,
-                          groupId,
-                          ...(item.senderId ? { userId: item.senderId } : {})
-                        }
-                      })
-              }
-              style={[styles.messageRow, mine ? styles.mineRow : styles.theirRow]}
-            >
-              {!mine ? (
-                <Text style={[styles.sender, { color: theme.primary }]}>
-                  {item.senderId ? (memberNames.get(item.senderId) ?? 'Crew member') : ''}
+            <View>
+              <Pressable
+                accessibilityRole="text"
+                accessibilityLabel={`${mine ? 'You' : item.senderId ? (memberNames.get(item.senderId) ?? 'Group member') : 'Group member'} said ${item.body}. ${format(new Date(item.createdAt), 'h:mm a')}`}
+                accessibilityHint={
+                  mine ? undefined : 'Long-press to report this message privately'
+                }
+                onLongPress={
+                  mine
+                    ? undefined
+                    : () =>
+                        router.push({
+                          pathname: '/report',
+                          params: {
+                            messageId: item.id,
+                            groupId,
+                            ...(item.senderId ? { userId: item.senderId } : {})
+                          }
+                        })
+                }
+                style={[styles.messageRow, mine ? styles.mineRow : styles.theirRow]}
+              >
+                {!mine ? (
+                  <View style={styles.senderRow}>
+                    <Text style={[styles.sender, { color: theme.textMuted }]}>
+                      {item.senderId
+                        ? (memberNames.get(item.senderId) ?? 'Group member')
+                        : 'Group member'}
+                    </Text>
+                  </View>
+                ) : null}
+                <View
+                  style={[
+                    styles.bubble,
+                    mine ? styles.mineBubble : styles.theirBubble,
+                    {
+                      backgroundColor: mine ? theme.primary : theme.surfaceElevated,
+                      borderColor: mine ? theme.primary : theme.border
+                    }
+                  ]}
+                >
+                  <Text
+                    style={[styles.body, { color: mine ? theme.onPrimary : theme.text }]}
+                  >
+                    {item.body}
+                  </Text>
+                </View>
+                <View style={styles.metadata}>
+                  <Text style={[styles.time, { color: theme.textSubtle }]}>
+                    {format(new Date(item.createdAt), 'h:mm a')}
+                  </Text>
+                  {pending ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        item.delivery === 'failed'
+                          ? 'Message failed. Retry'
+                          : 'Message sending'
+                      }
+                      disabled={item.delivery === 'sending' || !online}
+                      onPress={() => chat.retry(item)}
+                      hitSlop={8}
+                    >
+                      <Text
+                        style={[
+                          styles.delivery,
+                          {
+                            color:
+                              item.delivery === 'failed' ? theme.danger : theme.textMuted
+                          }
+                        ]}
+                      >
+                        {item.delivery === 'failed'
+                          ? online
+                            ? 'Failed · tap to retry'
+                            : 'Failed · reconnect to retry'
+                          : 'Sending…'}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              </Pressable>
+              {showDate ? (
+                <Text style={[styles.dateDivider, { color: theme.textSubtle }]}>
+                  {format(new Date(item.createdAt), 'EEEE, MMM d')}
                 </Text>
               ) : null}
-              <View
-                style={[
-                  styles.bubble,
-                  {
-                    backgroundColor: mine ? theme.primary : theme.surface,
-                    borderColor: mine ? theme.primary : theme.border
-                  }
-                ]}
-              >
-                <Text style={[styles.body, { color: mine ? '#FFFFFF' : theme.text }]}>
-                  {item.body}
-                </Text>
-              </View>
-              <View style={styles.metadata}>
-                <Text style={[styles.time, { color: theme.textMuted }]}>
-                  {format(new Date(item.createdAt), 'h:mm a')}
-                </Text>
-                {pending ? (
-                  <Pressable
-                    disabled={item.delivery === 'sending'}
-                    onPress={() => chat.retry(item)}
-                  >
-                    <Text
-                      style={[
-                        styles.delivery,
-                        {
-                          color:
-                            item.delivery === 'failed' ? theme.danger : theme.textMuted
-                        }
-                      ]}
-                    >
-                      {item.delivery === 'failed' ? 'Failed · tap to retry' : 'Sending…'}
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
-            </Pressable>
+            </View>
           );
         }}
-        ListEmptyComponent={
-          <StatePanel
-            icon="👋"
-            title="Start the crew chat"
-            message="Coordinate what to bring or say hello. Keep all plans at the revealed public venue."
-          />
-        }
       />
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  back: {
-    minHeight: tokens.touchTarget,
-    alignSelf: 'flex-start',
-    justifyContent: 'center',
-    borderRadius: tokens.radius.md,
-    paddingHorizontal: tokens.space.md,
-    marginBottom: tokens.space.sm
+  screen: { paddingBottom: 0 },
+  context: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingBottom: tokens.space.md,
+    marginBottom: tokens.space.md
   },
-  backText: { fontSize: 14, fontWeight: '800' },
+  title: {
+    fontSize: tokens.type.heading,
+    lineHeight: tokens.lineHeight.heading,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.3
+  },
+  subtitle: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption,
+    fontWeight: tokens.weight.medium
+  },
   list: { flexGrow: 1, paddingVertical: tokens.space.sm },
+  loadingOlder: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: tokens.space.md
+  },
+  loadingOlderText: {
+    marginLeft: tokens.space.sm,
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
+  },
   system: {
+    maxWidth: '92%',
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'center',
-    maxWidth: '86%',
-    borderRadius: tokens.radius.pill,
+    borderRadius: tokens.radius.md,
     paddingHorizontal: tokens.space.md,
     paddingVertical: tokens.space.sm,
     marginVertical: tokens.space.sm
   },
-  systemText: { fontSize: 12, lineHeight: 17, fontWeight: '700', textAlign: 'center' },
-  messageRow: { maxWidth: '82%', marginVertical: 5 },
+  systemMark: { marginRight: tokens.space.sm },
+  systemText: {
+    flex: 1,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption,
+    fontWeight: tokens.weight.regular
+  },
+  dateDivider: {
+    alignSelf: 'center',
+    marginVertical: tokens.space.md,
+    fontSize: tokens.type.micro,
+    fontWeight: tokens.weight.medium
+  },
+  messageRow: { maxWidth: '84%', marginVertical: 6 },
   mineRow: { alignSelf: 'flex-end', alignItems: 'flex-end' },
   theirRow: { alignSelf: 'flex-start', alignItems: 'flex-start' },
-  sender: { marginLeft: 8, marginBottom: 3, fontSize: 11, fontWeight: '900' },
+  senderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 5 },
+  sender: {
+    fontSize: tokens.type.micro,
+    fontWeight: tokens.weight.medium
+  },
   bubble: {
     borderWidth: 1,
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 10
+    paddingHorizontal: 15,
+    paddingVertical: 11
   },
-  body: { fontSize: 15, lineHeight: 21 },
-  metadata: { flexDirection: 'row', gap: tokens.space.sm, marginTop: 3 },
-  time: { fontSize: 10, fontWeight: '700' },
-  delivery: { fontSize: 10, fontWeight: '800' },
+  mineBubble: {
+    borderTopLeftRadius: tokens.radius.md,
+    borderTopRightRadius: tokens.radius.xs,
+    borderBottomRightRadius: tokens.radius.md,
+    borderBottomLeftRadius: tokens.radius.md
+  },
+  theirBubble: {
+    borderTopLeftRadius: tokens.radius.xs,
+    borderTopRightRadius: tokens.radius.md,
+    borderBottomRightRadius: tokens.radius.md,
+    borderBottomLeftRadius: tokens.radius.md
+  },
+  body: {
+    fontSize: tokens.type.label,
+    lineHeight: 21,
+    fontWeight: tokens.weight.regular
+  },
+  metadata: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.space.sm,
+    marginTop: 4
+  },
+  time: { fontSize: 10, fontWeight: tokens.weight.medium },
+  delivery: { fontSize: 10, fontWeight: tokens.weight.bold },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -248,17 +428,17 @@ const styles = StyleSheet.create({
     maxHeight: 120,
     flex: 1,
     borderWidth: 1,
-    borderRadius: 18,
+    borderRadius: tokens.radius.sm,
     paddingHorizontal: tokens.space.md,
     paddingVertical: 12,
-    fontSize: 15
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.regular
   },
   send: {
     width: 48,
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18
-  },
-  sendText: { color: '#FFFFFF', fontSize: 25, fontWeight: '900' }
+    borderRadius: tokens.radius.sm
+  }
 });

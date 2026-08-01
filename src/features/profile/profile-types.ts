@@ -1,4 +1,4 @@
-import type { XpReason } from '@/types/database.generated';
+import type { XpReason } from '@/types/database';
 
 export type XpEntry = {
   id: string;
@@ -10,8 +10,16 @@ export type XpEntry = {
 export type ProfileDashboard = {
   xpTotal: number;
   avatarUrl: string | null;
+  campusName: string;
   xpEntries: XpEntry[];
   selectedInterestIds: string[];
+  badges: {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    awardedAt: string;
+  }[];
 };
 
 export type LeaderboardPeriod = 'week' | 'month' | 'all';

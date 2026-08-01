@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { BackButton } from '@/components/ui/back-button';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { SecondaryButton } from '@/components/ui/secondary-button';
 import { TextField } from '@/components/ui/text-field';
 import { onboardingSchema } from '@/features/auth/auth-schema';
 import { uploadAvatar } from '@/features/profile/profile-service';
@@ -88,9 +92,9 @@ export default function EditProfileScreen() {
 
   return (
     <AppScreen
-      eyebrow="Player card"
+      eyebrow="Account"
       title="Edit profile"
-      subtitle="Your display name, photo, bio, year, and interests appear only in the group contexts that require them."
+      subtitle="Update the details shared with your activity groups."
       footer={
         <View style={styles.footer}>
           <PrimaryButton
@@ -108,14 +112,41 @@ export default function EditProfileScreen() {
         </View>
       }
     >
-      <PrimaryButton
-        label={photo ? 'Photo selected ✓' : 'Choose optional photo'}
-        variant="secondary"
+      <BackButton label="Your profile" onPress={() => router.back()} />
+      <View
+        style={[
+          styles.photoCard,
+          { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
+        ]}
+      >
+        {photo?.uri || dashboard.data?.avatarUrl ? (
+          <Image
+            source={{ uri: photo?.uri ?? dashboard.data?.avatarUrl ?? '' }}
+            accessibilityLabel="Selected profile image"
+            contentFit="cover"
+            style={styles.avatar}
+          />
+        ) : (
+          <View style={[styles.avatar, { backgroundColor: theme.accentMuted }]}>
+            <Text style={[styles.initial, { color: theme.text }]}>
+              {(displayName || 'R').slice(0, 1).toUpperCase()}
+            </Text>
+          </View>
+        )}
+        <View style={styles.photoCopy}>
+          <Text style={[styles.photoTitle, { color: theme.text }]}>Profile photo</Text>
+          <Text style={[styles.photoHelp, { color: theme.textMuted }]}>
+            Square JPG or PNG, up to 5 MB.
+            {isDemo ? ' Demo selections stay on this device.' : ''}
+          </Text>
+        </View>
+      </View>
+      <SecondaryButton
+        label={photo ? 'Choose a different photo' : 'Choose photo'}
+        leadingIcon="camera"
         onPress={() => void pickPhoto()}
+        style={styles.photoButton}
       />
-      <Text style={[styles.photoHelp, { color: theme.textMuted }]}>
-        Square JPG or PNG, up to 5 MB. Stored in your private campus avatar folder.
-      </Text>
       <TextField
         label="Display name"
         value={displayName}
@@ -159,27 +190,58 @@ export default function EditProfileScreen() {
                 }
               ]}
             >
-              <Text style={styles.chipEmoji}>{interest.emoji}</Text>
-              <Text style={[styles.chipText, { color: active ? '#FFFFFF' : theme.text }]}>
+              <Text
+                style={[
+                  styles.chipText,
+                  { color: active ? theme.onPrimary : theme.text }
+                ]}
+              >
                 {interest.name}
               </Text>
             </Pressable>
           );
         })}
       </View>
-      {error ? (
-        <Text accessibilityRole="alert" style={[styles.error, { color: theme.danger }]}>
-          {error}
-        </Text>
-      ) : null}
+      {error ? <InlineNotice tone="error" icon="!" message={error} /> : null}
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  photoHelp: { marginTop: 7, marginBottom: tokens.space.md, fontSize: 11 },
+  photoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md
+  },
+  avatar: {
+    width: 82,
+    height: 82,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderRadius: tokens.radius.md
+  },
+  initial: { fontSize: 34, fontWeight: tokens.weight.bold },
+  photoCopy: { flex: 1, marginLeft: tokens.space.md },
+  photoTitle: {
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.bold
+  },
+  photoHelp: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.micro,
+    lineHeight: 15,
+    fontWeight: tokens.weight.medium
+  },
+  photoButton: { marginTop: tokens.space.sm, marginBottom: tokens.space.lg },
   bio: { minHeight: 120, paddingTop: tokens.space.md, textAlignVertical: 'top' },
-  sectionTitle: { marginTop: tokens.space.lg, fontSize: 17, fontWeight: '900' },
+  sectionTitle: {
+    marginTop: tokens.space.lg,
+    fontSize: 17,
+    fontWeight: tokens.weight.bold
+  },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -191,12 +253,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: tokens.radius.pill,
+    borderRadius: tokens.radius.sm,
     paddingHorizontal: 13
   },
-  chipEmoji: { marginRight: 6, fontSize: 18 },
-  chipText: { fontSize: 13, fontWeight: '800' },
-  error: { marginTop: tokens.space.md, fontSize: 13, lineHeight: 19 },
+  chipText: { fontSize: 13, fontWeight: tokens.weight.bold },
   footer: { flexDirection: 'row', gap: tokens.space.sm },
   footerButton: { flex: 1 }
 });

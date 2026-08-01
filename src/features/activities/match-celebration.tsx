@@ -1,104 +1,167 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
+import { formatDistanceToNowStrict } from 'date-fns';
 import Animated, {
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
-  withDelay,
-  withSpring,
   withTiming
 } from 'react-native-reanimated';
 
+import { AppIcon } from '@/components/ui/app-icon';
+import { PrimaryButton } from '@/components/ui/primary-button';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
 type MatchCelebrationProps = {
   visible: boolean;
   onClose: () => void;
+  activityTitle?: string | undefined;
+  memberCount?: number | undefined;
+  confirmationDeadline?: string | undefined;
 };
 
-export function MatchCelebration({ visible, onClose }: MatchCelebrationProps) {
+export function MatchCelebration({
+  visible,
+  onClose,
+  activityTitle,
+  memberCount,
+  confirmationDeadline
+}: MatchCelebrationProps) {
   const { theme } = useTheme();
-  const scale = useSharedValue(0.5);
+  const reduceMotion = useReducedMotion();
   const opacity = useSharedValue(0);
+  const rise = useSharedValue(reduceMotion ? 0 : 12);
 
   useEffect(() => {
-    if (visible) {
-      opacity.value = withTiming(1, { duration: 180 });
-      scale.value = withDelay(80, withSpring(1, { damping: 10, stiffness: 150 }));
-    } else {
-      opacity.value = 0;
-      scale.value = 0.5;
-    }
-  }, [opacity, scale, visible]);
+    opacity.value = withTiming(visible ? 1 : 0, {
+      duration: reduceMotion ? tokens.motion.instant : tokens.motion.quick
+    });
+    rise.value = withTiming(visible ? 0 : 12, {
+      duration: reduceMotion ? tokens.motion.instant : tokens.motion.standard
+    });
+  }, [opacity, reduceMotion, rise, visible]);
 
-  const style = useAnimatedStyle(() => ({
+  const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ scale: scale.value }]
+    transform: [{ translateY: rise.value }]
   }));
-
-  if (!visible) return null;
+  const deadlineDate = confirmationDeadline ? new Date(confirmationDeadline) : undefined;
+  const deadline =
+    deadlineDate && !Number.isNaN(deadlineDate.getTime())
+      ? `Confirm ${formatDistanceToNowStrict(deadlineDate, { addSuffix: true })}`
+      : 'Confirm to hold your place';
 
   return (
-    <View style={styles.backdrop} accessibilityViewIsModal>
-      <Animated.View style={[styles.modal, { backgroundColor: theme.surface }, style]}>
-        <Text style={styles.icon}>🎉</Text>
-        <Text style={[styles.title, { color: theme.text }]}>Crew assembled!</Text>
-        <Text style={[styles.copy, { color: theme.textMuted }]}>
-          A group hit the minimum. Confirm before the countdown ends to unlock your public
-          meeting spot.
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onClose}
-          style={[styles.button, { backgroundColor: theme.primary }]}
+    <Modal
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+      transparent
+      visible={visible}
+    >
+      <View
+        accessibilityViewIsModal
+        accessibilityLabel="Group ready"
+        style={[styles.backdrop, { backgroundColor: theme.overlay }]}
+      >
+        <Animated.View
+          style={[
+            styles.modal,
+            {
+              backgroundColor: theme.surfaceElevated,
+              borderColor: theme.border
+            },
+            animatedStyle
+          ]}
         >
-          <Text style={styles.buttonText}>View my crew</Text>
-        </Pressable>
-      </Animated.View>
-    </View>
+          <View style={[styles.icon, { backgroundColor: theme.accentMuted }]}>
+            <AppIcon color={theme.primary} name="check" size={26} />
+          </View>
+          <Text style={[styles.title, { color: theme.text }]}>Your group is ready.</Text>
+          <Text style={[styles.activity, { color: theme.text }]}>
+            {activityTitle ?? 'Your activity'}
+          </Text>
+          <Text style={[styles.copy, { color: theme.textMuted }]}>
+            Confirm attendance to hold your place and see the approved meeting venue.
+          </Text>
+          {typeof memberCount === 'number' ? (
+            <Text style={[styles.memberCount, { color: theme.textMuted }]}>
+              {memberCount} {memberCount === 1 ? 'member' : 'members'} joined
+            </Text>
+          ) : null}
+          <View style={[styles.deadline, { borderColor: theme.border }]}>
+            <AppIcon color={theme.textMuted} name="clock" size={17} />
+            <Text style={[styles.deadlineText, { color: theme.text }]}>{deadline}</Text>
+          </View>
+          <PrimaryButton
+            label="View group"
+            leadingIcon="forward"
+            onPress={onClose}
+            style={styles.button}
+          />
+        </Animated.View>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    zIndex: 100,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.space.lg,
-    backgroundColor: 'rgba(9,14,26,0.82)'
+    padding: tokens.layout.screenPadding
   },
   modal: {
     width: '100%',
-    maxWidth: 380,
+    maxWidth: 390,
     alignItems: 'center',
-    borderRadius: 28,
+    borderWidth: 1,
+    borderRadius: tokens.radius.lg,
     padding: tokens.space.xl
   },
-  icon: { fontSize: 64 },
+  icon: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.md
+  },
   title: {
-    marginTop: tokens.space.md,
+    marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
-    fontWeight: '900',
+    lineHeight: tokens.lineHeight.title,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.7,
+    textAlign: 'center'
+  },
+  activity: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   copy: {
-    marginTop: tokens.space.sm,
-    fontSize: 15,
+    marginTop: tokens.space.md,
+    fontSize: tokens.type.label,
     lineHeight: 22,
     textAlign: 'center'
   },
-  button: {
-    minHeight: 52,
+  memberCount: {
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.caption
+  },
+  deadline: {
     width: '100%',
+    minHeight: 48,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: tokens.radius.md,
+    gap: tokens.space.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
     marginTop: tokens.space.lg
   },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' }
+  deadlineText: { fontSize: tokens.type.caption, fontWeight: tokens.weight.medium },
+  button: { width: '100%', marginTop: tokens.space.md }
 });

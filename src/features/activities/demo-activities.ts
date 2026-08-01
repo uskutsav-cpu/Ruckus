@@ -20,7 +20,9 @@ function activity(
   startsAt: Date,
   durationMinutes: number,
   imageSource: number,
-  colors: readonly [string, string]
+  colors: readonly [string, string],
+  campusArea: string,
+  interestedCount: number
 ): Activity {
   const endsAt = new Date(startsAt.getTime() + durationMinutes * 60_000);
   const swipeClosesAt = new Date(startsAt.getTime() - 2 * 60 * 60_000);
@@ -38,7 +40,9 @@ function activity(
     gradientStart: colors[0],
     gradientEnd: colors[1],
     imagePath: null,
-    imageSource
+    imageSource,
+    campusArea,
+    interestedCount
   };
 }
 
@@ -56,7 +60,9 @@ export const demoActivities: Activity[] = [
     dateAfter(0, 18),
     90,
     trailImage,
-    ['#F97316', '#7C3AED']
+    ['#F97316', '#7C3AED'],
+    'Riverside trail',
+    2
   ),
   activity(
     '40000000-0000-4000-8000-000000000002',
@@ -67,7 +73,9 @@ export const demoActivities: Activity[] = [
     dateAfter(1, 19),
     120,
     tacoImage,
-    ['#EF4444', '#FBBF24']
+    ['#EF4444', '#FBBF24'],
+    'West Campus',
+    3
   ),
   activity(
     '40000000-0000-4000-8000-000000000003',
@@ -78,18 +86,22 @@ export const demoActivities: Activity[] = [
     dateAfter(2, 20),
     120,
     bowlingImage,
-    ['#0EA5E9', '#EC4899']
+    ['#0EA5E9', '#EC4899'],
+    'Student Union',
+    1
   ),
   activity(
     '40000000-0000-4000-8000-000000000004',
     '30000000-0000-4000-8000-000000000004',
     'Paint & Playlist',
-    'Make a mini canvas while the crew builds the night’s shared playlist.',
+    'Make a mini canvas while the group builds the night’s shared playlist.',
     'Arts',
     dateAfter(3, 18),
     90,
     tacoImage,
-    ['#8B5CF6', '#22D3EE']
+    ['#8B5CF6', '#22D3EE'],
+    'Arts District',
+    2
   ),
   activity(
     '40000000-0000-4000-8000-000000000005',
@@ -100,7 +112,9 @@ export const demoActivities: Activity[] = [
     dateAfter(4, 17),
     90,
     trailImage,
-    ['#14B8A6', '#F59E0B']
+    ['#14B8A6', '#F59E0B'],
+    'Rec fields',
+    3
   ),
   activity(
     '40000000-0000-4000-8000-000000000006',
@@ -111,7 +125,9 @@ export const demoActivities: Activity[] = [
     dateAfter(5, 20),
     120,
     bowlingImage,
-    ['#DB2777', '#4F46E5']
+    ['#DB2777', '#4F46E5'],
+    'Campus core',
+    1
   )
 ];
 

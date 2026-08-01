@@ -3,7 +3,7 @@ import type {
   LeaderboardPeriod,
   ProfileDashboard
 } from '@/features/profile/profile-types';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 
 const demoLeaderboard: LeaderboardEntry[] = [
   {
@@ -42,6 +42,7 @@ const demoLeaderboard: LeaderboardEntry[] = [
 
 export async function fetchProfileDashboard(
   userId: string,
+  campusId: string,
   avatarPath: string | null,
   isDemo: boolean
 ): Promise<ProfileDashboard> {
@@ -49,7 +50,17 @@ export async function fetchProfileDashboard(
     return {
       xpTotal: 260,
       avatarUrl: null,
+      campusName: 'Riverside University',
       selectedInterestIds: [],
+      badges: [
+        {
+          id: 'first_checkin',
+          name: 'First check-in',
+          description: 'Completed a first verified Ruckus event check-in.',
+          icon: 'check',
+          awardedAt: new Date(Date.now() - 2 * 24 * 60 * 60_000).toISOString()
+        }
+      ],
       xpEntries: [
         {
           id: 'b0000000-0000-4000-8000-000000000001',
@@ -67,10 +78,13 @@ export async function fetchProfileDashboard(
     };
   }
 
+  const supabase = requireSupabase();
   const [
     { data: xpTotal, error: totalError },
     { data: ledger, error: ledgerError },
-    { data: interests, error: interestError }
+    { data: interests, error: interestError },
+    { data: campus, error: campusError },
+    { data: badges, error: badgeError }
   ] = await Promise.all([
     supabase.rpc('get_xp_total'),
     supabase
@@ -78,11 +92,19 @@ export async function fetchProfileDashboard(
       .select('id, amount, reason, created_at')
       .order('created_at', { ascending: false })
       .limit(20),
-    supabase.from('profile_interests').select('interest_id').eq('profile_id', userId)
+    supabase.from('profile_interests').select('interest_id').eq('profile_id', userId),
+    supabase.from('campuses').select('name').eq('id', campusId).single(),
+    supabase
+      .from('user_badges')
+      .select('badge_id,awarded_at,badge_definitions!inner(name,description,icon)')
+      .eq('profile_id', userId)
+      .order('awarded_at', { ascending: false })
   ]);
   if (totalError) throw totalError;
   if (ledgerError) throw ledgerError;
   if (interestError) throw interestError;
+  if (campusError) throw campusError;
+  if (badgeError) throw badgeError;
 
   let avatarUrl: string | null = null;
   if (avatarPath) {
@@ -95,7 +117,15 @@ export async function fetchProfileDashboard(
   return {
     xpTotal: Number(xpTotal ?? 0),
     avatarUrl,
+    campusName: campus.name,
     selectedInterestIds: (interests ?? []).map((row) => row.interest_id),
+    badges: (badges ?? []).map((badge) => ({
+      id: badge.badge_id,
+      name: badge.badge_definitions.name,
+      description: badge.badge_definitions.description,
+      icon: badge.badge_definitions.icon,
+      awardedAt: badge.awarded_at
+    })),
     xpEntries: (ledger ?? []).map((entry) => ({
       id: entry.id,
       amount: entry.amount,
@@ -116,6 +146,7 @@ export async function fetchLeaderboard(
       xp: entry.xp * multiplier
     }));
   }
+  const supabase = requireSupabase();
   const { data, error } = await supabase.rpc('get_leaderboard', { period });
   if (error) throw error;
   return (data ?? []).map((entry) => ({
@@ -133,6 +164,7 @@ export async function uploadAvatar(input: {
   uri: string;
   mimeType: string;
 }): Promise<string> {
+  const supabase = requireSupabase();
   const extension = input.mimeType === 'image/png' ? 'png' : 'jpg';
   const path = `${input.userId}/avatar-${Date.now()}.${extension}`;
   const response = await fetch(input.uri);
@@ -164,6 +196,7 @@ export async function submitRating(
   isDemo: boolean
 ): Promise<void> {
   if (isDemo) return;
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('submit_event_rating', {
     target_session_id: sessionId,
     rating_value: rating,

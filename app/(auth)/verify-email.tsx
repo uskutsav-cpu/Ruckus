@@ -2,8 +2,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { AppScreen } from '@/components/ui/app-screen';
+import { AppIcon } from '@/components/ui/app-icon';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { AuthScaffold } from '@/features/auth/auth-scaffold';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
@@ -20,59 +22,65 @@ export default function VerifyEmailScreen() {
     setLoading(true);
     const result = await resendVerification(email);
     setLoading(false);
-    setMessage(result.error ?? 'Fresh link sent. Check your inbox.');
+    setMessage(result.error ?? 'A new link is on the way.');
   };
 
   return (
-    <AppScreen
-      eyebrow="One quick check"
-      title="Verify your campus email"
-      subtitle={`We sent a link to ${email || 'your university inbox'}. Open it on this device to continue.`}
+    <AuthScaffold
+      eyebrow="Check your email"
+      title="Verify your university email."
+      subtitle={`We sent a secure link to ${email || 'your university email'}.`}
     >
-      <View style={[styles.mail, { backgroundColor: theme.surfaceMuted }]}>
-        <Text style={styles.icon}>📬</Text>
-        <Text style={[styles.copy, { color: theme.text }]}>
-          Email-domain verification confirms access to that inbox. It is not proof of
-          identity.
-        </Text>
+      <View style={[styles.mail, { backgroundColor: theme.accentMuted }]}>
+        <View style={[styles.iconWrap, { backgroundColor: theme.surfaceElevated }]}>
+          <AppIcon color={theme.primary} name="forward" size={22} />
+        </View>
+        <View style={styles.mailCopy}>
+          <Text style={[styles.mailTitle, { color: theme.text }]}>
+            Open the link on this device
+          </Text>
+          <Text style={[styles.copy, { color: theme.textMuted }]}>
+            This confirms access to your university inbox, not your identity.
+          </Text>
+        </View>
       </View>
-      {message ? (
-        <Text
-          accessibilityRole="alert"
-          style={[styles.message, { color: theme.textMuted }]}
-        >
-          {message}
-        </Text>
-      ) : null}
+      {message ? <InlineNotice icon="✓" message={message} /> : null}
       <PrimaryButton
         label="Resend verification"
         loading={loading}
         onPress={() => void resend()}
       />
       <PrimaryButton
-        label="I’ve verified—sign in"
+        label="Continue to sign in"
         onPress={() => router.replace('/sign-in')}
         variant="ghost"
-        style={{ marginTop: 8 }}
+        style={styles.signInButton}
       />
-    </AppScreen>
+    </AuthScaffold>
   );
 }
 
 const styles = StyleSheet.create({
   mail: {
-    alignItems: 'center',
-    borderRadius: tokens.radius.lg,
-    padding: tokens.space.lg,
+    flexDirection: 'row',
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md,
     marginBottom: tokens.space.lg
   },
-  icon: { fontSize: 54 },
-  copy: {
-    marginTop: tokens.space.md,
-    fontSize: 15,
-    lineHeight: 22,
-    fontWeight: '600',
-    textAlign: 'center'
+  iconWrap: {
+    width: 46,
+    height: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.sm
   },
-  message: { marginBottom: tokens.space.md, textAlign: 'center' }
+  mailCopy: { flex: 1, marginLeft: tokens.space.md },
+  mailTitle: { fontSize: 15, fontWeight: tokens.weight.bold },
+  copy: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption,
+    fontWeight: tokens.weight.regular
+  },
+  signInButton: { marginTop: tokens.space.sm }
 });

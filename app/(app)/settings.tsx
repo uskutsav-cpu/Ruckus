@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { ActionRow } from '@/components/ui/action-row';
 import { AppScreen } from '@/components/ui/app-screen';
+import { BackButton } from '@/components/ui/back-button';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import {
   defaultNotificationPreferences,
   readNotificationPreferences,
   saveNotificationPreferences,
   type NotificationPreferences
 } from '@/features/settings/preferences';
-import { requestAccountDeletion } from '@/features/safety/safety-service';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
@@ -21,163 +24,222 @@ const themes = [
   { value: 'dark', label: 'Dark' }
 ] as const;
 
+type SaveNotice = { tone: 'info' | 'error'; message: string } | null;
+
 export default function SettingsScreen() {
   const { isDemo, signOut } = useAuth();
   const { preference, setPreference, theme } = useTheme();
   const [notifications, setNotifications] = useState<NotificationPreferences>(
     defaultNotificationPreferences
   );
-  const [deleting, setDeleting] = useState(false);
+  const [notificationsLoading, setNotificationsLoading] = useState(true);
+  const [saveNotice, setSaveNotice] = useState<SaveNotice>(null);
 
   useEffect(() => {
-    void readNotificationPreferences().then(setNotifications);
+    let active = true;
+    void readNotificationPreferences()
+      .then((stored) => {
+        if (active) setNotifications(stored);
+      })
+      .catch(() => {
+        if (active) {
+          setSaveNotice({
+            tone: 'error',
+            message: 'Notification preferences could not be loaded on this device.'
+          });
+        }
+      })
+      .finally(() => {
+        if (active) setNotificationsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const updateNotifications = (next: NotificationPreferences) => {
+  const updateNotifications = async (next: NotificationPreferences) => {
+    const previous = notifications;
     setNotifications(next);
-    void saveNotificationPreferences(next);
+    setSaveNotice({
+      tone: 'info',
+      message: isDemo
+        ? 'Demo preference saved on this device only. No push registration was changed.'
+        : 'Saving notification preferences…'
+    });
+    try {
+      await saveNotificationPreferences(next);
+      setSaveNotice({
+        tone: 'info',
+        message: isDemo
+          ? 'Demo preference saved on this device only. No push registration was changed.'
+          : 'Preferences saved. Push registration will sync securely.'
+      });
+    } catch {
+      setNotifications(previous);
+      setSaveNotice({
+        tone: 'error',
+        message: 'Preferences were not saved. Your previous choices remain active.'
+      });
+    }
   };
 
-  const confirmDeletion = () => {
-    Alert.alert(
-      'Request account deletion?',
-      'You’ll be signed out immediately, removed from waitlists and active groups, and your push tokens will be disabled. After 7 days, the scheduled purge deletes your Auth account and profile-owned data. Contact campus support during that window only if this was a mistake.',
-      [
-        { text: 'Keep account', style: 'cancel' },
-        {
-          text: 'Request deletion',
-          style: 'destructive',
-          onPress: () => {
-            setDeleting(true);
-            void requestAccountDeletion(isDemo)
-              .then(signOut)
-              .catch(() => {
-                setDeleting(false);
-                Alert.alert(
-                  'Deletion request failed',
-                  'Your account was not changed. Check your connection and try again.'
-                );
-              });
-          }
-        }
-      ]
-    );
+  const confirmSignOut = () => {
+    const title = isDemo ? 'Exit demo?' : 'Sign out of Ruckus?';
+    const message = isDemo
+      ? 'This ends the local demo session. No real account is affected.'
+      : 'You can sign in again with your verified university account.';
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${title}\n\n${message}`)) void signOut();
+      return;
+    }
+    Alert.alert(title, message, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: isDemo ? 'Exit demo' : 'Sign out',
+        style: 'destructive',
+        onPress: () => void signOut()
+      }
+    ]);
   };
 
   return (
-    <AppScreen
-      eyebrow="Preferences"
-      title="Settings & safety"
-      subtitle="Control appearance and notification categories, review meetup rules, or manage your account."
-    >
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => router.back()}
-        style={[styles.back, { backgroundColor: theme.surfaceMuted }]}
-      >
-        <Text style={[styles.backText, { color: theme.text }]}>← Profile</Text>
-      </Pressable>
-
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Appearance</Text>
-      <View style={styles.themeRow}>
-        {themes.map((option) => {
-          const active = preference === option.value;
-          return (
-            <Pressable
-              key={option.value}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-              onPress={() => setPreference(option.value)}
-              style={[
-                styles.themeChoice,
-                {
-                  backgroundColor: active ? theme.primary : theme.surfaceMuted,
-                  borderColor: active ? theme.primary : theme.border
-                }
-              ]}
-            >
-              <Text
-                style={[styles.themeText, { color: active ? '#FFFFFF' : theme.text }]}
-              >
-                {option.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Notifications</Text>
-      <SettingSwitch
-        title="Push notifications"
-        description="Group formation, confirmation deadlines, check-in, messages, and event timing."
-        value={notifications.enabled}
-        onChange={(enabled) => updateNotifications({ ...notifications, enabled })}
-      />
-      <SettingSwitch
-        title="Group chat messages"
-        description="Notify when another crew member posts."
-        value={notifications.enabled && notifications.chatMessages}
-        disabled={!notifications.enabled}
-        onChange={(chatMessages) =>
-          updateNotifications({ ...notifications, chatMessages })
-        }
-      />
-      <SettingSwitch
-        title="Activity reminders"
-        description="Confirmation deadline, check-in availability, and event start."
-        value={notifications.enabled && notifications.activityReminders}
-        disabled={!notifications.enabled}
-        onChange={(activityReminders) =>
-          updateNotifications({ ...notifications, activityReminders })
-        }
-      />
-
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Meetup safety</Text>
-      <View
-        style={[
-          styles.safetyCard,
-          { backgroundColor: theme.surface, borderColor: theme.border }
-        ]}
-      >
-        <Text style={[styles.rule, { color: theme.text }]}>
-          • Meet only at the public, staffed venue in the confirmed lobby.
-        </Text>
-        <Text style={[styles.rule, { color: theme.text }]}>
-          • Keep plans in group chat; Campus Clash has no 1:1 DMs.
-        </Text>
-        <Text style={[styles.rule, { color: theme.text }]}>
-          • Leave any situation that feels unsafe and contact emergency or campus safety
-          services.
-        </Text>
-        <Text style={[styles.rule, { color: theme.text }]}>
-          • Long-press a member or message to report privately.
-        </Text>
-      </View>
-      <PrimaryButton
-        label="Open safety center"
-        variant="secondary"
-        onPress={() => router.push('/safety')}
-        style={styles.safetyButton}
-      />
-
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Account</Text>
-      <PrimaryButton
-        label="Sign out"
-        variant="secondary"
-        onPress={() => void signOut()}
-      />
-      <PrimaryButton
-        label="Request account deletion"
-        variant="danger"
-        loading={deleting}
-        onPress={confirmDeletion}
-        style={styles.danger}
-      />
-      <Text style={[styles.deletionNote, { color: theme.textMuted }]}>
-        Deletion is a trusted server workflow. The mobile app cannot delete Auth,
-        attendance, or XP rows directly.
+    <AppScreen>
+      <BackButton label="Profile" onPress={() => router.back()} />
+      <Text style={[styles.heading, { color: theme.text }]}>Settings</Text>
+      <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+        Manage appearance, notifications, safety, and your account.
       </Text>
+      {isDemo ? (
+        <InlineNotice message="Changes in this demo stay on this device." />
+      ) : null}
+
+      <SettingsSection title="Appearance">
+        <SegmentedControl
+          accessibilityLabel="Appearance preference"
+          value={preference}
+          options={themes}
+          onChange={setPreference}
+        />
+        <Text style={[styles.help, { color: theme.textMuted }]}>
+          System follows the light or dark setting on this device.
+        </Text>
+      </SettingsSection>
+
+      <SettingsSection title="Notifications">
+        {notificationsLoading ? (
+          <InlineNotice message="Loading notification preferences…" />
+        ) : (
+          <View style={styles.switches}>
+            <SettingSwitch
+              title="Push notifications"
+              description="Master control for Ruckus activity updates."
+              value={notifications.enabled}
+              onChange={(enabled) =>
+                void updateNotifications({ ...notifications, enabled })
+              }
+            />
+            <SettingSwitch
+              title="Group chat"
+              description="Updates when another group member posts."
+              value={notifications.enabled && notifications.chatMessages}
+              disabled={!notifications.enabled}
+              onChange={(chatMessages) =>
+                void updateNotifications({ ...notifications, chatMessages })
+              }
+            />
+            <SettingSwitch
+              title="Activity timing"
+              description="Confirmation deadlines, check-in availability, and event start."
+              value={notifications.enabled && notifications.activityReminders}
+              disabled={!notifications.enabled}
+              onChange={(activityReminders) =>
+                void updateNotifications({ ...notifications, activityReminders })
+              }
+            />
+          </View>
+        )}
+        {saveNotice ? (
+          <InlineNotice tone={saveNotice.tone} message={saveNotice.message} />
+        ) : null}
+      </SettingsSection>
+
+      <SettingsSection title="Privacy & safety">
+        <View style={styles.rows}>
+          <ActionRow
+            mark="!"
+            title="Safety center"
+            description="Public-meeting guidance, privacy boundaries, and emergency information."
+            tone="danger"
+            onPress={() => router.push('/safety')}
+          />
+          <ActionRow
+            mark="rules"
+            title="Community guidelines"
+            description="Read the conduct rules for groups, chat, and activities."
+            tone="accent"
+            onPress={() => router.push('/safety/guidelines')}
+          />
+          <ActionRow
+            mark="info"
+            title="Privacy, data & referrals"
+            description="Leaderboard visibility, history, referral state, and data export."
+            onPress={() => router.push('/privacy-and-growth')}
+          />
+        </View>
+      </SettingsSection>
+
+      <SettingsSection title="Support & legal">
+        <View style={styles.rows}>
+          <ActionRow
+            mark="help"
+            title="Support"
+            description="Reporting, account, privacy, appeal, and emergency guidance."
+            onPress={() => router.push('/public/support')}
+          />
+          <ActionRow
+            mark="document"
+            title="Terms and privacy drafts"
+            description="Read the clearly labeled beta drafts and legal-review status."
+            status="Draft"
+            onPress={() => router.push('/public/terms')}
+          />
+        </View>
+      </SettingsSection>
+
+      <SettingsSection title="Account">
+        <PrimaryButton
+          label={isDemo ? 'Exit demo' : 'Sign out'}
+          variant="secondary"
+          onPress={confirmSignOut}
+        />
+        <PrimaryButton
+          label="Account deletion"
+          variant="danger"
+          onPress={() => router.push('/account-deletion')}
+          style={styles.danger}
+        />
+        <Text style={[styles.help, { color: theme.textMuted }]}>
+          Deletion uses the trusted seven-day server workflow. The app never deletes
+          authentication, attendance, or XP records directly.
+        </Text>
+      </SettingsSection>
     </AppScreen>
+  );
+}
+
+function SettingsSection({
+  title,
+  children
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  const { theme } = useTheme();
+  return (
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>{title}</Text>
+      {children}
+    </View>
   );
 }
 
@@ -202,7 +264,7 @@ function SettingSwitch({
       style={[
         styles.settingRow,
         {
-          backgroundColor: theme.surface,
+          backgroundColor: theme.surfaceElevated,
           borderColor: theme.border,
           opacity: disabled ? 0.5 : 1
         }
@@ -216,62 +278,61 @@ function SettingSwitch({
       </View>
       <Switch
         accessibilityLabel={title}
+        accessibilityHint={description}
         disabled={disabled}
         value={value}
         onValueChange={onChange}
-        trackColor={{ true: theme.primary }}
+        trackColor={{ false: theme.surfaceStrong, true: theme.accent }}
+        thumbColor={value ? tokens.color.white : theme.surfaceElevated}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  back: {
-    minHeight: tokens.touchTarget,
-    alignSelf: 'flex-start',
-    justifyContent: 'center',
-    borderRadius: tokens.radius.md,
-    paddingHorizontal: tokens.space.md,
-    marginBottom: tokens.space.md
+  heading: {
+    marginTop: tokens.space.md,
+    fontSize: tokens.type.title,
+    lineHeight: tokens.lineHeight.title,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -1
   },
-  backText: { fontSize: 13, fontWeight: '800' },
+  subtitle: {
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.body,
+    lineHeight: tokens.lineHeight.body,
+    fontWeight: tokens.weight.medium
+  },
+  section: { marginTop: tokens.space.xl },
   sectionTitle: {
-    marginTop: tokens.space.xl,
-    marginBottom: tokens.space.sm,
-    fontSize: 18,
-    fontWeight: '900'
+    marginBottom: tokens.space.md,
+    fontSize: tokens.type.heading,
+    fontWeight: tokens.weight.bold
   },
-  themeRow: { flexDirection: 'row', gap: tokens.space.sm },
-  themeChoice: {
-    minHeight: tokens.touchTarget,
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: tokens.radius.pill
+  help: {
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption,
+    fontWeight: tokens.weight.medium
   },
-  themeText: { fontSize: 13, fontWeight: '900' },
+  switches: { gap: tokens.space.sm },
   settingRow: {
-    minHeight: 76,
+    minHeight: 82,
     flexDirection: 'row',
     alignItems: 'center',
     gap: tokens.space.md,
     borderWidth: 1,
     borderRadius: tokens.radius.md,
-    padding: tokens.space.md,
-    marginTop: tokens.space.sm
+    padding: tokens.space.md
   },
   settingCopy: { flex: 1 },
-  settingTitle: { fontSize: 14, fontWeight: '900' },
-  settingDescription: { marginTop: 4, fontSize: 11, lineHeight: 16 },
-  safetyCard: {
-    gap: tokens.space.sm,
-    borderWidth: 1,
-    borderRadius: tokens.radius.md,
-    padding: tokens.space.lg
+  settingTitle: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
+  settingDescription: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption,
+    fontWeight: tokens.weight.medium
   },
-  safetyButton: { marginTop: tokens.space.sm },
-  rule: { fontSize: 13, lineHeight: 19 },
-  danger: { marginTop: tokens.space.md },
-  deletionNote: { marginTop: tokens.space.sm, fontSize: 11, lineHeight: 16 }
+  rows: { gap: tokens.space.sm },
+  danger: { marginTop: tokens.space.sm }
 });

@@ -10,9 +10,20 @@ import { useAuth } from '@/providers/auth-provider';
 export function useProfileDashboard() {
   const { isDemo, profile, user } = useAuth();
   return useQuery({
-    queryKey: ['profile-dashboard', user?.id, profile?.avatar_path, isDemo],
+    queryKey: [
+      'profile-dashboard',
+      user?.id,
+      profile?.campus_id,
+      profile?.avatar_path,
+      isDemo
+    ],
     queryFn: () =>
-      fetchProfileDashboard(user?.id ?? '', profile?.avatar_path ?? null, isDemo),
+      fetchProfileDashboard(
+        user?.id ?? '',
+        profile?.campus_id ?? '',
+        profile?.avatar_path ?? null,
+        isDemo
+      ),
     enabled: Boolean(user)
   });
 }

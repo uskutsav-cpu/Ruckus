@@ -1,4 +1,5 @@
 import { withSupabase } from '@supabase/server';
+import type { Database } from '../_shared/database.types.ts';
 
 import { isUuid, jsonError, publicDatabaseError } from '../_shared/http.ts';
 import { sendPushToProfiles } from '../_shared/push.ts';
@@ -15,7 +16,7 @@ type MatchResult = {
 };
 
 export default {
-  fetch: withSupabase({ auth: 'user' }, async (request, context) => {
+  fetch: withSupabase<Database>({ auth: 'user' }, async (request, context) => {
     if (request.method !== 'POST') {
       return jsonError('Method not allowed.', 405, 'METHOD_NOT_ALLOWED');
     }

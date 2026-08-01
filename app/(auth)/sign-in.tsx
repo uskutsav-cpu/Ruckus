@@ -1,17 +1,17 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-import { AppScreen } from '@/components/ui/app-screen';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
+import { AuthScaffold } from '@/features/auth/auth-scaffold';
 import { signInSchema } from '@/features/auth/auth-schema';
 import { useAuth } from '@/providers/auth-provider';
-import { useTheme } from '@/providers/theme-provider';
+import { tokens } from '@/theme/tokens';
 
 export default function SignInScreen() {
   const { signIn } = useAuth();
-  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +24,7 @@ export default function SignInScreen() {
       return;
     }
     setLoading(true);
+    setError(null);
     const result = await signIn(parsed.data);
     setLoading(false);
     if (result.error) {
@@ -34,10 +35,10 @@ export default function SignInScreen() {
   };
 
   return (
-    <AppScreen
+    <AuthScaffold
       eyebrow="Welcome back"
-      title="Ready for round two?"
-      subtitle="Sign in with your verified university email."
+      title="Sign in to Ruckus."
+      subtitle="Use your verified university email."
     >
       <TextField
         label="University email"
@@ -46,6 +47,8 @@ export default function SignInScreen() {
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"
+        returnKeyType="next"
+        placeholder="you@university.edu"
       />
       <TextField
         label="Password"
@@ -53,19 +56,27 @@ export default function SignInScreen() {
         onChangeText={setPassword}
         secureTextEntry
         autoComplete="current-password"
+        returnKeyType="go"
+        onSubmitEditing={() => void submit()}
       />
-      {error ? (
-        <Text accessibilityRole="alert" style={{ color: theme.danger, marginBottom: 12 }}>
-          {error}
-        </Text>
-      ) : null}
+      {error ? <InlineNotice tone="error" icon="!" message={error} /> : null}
       <PrimaryButton label="Sign in" loading={loading} onPress={() => void submit()} />
       <PrimaryButton
-        label="Create a new account"
+        label="Forgot password?"
+        onPress={() => router.push('/forgot-password')}
+        variant="ghost"
+        style={styles.switchButton}
+      />
+      <PrimaryButton
+        label="Create account"
         onPress={() => router.replace('/sign-up')}
         variant="ghost"
-        style={{ marginTop: 8 }}
+        style={styles.switchButton}
       />
-    </AppScreen>
+    </AuthScaffold>
   );
 }
+
+const styles = StyleSheet.create({
+  switchButton: { marginTop: tokens.space.sm }
+});

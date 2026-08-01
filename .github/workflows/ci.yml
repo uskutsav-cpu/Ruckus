@@ -14,9 +14,9 @@ concurrency:
 
 jobs:
   app:
-    name: App quality
+    name: App quality and exports
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,12 +25,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
-      - run: npx expo export --platform all --output-dir dist
+      - run: npm run scan:secrets
+      - run: npm run audit:production
+      - run: npx expo export --platform web --output-dir dist/web
+      - run: npx expo export --platform ios --output-dir dist/ios
+      - run: npx expo export --platform android --output-dir dist/android
+
+  functions:
+    name: Edge Function typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --config supabase/functions/deno.json supabase/functions/*/index.ts
 
   database:
     name: Database policies and concurrency
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,11 +57,8 @@ jobs:
         run: npx supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor
       - run: npm run db:reset
       - run: npm run test:db
-      - name: Verify concurrent matching
-        shell: bash
-        run: |
-          publishable_key="$(npx supabase status -o env | awk -F= '/^(ANON_KEY|PUBLISHABLE_KEY)=/{gsub(/"/,"",$2); print $2; exit}')"
-          SUPABASE_PUBLISHABLE_KEY="$publishable_key" npm run test:matching
+      - run: npm run test:event-capacity
+      - run: npm run test:matching
       - name: Stop local Supabase
         if: always()
         run: npx supabase stop --no-backup

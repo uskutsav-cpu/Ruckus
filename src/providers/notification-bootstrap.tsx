@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { router, type Href } from 'expo-router';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 
 import { safeNotificationRoute } from '@/features/notifications/notification-route';
 import {
@@ -17,14 +18,16 @@ import {
 import { logger } from '@/lib/logger';
 import { useAuth } from '@/providers/auth-provider';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true
-  })
-});
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true
+    })
+  });
+}
 
 function openNotification(response: Notifications.NotificationResponse): void {
   const route = safeNotificationRoute(response.notification.request.content.data?.url);
@@ -44,7 +47,9 @@ export function NotificationBootstrap() {
   }, []);
 
   useEffect(() => {
-    if (!user || isDemo || !profile?.onboarding_completed_at) return;
+    if (Platform.OS === 'web' || !user || isDemo || !profile?.onboarding_completed_at) {
+      return;
+    }
     let active = true;
     void syncNotificationPreferences(preferences)
       .then(() =>
@@ -63,6 +68,8 @@ export function NotificationBootstrap() {
   }, [isDemo, preferences, profile?.onboarding_completed_at, user]);
 
   useEffect(() => {
+    if (Platform.OS === 'web') return;
+
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         lastResponseId.current = response.notification.request.identifier;

@@ -1,107 +1,148 @@
-# Campus Clash
+# Ruckus
 
-Campus Clash is a production-oriented mobile MVP for verified adult students at one
-launch university. Students swipe on scheduled group activities; the backend forms
-overlap-safe crews, gates a private lobby and Realtime chat, reveals an approved public
-venue after confirmation, verifies attendance with rotating QR codes, and awards XP
-from an append-only server ledger.
+**Swipe into something.** Ruckus is an 18+ campus events beta: verified students
+discover events, RSVP with one swipe, join the private attendee chat when confirmed,
+and earn server-controlled XP for verified participation. Clubs can manage events,
+waitlists, announcements, rotating QR check-in, and scoped organization roles.
 
-This is explicitly a group social activity app. It has no dating, one-to-one matching,
-direct messages, payments, user-created activities, AI recommendations, or live and
-background location collection.
+The repository also retains Ruckus Crews, the earlier small-group matching system, as
+an optional activity flow. Ruckus is not a dating product and has no direct messages,
+payments, anonymous chat, or live/background location tracking.
 
-## Stack
+## Product surface
 
-- Expo SDK 57, React Native 0.86, React 19.2, strict TypeScript, Expo Router
-- Supabase Auth, Postgres, RLS, Storage, Realtime, and authenticated Edge Functions
-- TanStack Query with offline awareness and persisted swipe intent
-- Expo Camera, Notifications, Image, Image Picker, Secure Store, Haptics, and EAS
-- Vitest, pgTAP, ESLint, Prettier, Supabase CLI, and GitHub Actions
+- Event-first Discover deck with accessible Join and Pass alternatives
+- Transactional capacity, approval, cancellation, and ordered waitlist promotion
+- My Events, public share pages, calendar export, event chat, and check-in status
+- Optimistic private chat with retry, replies, bounded reactions, copy, report, removed
+  content, deleted-user rendering, and event-ended read-only behavior
+- Organizer creation preview, attendee review, announcements, cancellation, archive,
+  share links, and 60-second rotating QR codes
+- Organization ownership, scoped roles, invitations, removal, verification/claim review,
+  event history, and audited role changes
+- Server-owned XP, campus leaderboard opt-out, verified referrals, privacy controls,
+  data-export requests, account deletion, reports, blocks, and admin moderation
+- Unauthenticated product, event, organization, referral, support, partnership, safety,
+  privacy-draft, terms-draft, and deletion-information pages
+- Clearly labeled offline demo mode; staging/production configuration fails closed
 
-Node.js 22.13 or newer is required.
+## Product preview
 
-## Run the app
+These screenshots were captured from the local demo using the exported web bundle. The
+data is synthetic and the images are product evidence, not physical-device or signed
+native-build verification.
+
+| Discover and RSVP                                                      | Event detail                                                             | Public landing                                                            |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| ![Ruckus mobile event discovery](docs/screenshots/discover-mobile.png) | ![Ruckus mobile event details](docs/screenshots/event-detail-mobile.png) | ![Ruckus public web landing](docs/screenshots/public-landing-desktop.png) |
+
+Generated phone-preview instructions and the broader visual acceptance matrix live in
+[`docs/PHONE_PREVIEW.md`](docs/PHONE_PREVIEW.md) and
+[`docs/VISUAL_QA.md`](docs/VISUAL_QA.md). Final App Store and Play Store captures remain
+an owner/device gate.
+
+## Stack and trust model
+
+- Expo SDK 57, React Native 0.86, React 19.2, Expo Router, strict TypeScript
+- Supabase Auth, Postgres, RLS, Storage, private Realtime, and Edge Functions
+- TanStack Query, Expo Camera/Calendar/Notifications/Image/Secure Store
+- Vitest, pgTAP, concurrency harnesses, ESLint, Prettier, Supabase CLI, GitHub Actions
+
+The client is untrusted. Multi-row RSVP, waitlist, check-in, XP, referral, organization,
+notification-claiming, and moderation transitions execute in reviewed database
+functions. The service-role credential is Edge-Function-only. See
+[`ARCHITECTURE.md`](ARCHITECTURE.md), [`SECURITY.md`](SECURITY.md), and
+[`docs/RLS_AUTHORIZATION_MATRIX.md`](docs/RLS_AUTHORIZATION_MATRIX.md).
+
+Node.js 22.13+ and Docker Desktop (or a compatible Docker runtime) are required for
+connected local development.
+
+## Local setup
 
 ```sh
-npm install
+npm ci
 cp .env.example .env
 npm run db:start
 npm run db:reset
 npx supabase status -o env
 ```
 
-Copy the local API URL and publishable/anon key into `.env`, then run a native
-development build:
+Copy only the local API URL and publishable/anonymous key into `.env`, then run:
 
 ```sh
-npm run ios
-# or
+npm run start:go       # web/Expo Go exploration where supported
+npm run ios            # native development build
 npm run android
 ```
 
-`npm run start:go` supports UI exploration where the native module set permits, but
-remote Android push notification acceptance requires a development build. Without
-Supabase variables, the app offers an explicit local demo flow with activity, group,
-chat, QR, profile, and leaderboard data.
+With both Supabase client variables empty, development intentionally enters a labeled
+demo. A partial configuration is an error. Staging and production builds require a
+matching hosted project ref, project URL, publishable key, EAS project UUID, university
+domain, and build target.
 
-The seed password is `CampusClash1!`. Local-only accounts are:
+Local seed users use the unmistakably local password `RuckusLocal1!`:
+`demo1@example.edu`–`demo6@example.edu`, `host@example.edu`, and
+`admin@example.edu`. Never deploy `supabase/seed.sql` to a hosted project.
 
-- `demo1@example.edu` through `demo6@example.edu`
-- `host@example.edu`
-- `admin@example.edu`
-
-The seeded campus uses `example.edu` and configurable database values of minimum 4,
-target 6, and maximum 8 group members.
-
-## Verify
+## Verification
 
 ```sh
 npm run verify
+npm run db:reset
 npm run test:db
-SUPABASE_PUBLISHABLE_KEY="<local key>" npm run test:matching
+npm run test:event-capacity
+npm run test:matching
+npx expo export --platform web --output-dir dist/web
+npx expo export --platform ios --output-dir dist/ios
+npx expo export --platform android --output-dir dist/android
+npx expo-doctor
+npm audit
 ```
 
-`npm run verify` checks formatting, lint, strict TypeScript, and unit tests. pgTAP
-covers RLS denial, matching invariants, check-in idempotency, and protected XP. The
-concurrency script signs in four seeded users, fires simultaneous matching operations,
-and verifies one unique assignment per user.
+The concurrency scripts discover the local publishable key automatically unless one is
+provided. CI repeats application verification, a clean database reset, pgTAP,
+concurrency checks, Edge Function validation, exports, audit, and secret scanning.
+Manual device/email/push/store checks are intentionally separate in
+[`docs/DEVICE_QA.md`](docs/DEVICE_QA.md).
 
-Docker Desktop or another compatible Docker runtime is required for local Supabase and
-pgTAP. CI runs both the app and database suites.
+## Edge Functions and deployment
 
-## Edge Functions and production
-
-Deployment, secrets, schedules, and account-purge behavior are documented in
-[`docs/OPERATIONS.md`](docs/OPERATIONS.md). The complete device acceptance checklist is
-in [`docs/E2E_SMOKE.md`](docs/E2E_SMOKE.md).
-
-Build profiles are EAS-compatible:
+Secrets such as `CHECKIN_TOKEN_PEPPER`, `CRON_SECRET`, `PARTNERSHIP_RATE_LIMIT_PEPPER`,
+the Expo access token, and the Supabase service role never use `EXPO_PUBLIC_*`.
+Deployment order, scheduler authentication, notification jobs, retry behavior,
+partnership intake, and account purge are documented in
+[`docs/OPERATIONS.md`](docs/OPERATIONS.md) and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ```sh
 eas build --profile development --platform all
-eas build --profile preview --platform all
-eas build --profile production --platform all
+eas build --profile staging-development --platform ios
+eas build --profile staging-development --platform android
 ```
 
-Set EAS environment variables for the four `EXPO_PUBLIC_*` values before remote builds.
-Keep the check-in pepper, cron secret, Expo push access token, and Supabase service key
-out of the mobile environment.
+No store submission, legal approval, production Supabase project, support address, or
+privacy/deletion URL is claimed by this repository.
 
-## Project map
+## Repository map
 
 ```text
-app/                         Protected Expo Router screens
-src/components/              Reusable accessible UI and state components
-src/domain/                  Pure gesture and route-validation rules
-src/features/                Queries, mutations, parsing, demo adapters
-src/lib/                     Environment, logging, query, Supabase, secure storage
-src/providers/               Auth, theme, notification, and app providers
-supabase/migrations/         Schema, trusted functions, RLS, Storage, Realtime
-supabase/functions/          Authenticated and cron-authenticated Edge Functions
-supabase/tests/              pgTAP authorization and integrity tests
-scripts/                     Concurrency verification
-docs/                        Operations and end-to-end runbooks
+app/                         Expo Router public, auth, onboarding, and protected routes
+src/components/              Accessible UI primitives and product components
+src/features/                Typed services, hooks, parsers, and explicit demo adapters
+src/lib/                     Validated config, analytics, logging, deep links, storage
+supabase/migrations/         Schema, trusted operations, RLS, Storage, Realtime
+supabase/functions/          Authenticated/public-hardened/cron Edge Functions
+supabase/tests/              Transactional pgTAP authorization and integrity tests
+scripts/                     Real concurrency and preview verification
+docs/                        Product, security, privacy, operations, QA, and release docs
 ```
 
-Read [`ARCHITECTURE.md`](ARCHITECTURE.md) for trust boundaries and
-[`SECURITY.md`](SECURITY.md) for the authorization matrix and threat model.
+## Status, contribution, and license
+
+This is a prerelease beta candidate. Automated gates do not replace physical-device,
+legal, accessibility-expert, abuse-operations, hosted-backend, or app-store review.
+See [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) for the exact state.
+
+Contributions follow [`CONTRIBUTING.md`](CONTRIBUTING.md) and the
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Security reports follow
+[`SECURITY.md`](SECURITY.md). The repository is **UNLICENSED / all rights reserved**;
+public visibility does not grant an open-source license.

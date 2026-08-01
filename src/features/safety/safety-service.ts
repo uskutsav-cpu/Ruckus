@@ -1,18 +1,40 @@
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 
 type ReportInput = {
   messageId?: string;
+  eventMessageId?: string;
   userId?: string;
   groupId?: string;
+  eventId?: string;
+  organizationId?: string;
   reason: string;
   details: string;
   blockUser: boolean;
 };
 
-export async function submitReport(input: ReportInput, isDemo: boolean): Promise<void> {
-  if (isDemo) return;
+export type ReportOutcome = {
+  reportSubmitted: boolean;
+  userBlocked: boolean;
+  blockFailed: boolean;
+};
 
-  if (input.messageId) {
+export async function submitReport(
+  input: ReportInput,
+  isDemo: boolean
+): Promise<ReportOutcome> {
+  if (isDemo) {
+    return { reportSubmitted: false, userBlocked: false, blockFailed: false };
+  }
+  const supabase = requireSupabase();
+
+  if (input.eventMessageId) {
+    const { error } = await supabase.rpc('report_event_message', {
+      target_message_id: input.eventMessageId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
+    });
+    if (error) throw error;
+  } else if (input.messageId) {
     const { error } = await supabase.rpc('report_message', {
       target_message_id: input.messageId,
       report_reason: input.reason,
@@ -33,6 +55,20 @@ export async function submitReport(input: ReportInput, isDemo: boolean): Promise
       ...(input.details.trim() ? { report_details: input.details.trim() } : {})
     });
     if (error) throw error;
+  } else if (input.eventId) {
+    const { error } = await supabase.rpc('report_event', {
+      target_event_id: input.eventId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
+    });
+    if (error) throw error;
+  } else if (input.organizationId) {
+    const { error } = await supabase.rpc('report_organization', {
+      target_organization_id: input.organizationId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
+    });
+    if (error) throw error;
   } else {
     throw new Error('A report target is required.');
   }
@@ -41,12 +77,21 @@ export async function submitReport(input: ReportInput, isDemo: boolean): Promise
     const { error } = await supabase.rpc('block_user', {
       target_profile_id: input.userId
     });
-    if (error) throw error;
+    if (error) {
+      return { reportSubmitted: true, userBlocked: false, blockFailed: true };
+    }
   }
+
+  return {
+    reportSubmitted: true,
+    userBlocked: Boolean(input.blockUser && input.userId),
+    blockFailed: false
+  };
 }
 
 export async function requestAccountDeletion(isDemo: boolean): Promise<void> {
   if (isDemo) return;
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('request_account_deletion');
   if (error) throw error;
 }

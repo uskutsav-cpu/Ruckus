@@ -1,106 +1,195 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View
+} from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { SecondaryButton } from '@/components/ui/secondary-button';
 import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
+import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
+
+const welcomeImage = require('../../assets/activities/taco-taste-off.png') as number;
 
 export default function WelcomeScreen() {
   const { enterDemo } = useAuth();
+  const { height } = useWindowDimensions();
+  const { theme } = useTheme();
+  const heroHeight = Math.min(Math.max(height * 0.5, 360), 480);
 
   return (
-    <LinearGradient colors={['#090E1A', '#3B0764', '#7C3AED']} style={styles.container}>
-      <View style={styles.badge}>
-        <Text style={styles.badgeIcon}>⚡</Text>
-      </View>
-      <View style={styles.copy}>
-        <Text style={styles.eyebrow}>YOUR CAMPUS. YOUR CREW.</Text>
-        <Text style={styles.title}>Plans hit different when everyone shows up.</Text>
-        <Text style={styles.subtitle}>
-          Swipe on real activities. Match into groups. Earn XP for making it out.
-        </Text>
-      </View>
-      <View style={styles.actions}>
-        <PrimaryButton label="Join the clash" onPress={() => router.push('/sign-up')} />
-        <PrimaryButton
-          label="I already have an account"
-          onPress={() => router.push('/sign-in')}
-          variant="ghost"
-          style={styles.secondary}
-        />
-        {!env.isBackendConfigured ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => void enterDemo()}
-            style={styles.demoButton}
-          >
-            <Text style={styles.demoText}>Enter local demo →</Text>
-          </Pressable>
-        ) : null}
-        <Text style={styles.footnote}>
-          18+ only · University email access required · Group activities at public venues
-        </Text>
-      </View>
-    </LinearGradient>
+    <SafeAreaView edges={[]} style={[styles.safe, { backgroundColor: theme.background }]}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { backgroundColor: theme.background }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.hero, { minHeight: heroHeight }]}>
+          <Image
+            source={welcomeImage}
+            accessibilityLabel="A group of college students sharing tacos"
+            contentFit="cover"
+            style={StyleSheet.absoluteFill}
+          />
+          <LinearGradient
+            colors={['rgba(13,15,14,0.18)', 'rgba(13,15,14,0.04)', 'rgba(13,15,14,0.8)']}
+            locations={[0, 0.5, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={styles.heroContent}>
+            <View style={styles.brand}>
+              <View style={styles.mark}>
+                <Text style={styles.markText}>R</Text>
+              </View>
+              <Text style={styles.wordmark}>Ruckus</Text>
+              {env.appEnvironment === 'staging' ? (
+                <View style={styles.stagingBadge}>
+                  <Text style={styles.stagingBadgeText}>STAGING</Text>
+                </View>
+              ) : null}
+            </View>
+            <View>
+              <Text style={styles.title}>Your campus, happening now.</Text>
+              <Text style={styles.heroSubtitle}>
+                Swipe through events. RSVP in one move.
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.actions}>
+          <Text style={[styles.intro, { color: theme.textMuted }]}>
+            Find events near campus, join before they fill, and meet the attendee
+            community instantly.
+          </Text>
+          <PrimaryButton
+            label="Create account"
+            accessibilityHint="Create a new Ruckus account"
+            onPress={() => router.push('/sign-up')}
+          />
+          <SecondaryButton label="Sign in" onPress={() => router.push('/sign-in')} />
+          {env.isDemoAvailable ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Enter local demo"
+              onPress={() => void enterDemo()}
+              style={styles.demoButton}
+            >
+              <Text style={[styles.demoText, { color: theme.primary }]}>
+                Try the demo
+              </Text>
+            </Pressable>
+          ) : null}
+          <Text style={[styles.footnote, { color: theme.textSubtle }]}>
+            For students 18 and older. University email required.
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: { flex: 1 },
+  scroll: { flexGrow: 1 },
+  hero: {
+    width: '100%',
+    overflow: 'hidden',
+    backgroundColor: tokens.color.ink
+  },
+  heroContent: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingHorizontal: tokens.space.lg,
-    paddingTop: 82,
-    paddingBottom: tokens.space.xl
+    paddingTop: 56,
+    paddingHorizontal: tokens.layout.screenPadding,
+    paddingBottom: tokens.space.lg
   },
-  badge: {
-    width: 78,
-    height: 78,
+  brand: { flexDirection: 'row', alignItems: 'center' },
+  mark: {
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    transform: [{ rotate: '-7deg' }]
+    borderRadius: tokens.radius.sm,
+    backgroundColor: tokens.color.ruckus
   },
-  badgeIcon: { fontSize: 40 },
-  copy: { marginVertical: tokens.space.xl },
-  eyebrow: {
-    color: '#67E8F9',
-    fontSize: 13,
-    fontWeight: '900',
-    letterSpacing: 1.5
+  markText: {
+    color: tokens.color.ink,
+    fontSize: 20,
+    fontWeight: tokens.weight.bold
+  },
+  wordmark: {
+    marginLeft: 10,
+    color: tokens.color.white,
+    fontSize: 18,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.2
+  },
+  stagingBadge: {
+    marginLeft: tokens.space.sm,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.68)',
+    borderRadius: tokens.radius.pill,
+    backgroundColor: 'rgba(9,10,13,0.34)'
+  },
+  stagingBadgeText: {
+    color: tokens.color.white,
+    fontSize: 9,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: 1
   },
   title: {
-    marginTop: tokens.space.md,
-    color: '#FFFFFF',
+    maxWidth: 340,
+    color: tokens.color.white,
     fontSize: 42,
-    lineHeight: 45,
-    fontWeight: '900',
-    letterSpacing: -1.8
+    lineHeight: 46,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -1.2
   },
-  subtitle: {
-    marginTop: tokens.space.md,
-    maxWidth: 420,
-    color: '#E9D5FF',
-    fontSize: 17,
-    lineHeight: 25,
-    fontWeight: '600'
+  heroSubtitle: {
+    maxWidth: 350,
+    marginTop: tokens.space.sm,
+    color: '#E7EAE7',
+    fontSize: tokens.type.body,
+    lineHeight: tokens.lineHeight.body
   },
-  actions: { gap: tokens.space.sm },
-  secondary: { backgroundColor: 'rgba(255,255,255,0.1)' },
+  actions: {
+    width: '100%',
+    maxWidth: tokens.layout.maxContentWidth,
+    alignSelf: 'center',
+    gap: tokens.space.sm,
+    paddingHorizontal: tokens.layout.screenPadding,
+    paddingTop: tokens.space.lg,
+    paddingBottom: tokens.space.xl
+  },
+  intro: {
+    marginBottom: tokens.space.sm,
+    fontSize: tokens.type.body,
+    lineHeight: tokens.lineHeight.body
+  },
   demoButton: {
-    minHeight: 48,
+    minHeight: tokens.touchTarget,
     alignItems: 'center',
     justifyContent: 'center'
   },
-  demoText: { color: '#FDE68A', fontSize: 15, fontWeight: '800' },
+  demoText: {
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.bold
+  },
   footnote: {
-    marginTop: tokens.space.sm,
-    color: '#C4B5FD',
-    fontSize: 12,
-    lineHeight: 17,
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption,
     textAlign: 'center'
   }
 });

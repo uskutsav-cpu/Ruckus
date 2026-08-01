@@ -7,7 +7,7 @@ import * as Notifications from 'expo-notifications';
 import type { NotificationPreferences } from '@/features/settings/preferences';
 import { logger } from '@/lib/logger';
 import { secureStorage } from '@/lib/secure-storage';
-import { supabase } from '@/lib/supabase';
+import { requireSupabase } from '@/lib/supabase';
 
 const deviceIdKey = 'campus-clash.push-device-id';
 
@@ -22,6 +22,7 @@ async function getDeviceId(): Promise<string> {
 export async function syncNotificationPreferences(
   preferences: NotificationPreferences
 ): Promise<void> {
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('set_notification_preferences', {
     enabled_value: preferences.enabled,
     chat_messages_value: preferences.chatMessages,
@@ -38,7 +39,7 @@ export async function registerForPush(): Promise<void> {
       name: 'Activity updates',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 180, 90, 180],
-      lightColor: '#7C3AED'
+      lightColor: '#C8F53D'
     });
   }
 
@@ -57,6 +58,7 @@ export async function registerForPush(): Promise<void> {
   }
 
   const token = await Notifications.getExpoPushTokenAsync({ projectId });
+  const supabase = requireSupabase();
   const { error } = await supabase.rpc('register_push_token', {
     token_value: token.data,
     platform_value: Platform.OS === 'ios' ? 'ios' : 'android',
@@ -68,6 +70,7 @@ export async function registerForPush(): Promise<void> {
 export async function unregisterCurrentPushDevice(): Promise<void> {
   const deviceId = await secureStorage.getItem(deviceIdKey);
   if (!deviceId) return;
+  const supabase = requireSupabase();
   const { error } = await supabase.from('push_tokens').delete().eq('device_id', deviceId);
   if (error) throw error;
 }

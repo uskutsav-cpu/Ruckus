@@ -3,7 +3,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/components/ui/app-screen';
+import { AppIcon } from '@/components/ui/app-icon';
+import { BackButton } from '@/components/ui/back-button';
+import { InlineNotice } from '@/components/ui/inline-notice';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { StatusPill } from '@/components/ui/status-pill';
 import { TextField } from '@/components/ui/text-field';
 import { submitRating } from '@/features/profile/profile-service';
 import { useAuth } from '@/providers/auth-provider';
@@ -11,7 +15,10 @@ import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
 export default function RateActivityScreen() {
-  const { sessionId: rawSessionId } = useLocalSearchParams<{ sessionId: string }>();
+  const { sessionId: rawSessionId } = useLocalSearchParams<{
+    sessionId: string;
+    demo?: string;
+  }>();
   const sessionId = Array.isArray(rawSessionId) ? rawSessionId[0] : rawSessionId;
   const { isDemo } = useAuth();
   const { theme } = useTheme();
@@ -39,13 +46,29 @@ export default function RateActivityScreen() {
     return (
       <AppScreen scroll={false}>
         <View style={styles.complete}>
-          <Text style={styles.completeIcon}>⭐</Text>
+          <StatusPill
+            label={isDemo ? 'Demo feedback · not sent' : 'Feedback recorded'}
+            tone={isDemo ? 'accent' : 'success'}
+          />
+          <View
+            style={[
+              styles.completeIcon,
+              { backgroundColor: isDemo ? theme.accentMuted : tokens.color.ruckusSoft }
+            ]}
+          >
+            <AppIcon
+              name="star"
+              size={34}
+              color={isDemo ? theme.accent : theme.success}
+            />
+          </View>
           <Text style={[styles.completeTitle, { color: theme.text }]}>
-            Thanks for the feedback
+            {isDemo ? 'Feedback preview complete' : 'Thanks for the feedback'}
           </Text>
           <Text style={[styles.completeCopy, { color: theme.textMuted }]}>
-            Your rating helps the campus team improve activities. The trusted ledger
-            awarded +10 XP once for this event.
+            {isDemo
+              ? 'No rating was sent and no XP was recorded. Connected mode submits feedback to campus operations.'
+              : 'Your rating helps the campus team improve activities. The trusted ledger awarded +10 XP once for this event.'}
           </Text>
           <PrimaryButton
             label="View profile"
@@ -58,11 +81,19 @@ export default function RateActivityScreen() {
   }
 
   return (
-    <AppScreen
-      eyebrow="Post-event feedback"
-      title="How was the activity?"
-      subtitle="Your rating goes to the campus operations team. It is not a rating of individual group members."
-    >
+    <AppScreen>
+      <BackButton label="Back" onPress={() => router.back()} />
+      <StatusPill
+        label={isDemo ? 'Demo feedback' : 'Post-event feedback'}
+        tone={isDemo ? 'accent' : 'neutral'}
+      />
+      <Text style={[styles.title, { color: theme.text }]}>How was the activity?</Text>
+      <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+        Your rating goes to campus operations, not individual group members.
+      </Text>
+      {isDemo ? (
+        <InlineNotice message="This preview accepts local input only. It does not submit feedback or award XP." />
+      ) : null}
       <View
         accessibilityRole="radiogroup"
         accessibilityLabel="Activity rating"
@@ -77,14 +108,11 @@ export default function RateActivityScreen() {
             onPress={() => setRating(value)}
             style={styles.starButton}
           >
-            <Text
-              style={[
-                styles.star,
-                { color: value <= rating ? tokens.color.amber : theme.border }
-              ]}
-            >
-              ★
-            </Text>
+            <AppIcon
+              name="star"
+              size={32}
+              color={value <= rating ? tokens.color.amber : theme.border}
+            />
           </Pressable>
         ))}
       </View>
@@ -98,23 +126,33 @@ export default function RateActivityScreen() {
         style={styles.feedback}
       />
       <PrimaryButton
-        label="Submit rating · +10 XP"
+        label={isDemo ? 'Preview submission' : 'Submit rating'}
         loading={submitting}
         disabled={!rating}
         onPress={() => void submit()}
         style={styles.submit}
       />
       <PrimaryButton label="Not now" variant="ghost" onPress={() => router.back()} />
-      {error ? (
-        <Text accessibilityRole="alert" style={[styles.error, { color: theme.danger }]}>
-          {error}
-        </Text>
-      ) : null}
+      {error ? <InlineNotice tone="error" message={error} /> : null}
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  title: {
+    marginTop: tokens.space.md,
+    fontSize: tokens.type.title,
+    lineHeight: tokens.lineHeight.title,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -1
+  },
+  subtitle: {
+    marginTop: tokens.space.sm,
+    marginBottom: tokens.space.md,
+    fontSize: tokens.type.body,
+    lineHeight: tokens.lineHeight.body,
+    fontWeight: tokens.weight.medium
+  },
   stars: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -126,16 +164,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  star: { fontSize: 39 },
   feedback: { minHeight: 150, paddingTop: tokens.space.md, textAlignVertical: 'top' },
   submit: { marginTop: tokens.space.lg },
-  error: { marginTop: tokens.space.md, fontSize: 13, lineHeight: 19 },
   complete: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  completeIcon: { fontSize: 70 },
+  completeIcon: {
+    width: 86,
+    height: 86,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 43,
+    marginTop: tokens.space.lg
+  },
   completeTitle: {
     marginTop: tokens.space.lg,
     fontSize: tokens.type.title,
-    fontWeight: '900',
+    fontWeight: tokens.weight.bold,
     textAlign: 'center'
   },
   completeCopy: {

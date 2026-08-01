@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { PrimaryButton } from '@/components/ui/primary-button';
+import { AppIcon } from '@/components/ui/app-icon';
+import { SecondaryButton } from '@/components/ui/secondary-button';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
-type StatePanelProps = {
-  icon: string;
+export type StatePanelProps = {
+  icon?: string;
+  eyebrow?: string;
   title: string;
   message: string;
   actionLabel?: string;
@@ -13,7 +15,8 @@ type StatePanelProps = {
 };
 
 export function StatePanel({
-  icon,
+  icon = 'info',
+  eyebrow,
   title,
   message,
   actionLabel,
@@ -22,16 +25,16 @@ export function StatePanel({
   const { theme } = useTheme();
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
+      <View style={[styles.iconWrap, { backgroundColor: theme.surfaceMuted }]}>
+        <AppIcon color={theme.textMuted} name={icon} size={34} />
+      </View>
+      {eyebrow ? (
+        <Text style={[styles.eyebrow, { color: theme.textMuted }]}>{eyebrow}</Text>
+      ) : null}
       <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
       <Text style={[styles.message, { color: theme.textMuted }]}>{message}</Text>
       {actionLabel && onAction ? (
-        <PrimaryButton
-          label={actionLabel}
-          onPress={onAction}
-          variant="secondary"
-          style={styles.button}
-        />
+        <SecondaryButton label={actionLabel} onPress={onAction} style={styles.button} />
       ) : null}
     </View>
   );
@@ -42,21 +45,36 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: tokens.space.xl
+    paddingHorizontal: tokens.space.xl,
+    paddingVertical: tokens.space.xxl
   },
-  icon: { fontSize: 52 },
+  iconWrap: {
+    width: 76,
+    height: 76,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.radius.md
+  },
+  eyebrow: {
+    marginTop: tokens.space.lg,
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
+  },
   title: {
-    marginTop: tokens.space.md,
+    marginTop: tokens.space.sm,
     fontSize: tokens.type.heading,
-    fontWeight: '900',
+    lineHeight: tokens.lineHeight.heading,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -0.4,
     textAlign: 'center'
   },
   message: {
     marginTop: tokens.space.sm,
     maxWidth: 330,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: tokens.type.label,
+    lineHeight: 21,
+    fontWeight: tokens.weight.regular,
     textAlign: 'center'
   },
-  button: { minWidth: 180, marginTop: tokens.space.lg }
+  button: { minWidth: 200, marginTop: tokens.space.lg }
 });

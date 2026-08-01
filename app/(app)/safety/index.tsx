@@ -1,119 +1,144 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { ActionRow } from '@/components/ui/action-row';
 import { AppScreen } from '@/components/ui/app-screen';
+import { BackButton } from '@/components/ui/back-button';
+import { StatusPill } from '@/components/ui/status-pill';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
-const safetyActions = [
-  {
-    icon: '🚨',
-    title: 'Emergency information',
-    copy: 'What to do if you or someone else may be in immediate danger.',
-    route: '/safety/emergency'
-  },
-  {
-    icon: '🤝',
-    title: 'Community guidelines',
-    copy: 'The behavior expected in every Campus Clash crew and public meetup.',
-    route: '/safety/guidelines'
-  },
-  {
-    icon: '🛡️',
-    title: 'Report a group',
-    copy: 'Open a private safety report from the relevant lobby or message.',
-    route: '/groups'
-  }
-] as const;
-
 export default function SafetyCenterScreen() {
   const { theme } = useTheme();
+
   return (
-    <AppScreen
-      eyebrow="Safety center"
-      title="Your safety comes first"
-      subtitle="Campus Clash verifies access to one university email domain. That is not proof of identity—use the same care you would with any new group."
-    >
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => router.back()}
-        style={[styles.back, { backgroundColor: theme.surfaceMuted }]}
+    <AppScreen>
+      <BackButton label="Settings" onPress={() => router.back()} />
+      <StatusPill label="Safety center" tone="warning" />
+      <Text style={[styles.title, { color: theme.text }]}>Plan for safety</Text>
+      <Text style={[styles.subtitle, { color: theme.textMuted }]}>
+        University-email access narrows the community. It does not prove identity, so use
+        the same judgment you would with any new group.
+      </Text>
+
+      <View
+        style={[
+          styles.foundation,
+          { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
+        ]}
       >
-        <Text style={[styles.backText, { color: theme.text }]}>← Settings</Text>
-      </Pressable>
-      <View style={[styles.foundation, { backgroundColor: theme.surface }]}>
+        <Text style={[styles.foundationEyebrow, { color: theme.accent }]}>
+          How Ruckus works
+        </Text>
         <Text style={[styles.foundationTitle, { color: theme.text }]}>
-          Built around public group activities
+          Public, group-based, and intentionally limited
         </Text>
         <Text style={[styles.foundationCopy, { color: theme.textMuted }]}>
-          There are no direct messages, no one-to-one matching, no user-created
-          activities, and no live or background location collection. Meeting spots are
-          approved public, staffed venues and stay locked until the crew confirms.
+          There are no direct messages, one-to-one matches, user-created activities, or
+          live and background location collection. Approved public venue details stay
+          hidden until the group confirms.
         </Text>
       </View>
+
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Get guidance</Text>
       <View style={styles.actions}>
-        {safetyActions.map((action) => (
-          <Pressable
-            key={action.title}
-            accessibilityRole="button"
-            onPress={() => router.push(action.route)}
-            style={({ pressed }) => [
-              styles.action,
-              {
-                backgroundColor: theme.surface,
-                borderColor: theme.border,
-                opacity: pressed ? 0.8 : 1
-              }
-            ]}
-          >
-            <Text style={styles.actionIcon}>{action.icon}</Text>
-            <View style={styles.actionCopy}>
-              <Text style={[styles.actionTitle, { color: theme.text }]}>
-                {action.title}
-              </Text>
-              <Text style={[styles.actionDescription, { color: theme.textMuted }]}>
-                {action.copy}
-              </Text>
-            </View>
-            <Text style={[styles.chevron, { color: theme.textMuted }]}>›</Text>
-          </Pressable>
-        ))}
+        <ActionRow
+          mark="warning"
+          title="Emergency information"
+          description="Leave first, get immediate help, and report only after you are safe."
+          tone="danger"
+          onPress={() => router.push('/safety/emergency')}
+        />
+        <ActionRow
+          mark="rules"
+          title="Community guidelines"
+          description="The conduct expected in every group, chat, and public meetup."
+          tone="accent"
+          onPress={() => router.push('/safety/guidelines')}
+        />
+        <ActionRow
+          mark="forward"
+          title="Report from the source"
+          description="Open the relevant group or message first so reviewers receive the right context."
+          onPress={() => router.push('/groups')}
+        />
       </View>
-      <Text style={[styles.reminder, { color: theme.textMuted }]}>
-        An in-app report is not an emergency channel. If a situation feels unsafe, leave
-        first and get help.
-      </Text>
+
+      <View
+        style={[
+          styles.reminder,
+          { backgroundColor: tokens.color.coralSoft, borderColor: tokens.color.coral }
+        ]}
+      >
+        <Text style={styles.reminderTitle}>Ruckus is not an emergency channel.</Text>
+        <Text style={styles.reminderCopy}>
+          Reports and chat may not be monitored in real time. Leave unsafe situations and
+          contact local emergency services or your campus safety office.
+        </Text>
+      </View>
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  back: {
-    minHeight: tokens.touchTarget,
-    alignSelf: 'flex-start',
-    justifyContent: 'center',
-    borderRadius: tokens.radius.md,
-    paddingHorizontal: tokens.space.md,
-    marginBottom: tokens.space.lg
+  title: {
+    marginTop: tokens.space.md,
+    fontSize: tokens.type.title,
+    lineHeight: tokens.lineHeight.title,
+    fontWeight: tokens.weight.bold,
+    letterSpacing: -1
   },
-  backText: { fontSize: 13, fontWeight: '800' },
-  foundation: { borderRadius: tokens.radius.lg, padding: tokens.space.lg },
-  foundationTitle: { fontSize: 18, fontWeight: '900' },
-  foundationCopy: { marginTop: 7, fontSize: 13, lineHeight: 20 },
-  actions: { gap: tokens.space.sm, marginTop: tokens.space.lg },
-  action: {
-    minHeight: 86,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: tokens.space.md,
+  subtitle: {
+    marginTop: tokens.space.sm,
+    marginBottom: tokens.space.lg,
+    fontSize: tokens.type.body,
+    lineHeight: tokens.lineHeight.body,
+    fontWeight: tokens.weight.medium
+  },
+  foundation: {
     borderWidth: 1,
     borderRadius: tokens.radius.md,
-    padding: tokens.space.md
+    padding: tokens.space.lg
   },
-  actionIcon: { fontSize: 28 },
-  actionCopy: { flex: 1 },
-  actionTitle: { fontSize: 15, fontWeight: '900' },
-  actionDescription: { marginTop: 4, fontSize: 11, lineHeight: 16 },
-  chevron: { fontSize: 28, fontWeight: '500' },
-  reminder: { marginTop: tokens.space.lg, fontSize: 12, lineHeight: 18 }
+  foundationEyebrow: {
+    fontSize: tokens.type.micro,
+    fontWeight: tokens.weight.bold
+  },
+  foundationTitle: {
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.heading,
+    lineHeight: tokens.lineHeight.heading,
+    fontWeight: tokens.weight.bold
+  },
+  foundationCopy: {
+    marginTop: tokens.space.sm,
+    fontSize: tokens.type.label,
+    lineHeight: 21,
+    fontWeight: tokens.weight.medium
+  },
+  sectionTitle: {
+    marginTop: tokens.space.xl,
+    marginBottom: tokens.space.md,
+    fontSize: tokens.type.heading,
+    fontWeight: tokens.weight.bold
+  },
+  actions: { gap: tokens.space.sm },
+  reminder: {
+    borderWidth: 1,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md,
+    marginTop: tokens.space.xl
+  },
+  reminderTitle: {
+    color: '#7C2421',
+    fontSize: tokens.type.label,
+    fontWeight: tokens.weight.bold
+  },
+  reminderCopy: {
+    marginTop: tokens.space.xs,
+    color: '#6F3430',
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption,
+    fontWeight: tokens.weight.medium
+  }
 });
