@@ -6,7 +6,7 @@ import { tokens } from '@/theme/tokens';
 
 type InlineNoticeProps = {
   message: string;
-  tone?: 'error' | 'info' | 'offline';
+  tone?: 'error' | 'info' | 'offline' | 'success';
   icon?: string;
 };
 
@@ -17,9 +17,17 @@ export function InlineNotice({ message, tone = 'info', icon }: InlineNoticeProps
       ? tokens.color.coralSoft
       : tone === 'offline'
         ? theme.offline
-        : theme.surfaceMuted;
+        : tone === 'success'
+          ? theme.accentMuted
+          : theme.surfaceMuted;
   const color =
-    tone === 'error' ? '#8B2522' : tone === 'offline' ? '#FFF0B7' : theme.textMuted;
+    tone === 'error'
+      ? '#8B2522'
+      : tone === 'offline'
+        ? '#FFF0B7'
+        : tone === 'success'
+          ? theme.success
+          : theme.textMuted;
 
   return (
     <View accessibilityRole="alert" style={[styles.notice, { backgroundColor }]}>

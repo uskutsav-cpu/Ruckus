@@ -45,7 +45,26 @@ const symbols = {
     web: 'error'
   },
   chat: { ios: 'bubble.left', android: 'chat_bubble', web: 'chat_bubble' },
-  settings: { ios: 'gearshape', android: 'settings', web: 'settings' }
+  settings: { ios: 'gearshape', android: 'settings', web: 'settings' },
+  discover: { ios: 'sparkles', android: 'explore', web: 'explore' },
+  calendar: { ios: 'calendar', android: 'calendar_today', web: 'calendar_today' },
+  bookmark: { ios: 'bookmark', android: 'bookmark', web: 'bookmark' },
+  share: { ios: 'square.and.arrow.up', android: 'share', web: 'share' },
+  list: { ios: 'list.bullet', android: 'view_list', web: 'view_list' },
+  filter: {
+    ios: 'line.3.horizontal.decrease',
+    android: 'filter_list',
+    web: 'filter_list'
+  },
+  organization: { ios: 'building.2', android: 'business', web: 'business' },
+  send: { ios: 'paperplane.fill', android: 'send', web: 'send' },
+  lock: { ios: 'lock', android: 'lock', web: 'lock' },
+  accessibility: {
+    ios: 'accessibility',
+    android: 'accessibility_new',
+    web: 'accessibility_new'
+  },
+  copy: { ios: 'doc.on.doc', android: 'content_copy', web: 'content_copy' }
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type AppIconName = keyof typeof symbols;

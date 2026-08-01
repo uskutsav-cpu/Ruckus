@@ -7,13 +7,18 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react';
 
 import { env } from '@/lib/env';
+import {
+  clearPendingReferralCode,
+  getPendingReferralCode
+} from '@/features/referrals/pending-referral';
 import { logger } from '@/lib/logger';
 import { requireSupabase } from '@/lib/supabase';
-import type { InterestRow, ProfileRow } from '@/types/database.generated';
+import type { InterestRow, ProfileRow } from '@/types/database';
 
 type AuthUser = {
   id: string;
@@ -36,6 +41,7 @@ type AuthContextValue = {
   interests: InterestRow[];
   isLoading: boolean;
   isDemo: boolean;
+  isPasswordRecovery: boolean;
   signUp: (input: {
     email: string;
     password: string;
@@ -44,6 +50,8 @@ type AuthContextValue = {
   signIn: (input: { email: string; password: string }) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   resendVerification: (email: string) => Promise<AuthResult>;
+  requestPasswordReset: (email: string) => Promise<AuthResult>;
+  updatePassword: (password: string) => Promise<AuthResult>;
   attestAgeAndSafety: () => Promise<AuthResult>;
   completeOnboarding: (input: CompleteOnboardingInput) => Promise<AuthResult>;
   refreshProfile: () => Promise<void>;
@@ -63,6 +71,10 @@ const demoProfile: ProfileRow = {
   bio: 'Always down for a new campus adventure.',
   graduation_year: 2028,
   role: 'student',
+  username: 'maya_demo',
+  trust_level: 0,
+  suspended_until: null,
+  banned_at: null,
   age_attested: true,
   age_attested_at: new Date().toISOString(),
   safety_acknowledged_at: new Date().toISOString(),
@@ -104,6 +116,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [interests, setInterests] = useState<InterestRow[]>([]);
   const [isLoading, setIsLoading] = useState(env.backendMode !== 'configuration-error');
   const [isDemo, setIsDemo] = useState(false);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const referralAttempt = useRef<string | null>(null);
 
   const loadProfile = useCallback(async (userId: string) => {
     const supabase = requireSupabase();
@@ -207,7 +221,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       }
     );
 
-    const authSubscription = supabase.auth.onAuthStateChange((_event, session) => {
+    const authSubscription = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setIsPasswordRecovery(true);
       const nextUser = toAuthUser(session?.user ?? null);
       setUser(nextUser);
       if (!nextUser) {
@@ -228,6 +243,33 @@ export function AuthProvider({ children }: PropsWithChildren) {
       linkSubscription.remove();
     };
   }, [handleAuthUrl, loadProfile]);
+
+  useEffect(() => {
+    if (
+      isDemo ||
+      !user ||
+      !profile?.onboarding_completed_at ||
+      referralAttempt.current === user.id
+    ) {
+      return;
+    }
+    referralAttempt.current = user.id;
+    void getPendingReferralCode().then(async (code) => {
+      if (!code) return;
+      const { error } = await requireSupabase().rpc('attribute_referral', {
+        referral_code: code
+      });
+      if (error) {
+        logger.warn('referral.pending_attribution_failed', {
+          code: error.code,
+          message: error.message
+        });
+        return;
+      }
+      await clearPendingReferralCode();
+      logger.info('referral.pending_attributed');
+    });
+  }, [isDemo, profile?.onboarding_completed_at, user]);
 
   const signUp = useCallback(
     async (input: { email: string; password: string; displayName: string }) => {
@@ -283,6 +325,28 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return { error: error?.message ?? null };
   }, []);
 
+  const requestPasswordReset = useCallback(async (email: string) => {
+    if (!env.isBackendConfigured) {
+      return { error: 'Email delivery requires a configured Supabase project.' };
+    }
+    const { error } = await requireSupabase().auth.resetPasswordForEmail(email, {
+      redirectTo: Linking.createURL('auth/callback')
+    });
+    return { error: error?.message ?? null };
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    if (!env.isBackendConfigured) {
+      return { error: 'Password recovery requires a configured Supabase project.' };
+    }
+    const supabase = requireSupabase();
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { error: error.message };
+    setIsPasswordRecovery(false);
+    await supabase.auth.signOut();
+    return { error: null };
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     if (user && !isDemo) await loadProfile(user.id);
   }, [isDemo, loadProfile, user]);
@@ -333,10 +397,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
       interests,
       isLoading,
       isDemo,
+      isPasswordRecovery,
       signUp,
       signIn,
       signOut,
       resendVerification,
+      requestPasswordReset,
+      updatePassword,
       attestAgeAndSafety,
       completeOnboarding,
       refreshProfile,
@@ -348,13 +415,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
       enterDemo,
       interests,
       isDemo,
+      isPasswordRecovery,
       isLoading,
       profile,
       refreshProfile,
+      requestPasswordReset,
       resendVerification,
       signIn,
       signOut,
       signUp,
+      updatePassword,
       user
     ]
   );

@@ -14,7 +14,7 @@ export async function generateCheckinToken(
     return {
       tokenId: '90000000-0000-4000-8000-000000000001',
       expiresAt: new Date(Date.now() + 90_000).toISOString(),
-      qrPayload: `campusclash://check-in/${groupId}?token=${demoToken}`
+      qrPayload: `ruckus://check-in/${groupId}?token=${demoToken}`
     };
   }
   const supabase = requireSupabase();

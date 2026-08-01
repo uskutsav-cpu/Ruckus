@@ -2,8 +2,11 @@ import { requireSupabase } from '@/lib/supabase';
 
 type ReportInput = {
   messageId?: string;
+  eventMessageId?: string;
   userId?: string;
   groupId?: string;
+  eventId?: string;
+  organizationId?: string;
   reason: string;
   details: string;
   blockUser: boolean;
@@ -24,7 +27,14 @@ export async function submitReport(
   }
   const supabase = requireSupabase();
 
-  if (input.messageId) {
+  if (input.eventMessageId) {
+    const { error } = await supabase.rpc('report_event_message', {
+      target_message_id: input.eventMessageId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
+    });
+    if (error) throw error;
+  } else if (input.messageId) {
     const { error } = await supabase.rpc('report_message', {
       target_message_id: input.messageId,
       report_reason: input.reason,
@@ -41,6 +51,20 @@ export async function submitReport(
   } else if (input.groupId) {
     const { error } = await supabase.rpc('report_group', {
       target_group_id: input.groupId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
+    });
+    if (error) throw error;
+  } else if (input.eventId) {
+    const { error } = await supabase.rpc('report_event', {
+      target_event_id: input.eventId,
+      report_reason: input.reason,
+      ...(input.details.trim() ? { report_details: input.details.trim() } : {})
+    });
+    if (error) throw error;
+  } else if (input.organizationId) {
+    const { error } = await supabase.rpc('report_organization', {
+      target_organization_id: input.organizationId,
       report_reason: input.reason,
       ...(input.details.trim() ? { report_details: input.details.trim() } : {})
     });

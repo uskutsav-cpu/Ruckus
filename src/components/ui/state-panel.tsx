@@ -6,7 +6,7 @@ import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
 export type StatePanelProps = {
-  icon: string;
+  icon?: string;
   eyebrow?: string;
   title: string;
   message: string;
@@ -15,7 +15,7 @@ export type StatePanelProps = {
 };
 
 export function StatePanel({
-  icon,
+  icon = 'info',
   eyebrow,
   title,
   message,

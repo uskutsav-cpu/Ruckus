@@ -27,7 +27,7 @@ export function parseCheckinPayload(payload: string, expectedGroupId: string): s
   const groupId = url.pathname.replace(/^\/+/, '');
   const token = url.searchParams.get('token');
   if (
-    url.protocol !== 'campusclash:' ||
+    !['ruckus:', 'campusclash:'].includes(url.protocol) ||
     url.hostname !== 'check-in' ||
     !uuidPattern.test(groupId) ||
     !token ||

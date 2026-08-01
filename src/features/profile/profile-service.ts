@@ -52,6 +52,15 @@ export async function fetchProfileDashboard(
       avatarUrl: null,
       campusName: 'Riverside University',
       selectedInterestIds: [],
+      badges: [
+        {
+          id: 'first_checkin',
+          name: 'First check-in',
+          description: 'Completed a first verified Ruckus event check-in.',
+          icon: 'check',
+          awardedAt: new Date(Date.now() - 2 * 24 * 60 * 60_000).toISOString()
+        }
+      ],
       xpEntries: [
         {
           id: 'b0000000-0000-4000-8000-000000000001',
@@ -74,7 +83,8 @@ export async function fetchProfileDashboard(
     { data: xpTotal, error: totalError },
     { data: ledger, error: ledgerError },
     { data: interests, error: interestError },
-    { data: campus, error: campusError }
+    { data: campus, error: campusError },
+    { data: badges, error: badgeError }
   ] = await Promise.all([
     supabase.rpc('get_xp_total'),
     supabase
@@ -83,12 +93,18 @@ export async function fetchProfileDashboard(
       .order('created_at', { ascending: false })
       .limit(20),
     supabase.from('profile_interests').select('interest_id').eq('profile_id', userId),
-    supabase.from('campuses').select('name').eq('id', campusId).single()
+    supabase.from('campuses').select('name').eq('id', campusId).single(),
+    supabase
+      .from('user_badges')
+      .select('badge_id,awarded_at,badge_definitions!inner(name,description,icon)')
+      .eq('profile_id', userId)
+      .order('awarded_at', { ascending: false })
   ]);
   if (totalError) throw totalError;
   if (ledgerError) throw ledgerError;
   if (interestError) throw interestError;
   if (campusError) throw campusError;
+  if (badgeError) throw badgeError;
 
   let avatarUrl: string | null = null;
   if (avatarPath) {
@@ -103,6 +119,13 @@ export async function fetchProfileDashboard(
     avatarUrl,
     campusName: campus.name,
     selectedInterestIds: (interests ?? []).map((row) => row.interest_id),
+    badges: (badges ?? []).map((badge) => ({
+      id: badge.badge_id,
+      name: badge.badge_definitions.name,
+      description: badge.badge_definitions.description,
+      icon: badge.badge_definitions.icon,
+      awardedAt: badge.awarded_at
+    })),
     xpEntries: (ledger ?? []).map((entry) => ({
       id: entry.id,
       amount: entry.amount,

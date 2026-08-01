@@ -12,7 +12,7 @@ import type {
 } from '@/features/activities/activity-types';
 import { logger } from '@/lib/logger';
 import { requireSupabase } from '@/lib/supabase';
-import type { ActivityFeedRow, Json } from '@/types/database.generated';
+import type { ActivityFeedRow, Json } from '@/types/database';
 
 type StoredDecision = {
   sessionId: string;

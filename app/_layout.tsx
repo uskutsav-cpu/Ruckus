@@ -39,6 +39,8 @@ function RootNavigator() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+        <Stack.Screen name="reset-password" options={{ headerShown: false }} />
+        <Stack.Screen name="public" options={{ headerShown: false }} />
         <Stack.Screen
           name="account-deletion-confirmed"
           options={{ headerShown: false, animation: 'fade' }}

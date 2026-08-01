@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
@@ -6,10 +7,13 @@ import { tokens } from '@/theme/tokens';
 
 type BackButtonProps = {
   label?: string;
-  onPress: () => void;
+  onPress?: () => void;
 };
 
-export function BackButton({ label = 'Back', onPress }: BackButtonProps) {
+export function BackButton({
+  label = 'Back',
+  onPress = () => router.back()
+}: BackButtonProps) {
   const { theme } = useTheme();
 
   return (

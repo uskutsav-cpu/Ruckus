@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type StyleProp,
   type ViewStyle
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -24,7 +25,7 @@ export type PrimaryButtonProps = {
   accessibilityLabel?: string;
   leadingIcon?: string;
   haptic?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function PrimaryButton({

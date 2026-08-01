@@ -14,7 +14,7 @@ import type {
   PendingMatch
 } from '@/features/groups/group-types';
 import { requireSupabase } from '@/lib/supabase';
-import type { MessageRow } from '@/types/database.generated';
+import type { MessageRow } from '@/types/database';
 
 const messagePageSize = 30;
 

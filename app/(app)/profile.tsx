@@ -11,10 +11,11 @@ import { ListCardSkeleton } from '@/components/ui/loading-skeleton';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { StatusPill } from '@/components/ui/status-pill';
 import { useProfileDashboard } from '@/features/profile/use-profile';
+import { getXpLevelProgress } from '@/domain/xp-level';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
-import type { XpReason } from '@/types/database.generated';
+import type { XpReason } from '@/types/database';
 
 const reasonLabels: Record<XpReason, string> = {
   attendance_confirmed: 'Confirmed attendance',
@@ -23,7 +24,10 @@ const reasonLabels: Record<XpReason, string> = {
   host_completion: 'Hosted a completed activity',
   no_show: 'Missed a confirmed event',
   late_cancellation: 'Late group cancellation',
-  admin_adjustment: 'Campus team adjustment'
+  admin_adjustment: 'Campus team adjustment',
+  verified_event_checkin: 'Verified event attendance',
+  hosted_event: 'Hosted a completed event',
+  qualified_referral: 'Referral completed attendance'
 };
 
 const reasonMarks: Record<XpReason, AppIconName> = {
@@ -33,7 +37,10 @@ const reasonMarks: Record<XpReason, AppIconName> = {
   host_completion: 'people',
   no_show: 'warning',
   late_cancellation: 'warning',
-  admin_adjustment: 'settings'
+  admin_adjustment: 'settings',
+  verified_event_checkin: 'qrCode',
+  hosted_event: 'people',
+  qualified_referral: 'person'
 };
 
 export default function ProfileScreen() {
@@ -57,9 +64,8 @@ export default function ProfileScreen() {
 
   const data = dashboard.data;
   const xpTotal = data?.xpTotal ?? 0;
-  const level = Math.max(1, Math.floor(Math.max(xpTotal, 0) / 250) + 1);
-  const levelFloor = (level - 1) * 250;
-  const levelProgress = Math.min(Math.max((xpTotal - levelFloor) / 250, 0), 1);
+  const levelState = getXpLevelProgress(xpTotal);
+  const { level, progress: levelProgress } = levelState;
   const verifiedCheckins =
     data?.xpEntries.filter((entry) => entry.reason === 'verified_checkin').length ?? 0;
   const reliabilityFlags =
@@ -155,9 +161,48 @@ export default function ProfileScreen() {
               />
             </View>
             <Text style={[styles.levelNote, { color: theme.textMuted }]}>
-              {Math.max(level * 250 - xpTotal, 0)} XP to Level {level + 1}
+              {Math.max(levelState.nextLevelAt - xpTotal, 0)} XP to Level {level + 1}
             </Text>
           </View>
+
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={[styles.sectionEyebrow, { color: theme.textMuted }]}>
+                Earned
+              </Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>Badges</Text>
+            </View>
+            <Text style={[styles.trust, { color: theme.textMuted }]}>
+              Verified actions
+            </Text>
+          </View>
+          {data.badges.length ? (
+            <View style={styles.badges} accessibilityRole="list">
+              {data.badges.map((badge) => (
+                <View
+                  key={badge.id}
+                  style={[
+                    styles.badgeCard,
+                    { backgroundColor: theme.surfaceElevated, borderColor: theme.border }
+                  ]}
+                >
+                  <AppIcon name={badge.icon} size={22} color={theme.accent} />
+                  <View style={styles.badgeCopy}>
+                    <Text style={[styles.badgeName, { color: theme.text }]}>
+                      {badge.name}
+                    </Text>
+                    <Text style={[styles.badgeDescription, { color: theme.textMuted }]}>
+                      {badge.description}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={[styles.badgeEmpty, { color: theme.textMuted }]}>
+              Complete a verified event check-in to earn your first badge.
+            </Text>
+          )}
 
           <View style={styles.metrics}>
             <View style={[styles.metric, { borderColor: theme.border }]}>
@@ -197,10 +242,22 @@ export default function ProfileScreen() {
               onPress={() => router.push('/groups')}
             />
             <ProfileAction
+              mark="organization"
+              label="Organizations"
+              onPress={() => router.push('/organizations')}
+            />
+            <ProfileAction
               mark="safety"
               label="Safety"
               onPress={() => router.push('/safety')}
             />
+            {profile?.role === 'admin' ? (
+              <ProfileAction
+                mark="safety"
+                label="Moderation queue"
+                onPress={() => router.push('/admin/moderation')}
+              />
+            ) : null}
           </View>
 
           <View style={styles.sectionHeader}>
@@ -413,6 +470,23 @@ const styles = StyleSheet.create({
     fontSize: tokens.type.caption,
     fontWeight: tokens.weight.regular
   },
+  badges: { gap: tokens.space.sm },
+  badgeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.space.md,
+    borderWidth: 1,
+    borderRadius: tokens.radius.md,
+    padding: tokens.space.md
+  },
+  badgeCopy: { flex: 1 },
+  badgeName: { fontSize: tokens.type.label, fontWeight: tokens.weight.bold },
+  badgeDescription: {
+    marginTop: tokens.space.xs,
+    fontSize: tokens.type.caption,
+    lineHeight: tokens.lineHeight.caption
+  },
+  badgeEmpty: { fontSize: tokens.type.label, lineHeight: tokens.lineHeight.body },
   metrics: {
     flexDirection: 'row',
     gap: tokens.space.sm,

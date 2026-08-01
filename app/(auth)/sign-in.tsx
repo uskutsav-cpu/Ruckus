@@ -62,6 +62,12 @@ export default function SignInScreen() {
       {error ? <InlineNotice tone="error" icon="!" message={error} /> : null}
       <PrimaryButton label="Sign in" loading={loading} onPress={() => void submit()} />
       <PrimaryButton
+        label="Forgot password?"
+        onPress={() => router.push('/forgot-password')}
+        variant="ghost"
+        style={styles.switchButton}
+      />
+      <PrimaryButton
         label="Create account"
         onPress={() => router.replace('/sign-up')}
         variant="ghost"

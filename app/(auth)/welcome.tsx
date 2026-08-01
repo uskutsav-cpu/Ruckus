@@ -57,9 +57,9 @@ export default function WelcomeScreen() {
               ) : null}
             </View>
             <View>
-              <Text style={styles.title}>Find something to do.</Text>
+              <Text style={styles.title}>Your campus, happening now.</Text>
               <Text style={styles.heroSubtitle}>
-                Group activities with verified college students.
+                Swipe through events. RSVP in one move.
               </Text>
             </View>
           </View>
@@ -67,7 +67,8 @@ export default function WelcomeScreen() {
 
         <View style={styles.actions}>
           <Text style={[styles.intro, { color: theme.textMuted }]}>
-            Browse plans near campus, join a group, and meet at an approved public venue.
+            Find events near campus, join before they fill, and meet the attendee
+            community instantly.
           </Text>
           <PrimaryButton
             label="Create account"

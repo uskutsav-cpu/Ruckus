@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Alert, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { ActionRow } from '@/components/ui/action-row';
 import { AppScreen } from '@/components/ui/app-screen';
@@ -84,20 +84,22 @@ export default function SettingsScreen() {
   };
 
   const confirmSignOut = () => {
-    Alert.alert(
-      isDemo ? 'Exit demo?' : 'Sign out of Ruckus?',
-      isDemo
-        ? 'This ends the local demo session. No real account is affected.'
-        : 'You can sign in again with your verified university account.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: isDemo ? 'Exit demo' : 'Sign out',
-          style: 'destructive',
-          onPress: () => void signOut()
-        }
-      ]
-    );
+    const title = isDemo ? 'Exit demo?' : 'Sign out of Ruckus?';
+    const message = isDemo
+      ? 'This ends the local demo session. No real account is affected.'
+      : 'You can sign in again with your verified university account.';
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${title}\n\n${message}`)) void signOut();
+      return;
+    }
+    Alert.alert(title, message, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: isDemo ? 'Exit demo' : 'Sign out',
+        style: 'destructive',
+        onPress: () => void signOut()
+      }
+    ]);
   };
 
   return (
@@ -179,9 +181,9 @@ export default function SettingsScreen() {
           />
           <ActionRow
             mark="info"
-            title="Privacy & data use"
-            description="Review what the app uses and what it intentionally does not collect."
-            onPress={() => router.push('/legal')}
+            title="Privacy, data & referrals"
+            description="Leaderboard visibility, history, referral state, and data export."
+            onPress={() => router.push('/privacy-and-growth')}
           />
         </View>
       </SettingsSection>
@@ -190,19 +192,16 @@ export default function SettingsScreen() {
         <View style={styles.rows}>
           <ActionRow
             mark="help"
-            title="Campus support"
-            description="No verified campus support contact is configured in this build."
-            status="Not configured"
-            disabled
-            onPress={() => undefined}
+            title="Support"
+            description="Reporting, account, privacy, appeal, and emergency guidance."
+            onPress={() => router.push('/public/support')}
           />
           <ActionRow
             mark="document"
-            title="Terms and privacy documents"
-            description="Approved production document URLs must be supplied by the deploying organization."
-            status="Pending"
-            disabled
-            onPress={() => undefined}
+            title="Terms and privacy drafts"
+            description="Read the clearly labeled beta drafts and legal-review status."
+            status="Draft"
+            onPress={() => router.push('/public/terms')}
           />
         </View>
       </SettingsSection>

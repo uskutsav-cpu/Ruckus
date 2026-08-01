@@ -6,7 +6,7 @@ import {
   useMemo,
   useState
 } from 'react';
-import { Appearance, useColorScheme } from 'react-native';
+import { Appearance, Platform, useColorScheme } from 'react-native';
 
 import {
   readThemePreference,
@@ -47,7 +47,9 @@ export function ThemeProvider({ children }: PropsWithChildren) {
       setPreference: (next) => {
         setPreference(next);
         void saveThemePreference(next);
-        if (next !== 'system') Appearance.setColorScheme(next);
+        if (Platform.OS !== 'web') {
+          Appearance.setColorScheme(next === 'system' ? 'unspecified' : next);
+        }
       },
       theme: isDark ? darkTheme : lightTheme
     }),

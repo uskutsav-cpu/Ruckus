@@ -74,7 +74,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     name: 'Ruckus',
     slug: 'campus-clash',
-    scheme: 'campusclash',
+    scheme: ['ruckus', 'campusclash'],
     version: '0.1.0',
     orientation: 'portrait',
     userInterfaceStyle: 'automatic',
@@ -98,6 +98,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     plugins: [
       'expo-router',
+      'expo-font',
+      [
+        'expo-calendar',
+        {
+          writeOnlyAccess: true,
+          writeOnlyCalendarPermission:
+            'Ruckus adds an event only when you choose Add to calendar.'
+        }
+      ],
       [
         'expo-camera',
         {

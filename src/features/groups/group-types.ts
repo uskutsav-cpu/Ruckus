@@ -1,8 +1,4 @@
-import type {
-  ConfirmationStatus,
-  GroupStatus,
-  MessageKind
-} from '@/types/database.generated';
+import type { ConfirmationStatus, GroupStatus, MessageKind } from '@/types/database';
 import type { ImageSource } from 'expo-image';
 
 export type GroupMemberCard = {

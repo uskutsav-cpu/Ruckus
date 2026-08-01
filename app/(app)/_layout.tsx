@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DemoModeBanner } from '@/components/demo-mode-banner';
+import { AppTabBar, primaryTabPaths } from '@/components/app-tab-bar';
 import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
@@ -13,6 +14,7 @@ export default function AppLayout() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const [demoBannerHeight, setDemoBannerHeight] = useState(42);
+  const pathname = usePathname();
   const bannerMode = isDemo
     ? 'demo'
     : env.appEnvironment === 'staging'
@@ -48,12 +50,21 @@ export default function AppLayout() {
           }}
         >
           <Stack.Screen name="deck" options={{ animation: 'fade' }} />
+          <Stack.Screen name="discover" options={{ animation: 'fade' }} />
+          <Stack.Screen name="my-events" options={{ animation: 'fade' }} />
+          <Stack.Screen name="create-event" options={{ animation: 'fade' }} />
+          <Stack.Screen name="chats" options={{ animation: 'fade' }} />
           <Stack.Screen name="pending" />
           <Stack.Screen name="groups" />
           <Stack.Screen name="profile" />
           <Stack.Screen name="profile/edit" />
+          <Stack.Screen name="organizations" />
+          <Stack.Screen name="organization/create" />
+          <Stack.Screen name="organization/[id]" />
+          <Stack.Screen name="admin/moderation" />
           <Stack.Screen name="leaderboard" />
           <Stack.Screen name="settings" />
+          <Stack.Screen name="privacy-and-growth" />
           <Stack.Screen name="legal" />
           <Stack.Screen name="account-deletion" />
           <Stack.Screen name="safety/index" />
@@ -71,7 +82,12 @@ export default function AppLayout() {
             name="activity/[id]"
             options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
           />
+          <Stack.Screen name="event/[id]" />
+          <Stack.Screen name="event/[id]/chat" />
+          <Stack.Screen name="event/[id]/check-in" />
+          <Stack.Screen name="event/[id]/manage" />
         </Stack>
+        {primaryTabPaths.has(pathname) ? <AppTabBar /> : null}
       </View>
     </View>
   );

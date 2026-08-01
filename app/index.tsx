@@ -11,5 +11,5 @@ export default function IndexRoute() {
     return <Redirect href="/age-and-safety" />;
   }
   if (!profile.onboarding_completed_at) return <Redirect href="/onboarding" />;
-  return <Redirect href="/deck" />;
+  return <Redirect href="/discover" />;
 }

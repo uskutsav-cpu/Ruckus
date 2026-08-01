@@ -39,14 +39,24 @@ const reasons = [
 export default function ReportScreen() {
   const params = useLocalSearchParams<{
     messageId?: string;
+    eventMessageId?: string;
     userId?: string;
     groupId?: string;
+    eventId?: string;
+    organizationId?: string;
   }>();
   const messageId = Array.isArray(params.messageId)
     ? params.messageId[0]
     : params.messageId;
+  const eventMessageId = Array.isArray(params.eventMessageId)
+    ? params.eventMessageId[0]
+    : params.eventMessageId;
   const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
   const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId;
+  const eventId = Array.isArray(params.eventId) ? params.eventId[0] : params.eventId;
+  const organizationId = Array.isArray(params.organizationId)
+    ? params.organizationId[0]
+    : params.organizationId;
   const { isDemo, user } = useAuth();
   const { theme } = useTheme();
   const [reason, setReason] = useState('');
@@ -55,8 +65,19 @@ export default function ReportScreen() {
   const [reviewing, setReviewing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const hasTarget = Boolean(messageId || userId || groupId);
-  const targetLabel = messageId ? 'message' : userId ? 'student' : 'group';
+  const hasTarget = Boolean(
+    eventMessageId || messageId || userId || groupId || eventId || organizationId
+  );
+  const targetLabel =
+    eventMessageId || messageId
+      ? 'message'
+      : userId
+        ? 'student'
+        : groupId
+          ? 'group'
+          : eventId
+            ? 'event'
+            : 'organization';
 
   const submit = async () => {
     if (!user || !hasTarget || !reason) return;
@@ -66,8 +87,11 @@ export default function ReportScreen() {
       const outcome = await submitReport(
         {
           messageId,
+          eventMessageId,
           userId,
-          groupId: messageId || userId ? undefined : groupId,
+          groupId: eventMessageId || messageId || userId ? undefined : groupId,
+          eventId: eventMessageId ? undefined : eventId,
+          organizationId,
           reason,
           details,
           blockUser

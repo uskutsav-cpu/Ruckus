@@ -1,5 +1,5 @@
 import type { GroupLobby } from '@/features/groups/group-types';
-import type { Json } from '@/types/database.generated';
+import type { Json } from '@/types/database';
 
 function isObject(value: Json | undefined): value is {
   [key: string]: Json | undefined;
