@@ -11,6 +11,7 @@
 - [x] Dependency audit reviewed (no blind force upgrade)
 - [x] Working tree and complete Git history secret/PII scan
 - [x] CI configuration validated; generated types and lockfile current
+- [x] Hosted CI and CodeQL completed successfully on the published `main`
 - [x] Final diff/status and non-destructive merge to `main`
 
 ## Product/security review
@@ -29,7 +30,7 @@
 - [ ] Accessibility-expert, moderation-operations, legal/privacy, and campus review
 - [ ] Support/security contacts and public legal/deletion URLs approved
 - [ ] Final branded screenshots and store metadata approved
-- [ ] Public GitHub repository created/pushed and remote contents verified
+- [x] Public GitHub repository created/pushed and remote contents verified
 
 A prerelease tag may truthfully record automated completion while external boxes remain
 open. It must not be called production 1.0 or store-ready.
