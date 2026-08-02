@@ -12,6 +12,13 @@
 | Referral                 | Attribution and verified attendance reward | Participants/trusted logic                | One attribution; no self/duplicate/cross-campus            |
 | Partnership lead         | Campus launch contact                      | Service-role review                       | Rate-limited; retention policy owner gate                  |
 | Analytics/logs           | Reliability and product counts             | Local/no-op by default                    | No bodies, report text, tokens, email, or precise location |
+| Campus admin assignment  | Campus-scoped staff authorization          | Platform admin grant; own access readable | Soft-revoked so the grant history survives audit           |
+| Campus admin audit log   | Accountability for staff actions           | Campus viewer/analyst/administrator       | Action, target type/id and actor only; no student records  |
+| Campus announcements     | Campus-wide messaging                      | Published item to own campus/audience     | Author and approver never shown to students; 30-day window |
+| Campus aggregate export  | Institutional reporting                    | Campus analyst/administrator              | Daily aggregates only; every export recorded for audit     |
+| Semester XP              | Semester standings                         | Honors existing leaderboard opt-out       | Own rank always visible; closed semesters retained         |
+| Ambassador programme     | Referral attribution and standing          | Own dashboard; campus admin review queue  | Counts only; an ambassador never sees who used their code  |
+| Campaign scan            | Printed-asset effectiveness                | Aggregate daily counts to campus staff    | Salted hash only, deduplicated per day; no device ID or IP |
 
 Users can change leaderboard/history/preferences, request an export, block users, and
 request deletion. Export request generation/delivery and production retention periods
