@@ -64,6 +64,7 @@ export default function AppLayout() {
           <Stack.Screen name="admin/moderation" />
           <Stack.Screen name="admin/campus" />
           <Stack.Screen name="leaderboard" />
+          <Stack.Screen name="ambassador" />
           <Stack.Screen name="settings" />
           <Stack.Screen name="privacy-and-growth" />
           <Stack.Screen name="legal" />

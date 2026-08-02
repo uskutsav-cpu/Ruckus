@@ -265,6 +265,11 @@ export default function ProfileScreen() {
                 onPress={() => router.push('/admin/moderation')}
               />
             ) : null}
+            <ProfileAction
+              mark="star"
+              label="Ambassador programme"
+              onPress={() => router.push('/ambassador')}
+            />
             {campusAdminAccess.data &&
             (campusAdminAccess.data.platformAdministrator ||
               campusAdminAccess.data.campuses.length > 0) ? (
