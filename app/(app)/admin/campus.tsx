@@ -15,6 +15,10 @@ import { TextField } from '@/components/ui/text-field';
 import type { CampusAnnouncementAudience } from '@/features/campus-admin/campus-admin-types';
 import { hasCampusCapability } from '@/features/campus-admin/campus-admin-types';
 import {
+  useAmbassadorApplications,
+  useReviewAmbassadorApplication
+} from '@/features/growth/use-ambassador';
+import {
   useApproveAnnouncement,
   useCampusAdminAccess,
   useCampusAggregateExport,
@@ -32,7 +36,8 @@ import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
-type CampusTab = 'overview' | 'verification' | 'announcements' | 'safety' | 'audit';
+type CampusTab =
+  'overview' | 'verification' | 'ambassadors' | 'announcements' | 'safety' | 'audit';
 
 const audiences: readonly { value: CampusAnnouncementAudience; label: string }[] = [
   { value: 'all', label: 'Everyone' },
@@ -87,6 +92,7 @@ export default function CampusAdministrationScreen() {
       verification: hasCampusCapability(access.data, campusId, 'verification'),
       announcements: hasCampusCapability(access.data, campusId, 'announcements'),
       moderation: hasCampusCapability(access.data, campusId, 'moderation'),
+      ambassadors: hasCampusCapability(access.data, campusId, 'ambassadors'),
       audit: hasCampusCapability(access.data, campusId, 'audit'),
       export: hasCampusCapability(access.data, campusId, 'export')
     }),
@@ -98,6 +104,8 @@ export default function CampusAdministrationScreen() {
     if (capabilities.overview) available.push({ value: 'overview', label: 'Overview' });
     if (capabilities.verification)
       available.push({ value: 'verification', label: 'Verify' });
+    if (capabilities.ambassadors)
+      available.push({ value: 'ambassadors', label: 'Ambassadors' });
     if (capabilities.announcements)
       available.push({ value: 'announcements', label: 'Notices' });
     if (capabilities.moderation) available.push({ value: 'safety', label: 'Safety' });
@@ -192,6 +200,9 @@ export default function CampusAdministrationScreen() {
       ) : null}
       {tab === 'verification' && capabilities.verification ? (
         <VerificationPanel campusId={campusId} />
+      ) : null}
+      {tab === 'ambassadors' && capabilities.ambassadors ? (
+        <AmbassadorReviewPanel campusId={campusId} />
       ) : null}
       {tab === 'announcements' && capabilities.announcements ? (
         <AnnouncementsPanel campusId={campusId} />
@@ -639,6 +650,149 @@ function SafetyPanel({ campusId }: { campusId: string | null }) {
           />
         </View>
       ))}
+    </View>
+  );
+}
+
+function AmbassadorReviewPanel({ campusId }: { campusId: string | null }) {
+  const { theme } = useTheme();
+  const { profile } = useAuth();
+  const applications = useAmbassadorApplications(campusId, true);
+  const review = useReviewAmbassadorApplication(campusId);
+  const [notes, setNotes] = useState('');
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  if (applications.isPending) return <ListCardSkeleton />;
+  if (applications.isError) {
+    return (
+      <ErrorState
+        icon="alert"
+        title="Applications unavailable"
+        message="Ambassador applications could not be loaded."
+      />
+    );
+  }
+  if ((applications.data?.length ?? 0) === 0) {
+    return (
+      <StatePanel
+        icon="check"
+        title="No applications waiting"
+        message="No students are currently waiting on an ambassador decision."
+      />
+    );
+  }
+
+  const notesValid = notes.trim().length >= 3;
+
+  return (
+    <View style={styles.section}>
+      <TextField
+        label="Review notes"
+        value={notes}
+        onChangeText={setNotes}
+        multiline
+        help="Required. Recorded against the decision in the campus audit log."
+        placeholder="Confirmed as an active organization officer."
+      />
+
+      {applications.data?.map((application) => {
+        const isOwnApplication = application.profileId === profile?.id;
+        const isOpen = openId === application.id;
+        return (
+          <View
+            key={application.id}
+            style={[styles.card, { backgroundColor: theme.surfaceMuted }]}
+          >
+            <View style={styles.rowBetween}>
+              <Text style={[styles.cardTitle, { color: theme.text }]}>
+                {application.displayName ?? 'Ruckus member'}
+              </Text>
+              <StatusPill label={application.status.replace(/_/g, ' ')} tone="neutral" />
+            </View>
+            <Text style={[styles.cardMeta, { color: theme.textSubtle }]}>
+              Applied {format(new Date(application.createdAt), 'MMM d, yyyy')}
+            </Text>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: isOpen }}
+              accessibilityLabel={`${isOpen ? 'Hide' : 'Show'} application details`}
+              onPress={() => setOpenId(isOpen ? null : application.id)}
+            >
+              <Text style={[styles.cardMeta, { color: theme.primary }]}>
+                {isOpen ? 'Hide application' : 'Read application'}
+              </Text>
+            </Pressable>
+            {isOpen ? (
+              <Text style={[styles.cardBody, { color: theme.text }]}>
+                {application.motivation}
+              </Text>
+            ) : null}
+
+            {isOwnApplication ? (
+              <InlineNotice
+                tone="info"
+                icon="shield"
+                message="This is your own application. Another campus administrator must decide it."
+              />
+            ) : (
+              <View style={styles.actionRow}>
+                <PrimaryButton
+                  label="Approve"
+                  disabled={!notesValid || review.isPending}
+                  accessibilityHint="Activates this student as a campus ambassador and issues their referral code."
+                  onPress={() =>
+                    review.mutate(
+                      {
+                        applicationId: application.id,
+                        approve: true,
+                        notes: notes.trim()
+                      },
+                      {
+                        onSuccess: () => setNotes(''),
+                        onError: () =>
+                          Alert.alert(
+                            'Review failed',
+                            'The ambassador decision could not be saved.'
+                          )
+                      }
+                    )
+                  }
+                />
+                <PrimaryButton
+                  label="Decline"
+                  variant="secondary"
+                  disabled={!notesValid || review.isPending}
+                  onPress={() =>
+                    review.mutate(
+                      {
+                        applicationId: application.id,
+                        approve: false,
+                        notes: notes.trim()
+                      },
+                      {
+                        onSuccess: () => setNotes(''),
+                        onError: () =>
+                          Alert.alert(
+                            'Review failed',
+                            'The ambassador decision could not be saved.'
+                          )
+                      }
+                    )
+                  }
+                />
+              </View>
+            )}
+          </View>
+        );
+      })}
+
+      {!notesValid ? (
+        <InlineNotice
+          tone="info"
+          message="Add review notes before approving or declining an application."
+        />
+      ) : null}
     </View>
   );
 }

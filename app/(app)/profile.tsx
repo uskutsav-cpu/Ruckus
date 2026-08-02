@@ -270,6 +270,11 @@ export default function ProfileScreen() {
               label="Ambassador programme"
               onPress={() => router.push('/ambassador')}
             />
+            <ProfileAction
+              mark="people"
+              label="Club competitions"
+              onPress={() => router.push('/competitions')}
+            />
             {campusAdminAccess.data &&
             (campusAdminAccess.data.platformAdministrator ||
               campusAdminAccess.data.campuses.length > 0) ? (
@@ -277,6 +282,15 @@ export default function ProfileScreen() {
                 mark="safety"
                 label="Campus administration"
                 onPress={() => router.push('/admin/campus')}
+              />
+            ) : null}
+            {campusAdminAccess.data &&
+            (campusAdminAccess.data.platformAdministrator ||
+              campusAdminAccess.data.campuses.length > 0) ? (
+              <ProfileAction
+                mark="star"
+                label="Campus campaigns"
+                onPress={() => router.push('/admin/campaigns')}
               />
             ) : null}
           </View>

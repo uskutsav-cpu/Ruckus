@@ -108,7 +108,10 @@ export const campusAdminCapabilities = {
   announcements: ['announcement_manager', 'administrator'],
   moderation: ['moderator', 'administrator'],
   audit: ['viewer', 'analyst', 'administrator'],
-  export: ['analyst', 'administrator']
+  export: ['analyst', 'administrator'],
+  // Ambassador review is administrator-only, matching the database gate on
+  // get_campus_ambassador_applications and review_ambassador_application.
+  ambassadors: ['administrator']
 } as const satisfies Record<string, readonly CampusAdminRole[]>;
 
 export type CampusAdminCapability = keyof typeof campusAdminCapabilities;
