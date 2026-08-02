@@ -90,5 +90,8 @@ verify_jwt = false
 [functions.analytics-maintenance]
 verify_jwt = false
 
+[functions.campus-announcement-publisher]
+verify_jwt = false
+
 [functions.partnership-lead]
 verify_jwt = false

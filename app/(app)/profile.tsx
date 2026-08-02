@@ -10,6 +10,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { ListCardSkeleton } from '@/components/ui/loading-skeleton';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { StatusPill } from '@/components/ui/status-pill';
+import { useCampusAdminAccess } from '@/features/campus-admin/use-campus-admin';
 import { useProfileDashboard } from '@/features/profile/use-profile';
 import { getXpLevelProgress } from '@/domain/xp-level';
 import { useAuth } from '@/providers/auth-provider';
@@ -45,6 +46,7 @@ const reasonMarks: Record<XpReason, AppIconName> = {
 
 export default function ProfileScreen() {
   const { profile } = useAuth();
+  const campusAdminAccess = useCampusAdminAccess();
   const { theme } = useTheme();
   const dashboard = useProfileDashboard();
 
@@ -261,6 +263,15 @@ export default function ProfileScreen() {
                 mark="safety"
                 label="Moderation queue"
                 onPress={() => router.push('/admin/moderation')}
+              />
+            ) : null}
+            {campusAdminAccess.data &&
+            (campusAdminAccess.data.platformAdministrator ||
+              campusAdminAccess.data.campuses.length > 0) ? (
+              <ProfileAction
+                mark="safety"
+                label="Campus administration"
+                onPress={() => router.push('/admin/campus')}
               />
             ) : null}
           </View>
