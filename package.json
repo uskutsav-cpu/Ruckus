@@ -78,12 +78,12 @@
   "devDependencies": {
     "@types/react": "~19.2.2",
     "@types/react-test-renderer": "^19.1.0",
-    "eslint": "^9.39.0",
+    "eslint": "^10.8.0",
     "eslint-config-expo": "~57.0.1",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.6.2",
-    "supabase": "^2.72.0",
-    "typescript": "~6.0.3",
-    "vitest": "^3.2.4"
+    "supabase": "^2.110.0",
+    "typescript": "~7.0.2",
+    "vitest": "^4.1.10"
   }
 }
