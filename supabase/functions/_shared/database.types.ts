@@ -192,6 +192,72 @@ export type Database = {
           }
         ];
       };
+      analytics_export_audit: {
+        Row: {
+          actor_id: string | null;
+          event_id: string;
+          exported_at: string;
+          id: string;
+          organization_id: string | null;
+          period_key: string;
+          row_count: number;
+        };
+        Insert: {
+          actor_id?: string | null;
+          event_id: string;
+          exported_at?: string;
+          id?: string;
+          organization_id?: string | null;
+          period_key: string;
+          row_count: number;
+        };
+        Update: {
+          actor_id?: string | null;
+          event_id?: string;
+          exported_at?: string;
+          id?: string;
+          organization_id?: string | null;
+          period_key?: string;
+          row_count?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'analytics_export_audit_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'analytics_export_audit_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'analytics_export_audit_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'analytics_export_audit_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'analytics_export_audit_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_organization_profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       attendance_confirmations: {
         Row: {
           created_at: string;
@@ -302,6 +368,44 @@ export type Database = {
             columns: ['blocker_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      campus_semesters: {
+        Row: {
+          campus_id: string;
+          created_at: string;
+          ends_on: string;
+          id: string;
+          name: string;
+          starts_on: string;
+          updated_at: string;
+        };
+        Insert: {
+          campus_id: string;
+          created_at?: string;
+          ends_on: string;
+          id?: string;
+          name: string;
+          starts_on: string;
+          updated_at?: string;
+        };
+        Update: {
+          campus_id?: string;
+          created_at?: string;
+          ends_on?: string;
+          id?: string;
+          name?: string;
+          starts_on?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'campus_semesters_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: false;
+            referencedRelation: 'campuses';
             referencedColumns: ['id'];
           }
         ];
@@ -526,6 +630,141 @@ export type Database = {
           }
         ];
       };
+      event_analytics_daily: {
+        Row: {
+          attribution_sources: Json;
+          cancellations: number;
+          chat_participants: number;
+          checkins: number;
+          confirmed_rsvps: number;
+          event_card_opens: number;
+          event_id: string;
+          feed_impressions: number;
+          join_attempts: number;
+          metric_date: string;
+          no_shows: number;
+          pending_requests: number;
+          rating_total: number;
+          ratings: number;
+          referral_visits: number;
+          refreshed_at: string;
+          repeat_attendees: number;
+          shares: number;
+          unique_participants: number;
+          waitlist_additions: number;
+          waitlist_promotions: number;
+        };
+        Insert: {
+          attribution_sources?: Json;
+          cancellations?: number;
+          chat_participants?: number;
+          checkins?: number;
+          confirmed_rsvps?: number;
+          event_card_opens?: number;
+          event_id: string;
+          feed_impressions?: number;
+          join_attempts?: number;
+          metric_date: string;
+          no_shows?: number;
+          pending_requests?: number;
+          rating_total?: number;
+          ratings?: number;
+          referral_visits?: number;
+          refreshed_at?: string;
+          repeat_attendees?: number;
+          shares?: number;
+          unique_participants?: number;
+          waitlist_additions?: number;
+          waitlist_promotions?: number;
+        };
+        Update: {
+          attribution_sources?: Json;
+          cancellations?: number;
+          chat_participants?: number;
+          checkins?: number;
+          confirmed_rsvps?: number;
+          event_card_opens?: number;
+          event_id?: string;
+          feed_impressions?: number;
+          join_attempts?: number;
+          metric_date?: string;
+          no_shows?: number;
+          pending_requests?: number;
+          rating_total?: number;
+          ratings?: number;
+          referral_visits?: number;
+          refreshed_at?: string;
+          repeat_attendees?: number;
+          shares?: number;
+          unique_participants?: number;
+          waitlist_additions?: number;
+          waitlist_promotions?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_analytics_daily_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_analytics_daily_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      event_analytics_hourly: {
+        Row: {
+          day_of_week: number;
+          event_id: string;
+          hour_of_day: number;
+          impressions: number;
+          join_attempts: number;
+          opens: number;
+          refreshed_at: string;
+          unique_participants: number;
+        };
+        Insert: {
+          day_of_week: number;
+          event_id: string;
+          hour_of_day: number;
+          impressions?: number;
+          join_attempts?: number;
+          opens?: number;
+          refreshed_at?: string;
+          unique_participants?: number;
+        };
+        Update: {
+          day_of_week?: number;
+          event_id?: string;
+          hour_of_day?: number;
+          impressions?: number;
+          join_attempts?: number;
+          opens?: number;
+          refreshed_at?: string;
+          unique_participants?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_analytics_hourly_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_analytics_hourly_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       event_announcements: {
         Row: {
           author_id: string;
@@ -574,6 +813,125 @@ export type Database = {
           },
           {
             foreignKeyName: 'event_announcements_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      event_attribution_tokens: {
+        Row: {
+          campaign_key: string | null;
+          created_at: string;
+          created_by: string | null;
+          event_id: string;
+          expires_at: string;
+          id: string;
+          max_uses: number;
+          revoked_at: string | null;
+          source: Database['public']['Enums']['event_attribution_source'];
+          token_digest: string;
+          use_count: number;
+        };
+        Insert: {
+          campaign_key?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          event_id: string;
+          expires_at: string;
+          id?: string;
+          max_uses?: number;
+          revoked_at?: string | null;
+          source: Database['public']['Enums']['event_attribution_source'];
+          token_digest: string;
+          use_count?: number;
+        };
+        Update: {
+          campaign_key?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          event_id?: string;
+          expires_at?: string;
+          id?: string;
+          max_uses?: number;
+          revoked_at?: string | null;
+          source?: Database['public']['Enums']['event_attribution_source'];
+          token_digest?: string;
+          use_count?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_attribution_tokens_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_attribution_tokens_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_attribution_tokens_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      event_attribution_visits: {
+        Row: {
+          attribution_token_id: string | null;
+          event_id: string;
+          expires_at: string;
+          id: string;
+          occurred_at: string;
+          source: Database['public']['Enums']['event_attribution_source'];
+          visited_on: string;
+          visitor_digest: string;
+        };
+        Insert: {
+          attribution_token_id?: string | null;
+          event_id: string;
+          expires_at?: string;
+          id?: string;
+          occurred_at?: string;
+          source: Database['public']['Enums']['event_attribution_source'];
+          visited_on: string;
+          visitor_digest: string;
+        };
+        Update: {
+          attribution_token_id?: string | null;
+          event_id?: string;
+          expires_at?: string;
+          id?: string;
+          occurred_at?: string;
+          source?: Database['public']['Enums']['event_attribution_source'];
+          visited_on?: string;
+          visitor_digest?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_attribution_visits_attribution_token_id_fkey';
+            columns: ['attribution_token_id'];
+            isOneToOne: false;
+            referencedRelation: 'event_attribution_tokens';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_attribution_visits_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_attribution_visits_event_id_fkey';
             columns: ['event_id'];
             isOneToOne: false;
             referencedRelation: 'public_event_pages';
@@ -908,6 +1266,52 @@ export type Database = {
             columns: ['event_id'];
             isOneToOne: false;
             referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      event_feedback: {
+        Row: {
+          created_at: string;
+          event_id: string;
+          profile_id: string;
+          rating: number;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          event_id: string;
+          profile_id: string;
+          rating: number;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          event_id?: string;
+          profile_id?: string;
+          rating?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'event_feedback_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'events';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_feedback_event_id_fkey';
+            columns: ['event_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_event_pages';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'event_feedback_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
             referencedColumns: ['id'];
           }
         ];
@@ -3627,6 +4031,10 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      cleanup_event_analytics: {
+        Args: { batch_size?: number };
+        Returns: number;
+      };
       cleanup_recommendation_data: {
         Args: { batch_size?: number };
         Returns: number;
@@ -3684,6 +4092,16 @@ export type Database = {
         };
         Returns: string;
       };
+      create_event_attribution_token: {
+        Args: {
+          attribution_source: Database['public']['Enums']['event_attribution_source'];
+          target_event_id: string;
+          token_campaign_key?: string;
+          token_expires_at?: string;
+          token_max_uses?: number;
+        };
+        Returns: string;
+      };
       create_event_checkin_token_digest: {
         Args: {
           target_digest: string;
@@ -3694,6 +4112,14 @@ export type Database = {
       };
       duplicate_event: { Args: { target_event_id: string }; Returns: string };
       ensure_user_referral_code: { Args: never; Returns: string };
+      export_event_analytics_csv: {
+        Args: {
+          anchor_date?: string;
+          period_key?: string;
+          target_event_id: string;
+        };
+        Returns: string;
+      };
       finalize_group_attendance: {
         Args: { target_group_id: string };
         Returns: Json;
@@ -3705,6 +4131,14 @@ export type Database = {
       follow_user: {
         Args: { target_profile_id: string };
         Returns: Database['public']['Enums']['follow_status'];
+      };
+      get_event_analytics: {
+        Args: {
+          anchor_date?: string;
+          period_key?: string;
+          target_event_id: string;
+        };
+        Returns: Json;
       };
       get_event_attendees: { Args: { target_event_id: string }; Returns: Json };
       get_event_detail: { Args: { target_event_id: string }; Returns: Json };
@@ -3755,6 +4189,14 @@ export type Database = {
         Returns: Json;
       };
       get_my_organizations: { Args: never; Returns: Json };
+      get_organization_analytics: {
+        Args: {
+          range_end: string;
+          range_start: string;
+          target_organization_id: string;
+        };
+        Returns: Json;
+      };
       get_organization_dashboard: {
         Args: { target_organization_id: string };
         Returns: Json;
@@ -3823,6 +4265,14 @@ export type Database = {
         Args: { target_session_id: string };
         Returns: Json;
       };
+      record_event_attribution_visit: {
+        Args: {
+          anonymous_visitor_key?: string;
+          attribution_token?: string;
+          target_event_id: string;
+        };
+        Returns: Database['public']['Enums']['event_attribution_source'];
+      };
       record_event_impressions: {
         Args: { interaction_surface?: string; target_event_ids: string[] };
         Returns: number;
@@ -3843,6 +4293,7 @@ export type Database = {
         Args: { target_digest: string };
         Returns: Json;
       };
+      refresh_event_analytics: { Args: never; Returns: number };
       refresh_event_collaborative_signals: { Args: never; Returns: number };
       register_push_token: {
         Args: {
@@ -3957,6 +4408,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      submit_event_feedback: {
+        Args: { rating_value: number; target_event_id: string };
+        Returns: undefined;
+      };
       submit_event_rating: {
         Args: {
           feedback_value?: string;
@@ -3993,6 +4448,17 @@ export type Database = {
       attendance_visibility: 'friends' | 'confirmed_attendees' | 'private';
       confirmation_status: 'pending' | 'confirmed' | 'declined' | 'expired';
       data_request_status: 'requested' | 'processing' | 'ready' | 'expired' | 'cancelled';
+      event_attribution_source:
+        | 'direct'
+        | 'event_share_link'
+        | 'user_referral'
+        | 'ambassador'
+        | 'organization_page'
+        | 'campus_campaign'
+        | 'qr_poster'
+        | 'public_search'
+        | 'internal_recommendation'
+        | 'welcome_week';
       event_decision: 'passed' | 'saved';
       event_host_role: 'owner' | 'cohost' | 'checkin';
       event_message_kind: 'text' | 'system' | 'announcement';
@@ -4186,6 +4652,18 @@ export const Constants = {
       attendance_visibility: ['friends', 'confirmed_attendees', 'private'],
       confirmation_status: ['pending', 'confirmed', 'declined', 'expired'],
       data_request_status: ['requested', 'processing', 'ready', 'expired', 'cancelled'],
+      event_attribution_source: [
+        'direct',
+        'event_share_link',
+        'user_referral',
+        'ambassador',
+        'organization_page',
+        'campus_campaign',
+        'qr_poster',
+        'public_search',
+        'internal_recommendation',
+        'welcome_week'
+      ],
       event_decision: ['passed', 'saved'],
       event_host_role: ['owner', 'cohost', 'checkin'],
       event_message_kind: ['text', 'system', 'announcement'],

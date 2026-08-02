@@ -87,5 +87,8 @@ verify_jwt = false
 [functions.recommendation-maintenance]
 verify_jwt = false
 
+[functions.analytics-maintenance]
+verify_jwt = false
+
 [functions.partnership-lead]
 verify_jwt = false

@@ -1,9 +1,14 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
+
 import { demoEvents } from '@/features/events/demo-events';
 import { requireSupabase } from '@/lib/supabase';
 import type { Tables } from '@/types/database.generated';
 
 export type PublicEvent = Tables<'public_event_pages'>;
 export type PublicOrganization = Tables<'public_organization_profiles'>;
+
+const anonymousAnalyticsKey = 'ruckus.public-analytics-visitor.v1';
 
 function demoPublicEvent(slug: string): PublicEvent | null {
   const event = demoEvents.find(
@@ -65,6 +70,25 @@ export async function fetchPublicEvent(
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+export async function recordPublicEventVisit(
+  eventId: string,
+  attributionToken: string | null,
+  isDemo: boolean
+): Promise<void> {
+  if (isDemo) return;
+  let visitorKey = await AsyncStorage.getItem(anonymousAnalyticsKey);
+  if (!visitorKey) {
+    visitorKey = `${Crypto.randomUUID()}${Crypto.randomUUID()}`;
+    await AsyncStorage.setItem(anonymousAnalyticsKey, visitorKey);
+  }
+  const { error } = await requireSupabase().rpc('record_event_attribution_visit', {
+    target_event_id: eventId,
+    anonymous_visitor_key: visitorKey,
+    ...(attributionToken ? { attribution_token: attributionToken } : {})
+  });
+  if (error) throw error;
 }
 
 export async function fetchPublicOrganization(

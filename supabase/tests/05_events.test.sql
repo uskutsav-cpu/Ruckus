@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(18);
+select plan(20);
 
 create function pg_temp.operation_fails(command text)
 returns boolean
@@ -263,6 +263,29 @@ select is(
   (select count(*) from public.event_rsvps),
   0::bigint,
   'an unrelated user cannot enumerate event attendees'
+);
+
+select set_config(
+  'request.jwt.claims',
+  '{"sub":"10000000-0000-4000-8000-000000000007","role":"authenticated"}',
+  true
+);
+select set_config(
+  'request.jwt.claim.sub',
+  '10000000-0000-4000-8000-000000000007',
+  true
+);
+select lives_ok(
+  $$select public.cancel_event(
+    '70000000-0000-4000-8000-000000000099', 'Weather closure'
+  )$$,
+  'an authorized host can cancel an event without an ambiguous-column error'
+);
+select is(
+  (select cancellation_reason from public.events
+    where id = '70000000-0000-4000-8000-000000000099'),
+  'Weather closure',
+  'event cancellation persists the supplied organizer reason'
 );
 
 reset role;

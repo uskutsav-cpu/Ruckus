@@ -280,7 +280,8 @@ begin
     raise exception using errcode = '42501', message = 'FOLLOWS_DISABLED';
   end if;
 
-  next_status := case when target_policy = 'public' then 'active' else 'pending' end;
+  next_status := case when target_policy = 'public'
+    then 'active'::public.follow_status else 'pending'::public.follow_status end;
 
   insert into public.user_follows (
     follower_id, followed_id, status, accepted_at
@@ -529,7 +530,9 @@ begin
     raise exception using errcode = '42501', message = 'SOCIAL_TARGET_UNAVAILABLE';
   end if;
 
-  next_status := case when accept_request then 'accepted' else 'declined' end;
+  next_status := case when accept_request
+    then 'accepted'::public.friend_request_status
+    else 'declined'::public.friend_request_status end;
   update public.friend_requests
   set status = next_status, responded_at = now(), updated_at = now()
   where id = request_record.id;

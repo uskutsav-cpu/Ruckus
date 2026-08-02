@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { format } from 'date-fns';
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -16,14 +17,19 @@ import { ListCardSkeleton } from '@/components/ui/loading-skeleton';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { StatusPill } from '@/components/ui/status-pill';
-import { fetchPublicEvent } from '@/features/public/public-service';
+import {
+  fetchPublicEvent,
+  recordPublicEventVisit
+} from '@/features/public/public-service';
+import { logger } from '@/lib/logger';
 import { useAuth } from '@/providers/auth-provider';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
 export default function PublicEventScreen() {
-  const { slug } = useLocalSearchParams<{ slug: string }>();
+  const { slug, a } = useLocalSearchParams<{ slug: string; a?: string }>();
   const eventSlug = Array.isArray(slug) ? slug[0] : slug;
+  const attributionToken = Array.isArray(a) ? a[0] : a;
   const { isDemo, user } = useAuth();
   const { theme } = useTheme();
   const event = useQuery({
@@ -31,6 +37,17 @@ export default function PublicEventScreen() {
     queryFn: () => fetchPublicEvent(eventSlug ?? '', isDemo),
     enabled: Boolean(eventSlug)
   });
+
+  useEffect(() => {
+    if (!event.data?.id) return;
+    void recordPublicEventVisit(event.data.id, attributionToken ?? null, isDemo).catch(
+      (error: unknown) => {
+        logger.warn('public_event.attribution_failed', {
+          message: error instanceof Error ? error.message : 'Unknown attribution error'
+        });
+      }
+    );
+  }, [attributionToken, event.data?.id, isDemo]);
 
   if (event.isLoading) {
     return (
@@ -56,7 +73,11 @@ export default function PublicEventScreen() {
   }
 
   const data = event.data;
-  const eventLink = Linking.createURL(`/public/event/${data.slug}`);
+  const eventLink = attributionToken
+    ? Linking.createURL(`/public/event/${data.slug}`, {
+        queryParams: { a: attributionToken }
+      })
+    : Linking.createURL(`/public/event/${data.slug}`);
   const cancelled = data.status === 'cancelled';
   const completed = data.status === 'completed';
   const description =

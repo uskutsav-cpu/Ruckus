@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import * as Linking from 'expo-linking';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, type Href, useLocalSearchParams } from 'expo-router';
 import QRCode from 'react-native-qrcode-svg';
 
 import { AppIcon } from '@/components/ui/app-icon';
@@ -15,6 +15,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { StatusPill } from '@/components/ui/status-pill';
 import { TextField } from '@/components/ui/text-field';
+import { createAttributionToken } from '@/features/analytics/organizer-analytics-service';
 import { createEventCheckinCode } from '@/features/events/event-service';
 import {
   useArchiveHostedEvent,
@@ -89,8 +90,6 @@ export default function EventManageScreen() {
   const pending = dashboard.data.attendees.filter(
     (attendee) => attendee.status === 'pending'
   );
-  const launchLink = Linking.createURL(`/event/${event.data.id}`);
-
   return (
     <AppScreen>
       <BackButton />
@@ -239,6 +238,11 @@ export default function EventManageScreen() {
       <View style={[styles.section, { borderColor: theme.border }]}>
         <Text style={[styles.heading, { color: theme.text }]}>Launch tools</Text>
         <SecondaryButton
+          label="Open event analytics"
+          leadingIcon="list"
+          onPress={() => router.push(`/event/${eventId}/analytics` as Href)}
+        />
+        <SecondaryButton
           label="Duplicate as draft"
           leadingIcon="copy"
           loading={duplicate.isPending}
@@ -255,12 +259,23 @@ export default function EventManageScreen() {
         <SecondaryButton
           label="Share launch link"
           leadingIcon="share"
-          onPress={() =>
-            void Share.share({
-              message: `${event.data.title}\n${launchLink}`,
-              url: launchLink
-            })
-          }
+          onPress={() => {
+            void createAttributionToken(eventId, 'event_share_link', isDemo)
+              .then((attributionToken) =>
+                Linking.createURL(`/public/event/${event.data.slug}`, {
+                  queryParams: { a: attributionToken }
+                })
+              )
+              .then((launchLink) =>
+                Share.share({
+                  message: `${event.data.title}\n${launchLink}`,
+                  url: launchLink
+                })
+              )
+              .catch(() =>
+                setNotice('A tracked launch link could not be created. Try again.')
+              );
+          }}
         />
         <SecondaryButton
           label="Open event chat"
