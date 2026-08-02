@@ -192,6 +192,138 @@ export type Database = {
           }
         ];
       };
+      ambassador_applications: {
+        Row: {
+          campus_id: string;
+          created_at: string;
+          id: string;
+          motivation: string;
+          profile_id: string;
+          review_notes: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          status: Database['public']['Enums']['ambassador_application_status'];
+          updated_at: string;
+        };
+        Insert: {
+          campus_id: string;
+          created_at?: string;
+          id?: string;
+          motivation: string;
+          profile_id: string;
+          review_notes?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          status?: Database['public']['Enums']['ambassador_application_status'];
+          updated_at?: string;
+        };
+        Update: {
+          campus_id?: string;
+          created_at?: string;
+          id?: string;
+          motivation?: string;
+          profile_id?: string;
+          review_notes?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          status?: Database['public']['Enums']['ambassador_application_status'];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ambassador_applications_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: false;
+            referencedRelation: 'campuses';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ambassador_applications_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ambassador_applications_reviewed_by_fkey';
+            columns: ['reviewed_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      ambassadors: {
+        Row: {
+          activated_at: string;
+          activated_by: string;
+          campus_id: string;
+          created_at: string;
+          id: string;
+          profile_id: string;
+          referral_code_id: string | null;
+          retired_at: string | null;
+          status: Database['public']['Enums']['ambassador_status'];
+          tier: Database['public']['Enums']['ambassador_tier'];
+          updated_at: string;
+        };
+        Insert: {
+          activated_at?: string;
+          activated_by: string;
+          campus_id: string;
+          created_at?: string;
+          id?: string;
+          profile_id: string;
+          referral_code_id?: string | null;
+          retired_at?: string | null;
+          status?: Database['public']['Enums']['ambassador_status'];
+          tier?: Database['public']['Enums']['ambassador_tier'];
+          updated_at?: string;
+        };
+        Update: {
+          activated_at?: string;
+          activated_by?: string;
+          campus_id?: string;
+          created_at?: string;
+          id?: string;
+          profile_id?: string;
+          referral_code_id?: string | null;
+          retired_at?: string | null;
+          status?: Database['public']['Enums']['ambassador_status'];
+          tier?: Database['public']['Enums']['ambassador_tier'];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ambassadors_activated_by_fkey';
+            columns: ['activated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ambassadors_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: false;
+            referencedRelation: 'campuses';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ambassadors_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ambassadors_referral_code_id_fkey';
+            columns: ['referral_code_id'];
+            isOneToOne: false;
+            referencedRelation: 'referral_codes';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       analytics_export_audit: {
         Row: {
           actor_id: string | null;
@@ -3793,6 +3925,83 @@ export type Database = {
           }
         ];
       };
+      semester_xp: {
+        Row: {
+          id: string;
+          profile_id: string;
+          semester_id: string;
+          updated_at: string;
+          xp_total: number;
+        };
+        Insert: {
+          id?: string;
+          profile_id: string;
+          semester_id: string;
+          updated_at?: string;
+          xp_total?: number;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string;
+          semester_id?: string;
+          updated_at?: string;
+          xp_total?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'semester_xp_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'semester_xp_semester_id_fkey';
+            columns: ['semester_id'];
+            isOneToOne: false;
+            referencedRelation: 'semesters';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      semesters: {
+        Row: {
+          campus_id: string;
+          created_at: string;
+          ends_on: string;
+          id: string;
+          is_current: boolean;
+          name: string;
+          starts_on: string;
+        };
+        Insert: {
+          campus_id: string;
+          created_at?: string;
+          ends_on: string;
+          id?: string;
+          is_current?: boolean;
+          name: string;
+          starts_on: string;
+        };
+        Update: {
+          campus_id?: string;
+          created_at?: string;
+          ends_on?: string;
+          id?: string;
+          is_current?: boolean;
+          name?: string;
+          starts_on?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'semesters_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: false;
+            referencedRelation: 'campuses';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       social_audit_log: {
         Row: {
           action: string;
@@ -4229,6 +4438,10 @@ export type Database = {
       };
     };
     Functions: {
+      apply_for_ambassador_program: {
+        Args: { application_motivation: string };
+        Returns: string;
+      };
       apply_moderation_action: {
         Args: {
           action_reason: string;
@@ -4476,6 +4689,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_campus_ambassador_applications: {
+        Args: { target_campus_id: string };
+        Returns: Json;
+      };
       get_campus_announcements: { Args: never; Returns: Json };
       get_campus_safety_escalations: {
         Args: { target_campus_id: string };
@@ -4541,6 +4758,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_my_ambassador_dashboard: { Args: never; Returns: Json };
       get_my_campus_admin_access: { Args: never; Returns: Json };
       get_my_organizations: { Args: never; Returns: Json };
       get_organization_analytics: {
@@ -4555,6 +4773,7 @@ export type Database = {
         Args: { target_organization_id: string };
         Returns: Json;
       };
+      get_semester_leaderboard: { Args: { page_size?: number }; Returns: Json };
       get_social_connections: {
         Args: {
           before_created_at?: string;
@@ -4613,6 +4832,15 @@ export type Database = {
         Args: { page_size?: number; target_campus_id: string };
         Returns: Json;
       };
+      open_campus_semester: {
+        Args: {
+          ends_on: string;
+          semester_name: string;
+          starts_on: string;
+          target_campus_id: string;
+        };
+        Returns: string;
+      };
       process_swipe_and_match: {
         Args: { target_session_id: string };
         Returns: Json;
@@ -4620,6 +4848,7 @@ export type Database = {
       publish_due_campus_announcements: { Args: never; Returns: number };
       publish_event: { Args: { target_event_id: string }; Returns: undefined };
       queue_event_embedding_jobs: { Args: never; Returns: number };
+      recompute_ambassador_tiers: { Args: never; Returns: number };
       record_activity_pass: {
         Args: { target_session_id: string };
         Returns: Json;
@@ -4733,6 +4962,14 @@ export type Database = {
         Args: { accept_invitation: boolean; target_organization_id: string };
         Returns: Database['public']['Enums']['organization_membership_status'];
       };
+      retire_ambassador: {
+        Args: { reason: string; target_ambassador_id: string };
+        Returns: undefined;
+      };
+      review_ambassador_application: {
+        Args: { approve: boolean; notes: string; target_application_id: string };
+        Returns: Database['public']['Enums']['ambassador_application_status'];
+      };
       review_campus_organization_verification: {
         Args: {
           approve: boolean;
@@ -4756,6 +4993,15 @@ export type Database = {
       revoke_campus_organization_verification: {
         Args: { revocation_reason: string; target_organization_id: string };
         Returns: undefined;
+      };
+      roll_over_campus_semester: {
+        Args: {
+          next_ends_on: string;
+          next_name: string;
+          next_starts_on: string;
+          target_campus_id: string;
+        };
+        Returns: string;
       };
       send_friend_request: {
         Args: { target_profile_id: string };
@@ -4828,6 +5074,10 @@ export type Database = {
       };
     };
     Enums: {
+      ambassador_application_status:
+        'submitted' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
+      ambassador_status: 'active' | 'paused' | 'retired';
+      ambassador_tier: 'rookie' | 'builder' | 'leader';
       attendance_visibility: 'friends' | 'confirmed_attendees' | 'private';
       campus_admin_role:
         | 'viewer'
@@ -5049,6 +5299,15 @@ export const Constants = {
   },
   public: {
     Enums: {
+      ambassador_application_status: [
+        'submitted',
+        'under_review',
+        'approved',
+        'rejected',
+        'withdrawn'
+      ],
+      ambassador_status: ['active', 'paused', 'retired'],
+      ambassador_tier: ['rookie', 'builder', 'leader'],
       attendance_visibility: ['friends', 'confirmed_attendees', 'private'],
       campus_admin_role: [
         'viewer',
