@@ -218,7 +218,11 @@ begin
     'campusId', target_campus_id, 'range', jsonb_build_object('start', range_start, 'end', range_end),
     'privacyThreshold', threshold,
     'counts', jsonb_build_object(
-      'activeUsers', (select count(distinct profile_id) from (
+      'activeUsers', (select case when count(distinct profile_id) >= threshold then count(distinct profile_id) else null end from (
+        select profile_id from public.recommendation_interactions where campus_id = target_campus_id and occurred_at::date between range_start and range_end
+        union select profile_id from public.event_checkins c join public.events e on e.id=c.event_id where e.campus_id=target_campus_id and c.verified_at::date between range_start and range_end
+      ) u),
+      'activeUsersSuppressed', (select count(distinct profile_id) < threshold from (
         select profile_id from public.recommendation_interactions where campus_id = target_campus_id and occurred_at::date between range_start and range_end
         union select profile_id from public.event_checkins c join public.events e on e.id=c.event_id where e.campus_id=target_campus_id and c.verified_at::date between range_start and range_end
       ) u),
@@ -233,8 +237,12 @@ begin
       'checkins', (select coalesce(sum(d.checkins),0) from public.event_analytics_daily d join public.events e on e.id=d.event_id where e.campus_id=target_campus_id and d.metric_date between range_start and range_end),
       'repeatAttendance', (select coalesce(sum(d.repeat_attendees),0) from public.event_analytics_daily d join public.events e on e.id=d.event_id where e.campus_id=target_campus_id and d.metric_date between range_start and range_end)
     ),
-    'reportTrends', (select coalesce(jsonb_agg(jsonb_build_object('date', report_date, 'count', report_count) order by report_date),'[]'::jsonb) from (
-      select created_at::date report_date, count(*) report_count from public.reports r
+    'reportTrends', (select coalesce(jsonb_agg(jsonb_build_object(
+        'date', report_date,
+        'count', case when report_count >= threshold then report_count else null end,
+        'suppressed', report_count < threshold
+      ) order by report_date),'[]'::jsonb) from (
+      select r.created_at::date report_date, count(*) report_count from public.reports r
       left join public.events e on e.id=r.target_event_id left join public.organizations o on o.id=r.target_organization_id left join public.profiles p on p.id=r.target_user_id
       where coalesce(e.campus_id,o.campus_id,p.campus_id)=target_campus_id and r.created_at::date between range_start and range_end group by 1
     ) trends),
@@ -263,21 +271,21 @@ end;
 $$;
 
 create or replace function public.review_campus_organization_verification(
-  target_request_id uuid, approve boolean, review_notes text
+  target_request_id uuid, approve boolean, reviewer_notes text
 )
 returns public.verification_request_status language plpgsql security definer set search_path = '' as $$
-declare actor_id uuid := (select auth.uid()); request_record public.organization_verification_requests%rowtype; campus_id uuid; next_status public.verification_request_status;
+declare actor_id uuid := (select auth.uid()); request_record public.organization_verification_requests%rowtype; target_campus_id uuid; next_status public.verification_request_status;
 begin
-  select v.*, o.campus_id into request_record from public.organization_verification_requests v join public.organizations o on o.id=v.organization_id where v.id=target_request_id for update of v;
-  select o.campus_id into campus_id from public.organization_verification_requests v join public.organizations o on o.id=v.organization_id where v.id=target_request_id;
-  if request_record.id is null or not ruckus_private.has_campus_admin_role(campus_id,actor_id,array['organization_verifier','administrator']::public.campus_admin_role[]) then
+  select v.* into request_record from public.organization_verification_requests v where v.id=target_request_id for update;
+  select o.campus_id into target_campus_id from public.organizations o where o.id=request_record.organization_id;
+  if request_record.id is null or not ruckus_private.has_campus_admin_role(target_campus_id,actor_id,array['organization_verifier','administrator']::public.campus_admin_role[]) then
     raise exception using errcode='42501', message='CAMPUS_VERIFIER_REQUIRED';
   end if;
-  if request_record.status not in ('submitted','under_review') or char_length(trim(review_notes)) not between 3 and 2000 then raise exception using errcode='22023', message='INVALID_VERIFICATION_REVIEW'; end if;
+  if request_record.status not in ('submitted','under_review') or char_length(trim(reviewer_notes)) not between 3 and 2000 then raise exception using errcode='22023', message='INVALID_VERIFICATION_REVIEW'; end if;
   next_status := case when approve then 'approved'::public.verification_request_status else 'rejected'::public.verification_request_status end;
-  update public.organization_verification_requests set status=next_status, reviewed_by=actor_id, reviewed_at=now(), review_notes=trim(review_notes), updated_at=now() where id=target_request_id;
+  update public.organization_verification_requests set status=next_status, reviewed_by=actor_id, reviewed_at=now(), review_notes=trim(reviewer_notes), updated_at=now() where id=target_request_id;
   update public.organizations set is_verified=approve, updated_at=now() where id=request_record.organization_id;
-  insert into public.campus_admin_audit_log(campus_id,actor_id,action,target_type,target_id,metadata) values(campus_id,actor_id,case when approve then 'organization_verified' else 'organization_verification_denied' end,'organization',request_record.organization_id,jsonb_build_object('requestId',target_request_id));
+  insert into public.campus_admin_audit_log(campus_id,actor_id,action,target_type,target_id,metadata) values(target_campus_id,actor_id,case when approve then 'organization_verified' else 'organization_verification_denied' end,'organization',request_record.organization_id,jsonb_build_object('requestId',target_request_id));
   insert into public.notification_jobs(profile_id,kind,deduplication_key,payload) values(request_record.requested_by,'organization_verification_outcome','organization-verification:'||target_request_id,jsonb_build_object('organizationId',request_record.organization_id,'status',next_status)) on conflict(deduplication_key) do nothing;
   return next_status;
 end;
@@ -380,11 +388,102 @@ begin
 end;
 $$;
 
+create trigger campus_announcements_set_updated_at
+before update on public.campus_announcements
+for each row execute function public.set_updated_at();
+
+-- Campus administrators review announcements they manage. Drafts and rejected
+-- items stay visible to the managing roles only; students never reach this path.
+create or replace function public.list_campus_announcements(target_campus_id uuid, page_size integer default 50)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare actor_id uuid := (select auth.uid()); result jsonb;
+begin
+  if page_size not between 1 and 100 or not ruckus_private.has_campus_admin_role(target_campus_id,actor_id,
+    array['viewer','analyst','announcement_manager','administrator']::public.campus_admin_role[]) then
+    raise exception using errcode='42501',message='CAMPUS_ANNOUNCEMENT_ACCESS_DENIED';
+  end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id',a.id,'title',a.title,'body',a.body,'audience',a.audience,'status',a.status,
+    'deepLink',a.deep_link,'authorId',a.author_id,'approvedBy',a.approved_by,
+    'scheduledFor',a.scheduled_for,'expiresAt',a.expires_at,'publishedAt',a.published_at,
+    'createdAt',a.created_at
+  ) order by a.created_at desc),'[]'::jsonb) into result
+  from (select * from public.campus_announcements where campus_id=target_campus_id order by created_at desc limit page_size) a;
+  return result;
+end;
+$$;
+
+-- Student-facing reader. Only published, unexpired announcements addressed to the
+-- caller's own campus and audience are ever returned, and never author identity.
+create or replace function public.get_campus_announcements()
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare actor_id uuid := (select auth.uid()); viewer public.profiles%rowtype; result jsonb;
+begin
+  select * into viewer from public.profiles where id=actor_id;
+  if viewer.id is null or viewer.banned_at is not null or viewer.email_domain_verified_at is null then
+    raise exception using errcode='42501',message='CAMPUS_MEMBER_REQUIRED';
+  end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id',a.id,'title',a.title,'body',a.body,'audience',a.audience,
+    'deepLink',a.deep_link,'publishedAt',a.published_at,'expiresAt',a.expires_at
+  ) order by a.published_at desc),'[]'::jsonb) into result
+  from public.campus_announcements a
+  where a.campus_id=viewer.campus_id and a.status='published'
+    and a.published_at is not null and a.published_at<=now()
+    and (a.expires_at is null or a.expires_at>now())
+    and (a.audience='all'
+      or (a.audience='organizers' and viewer.role in ('host','admin'))
+      or (a.audience='students' and viewer.role='student'));
+  return result;
+end;
+$$;
+
+create or replace function public.resolve_campus_safety_escalation(target_escalation_id uuid, resolution_note text)
+returns void language plpgsql security definer set search_path = '' as $$
+declare actor_id uuid := (select auth.uid()); escalation public.campus_safety_escalations%rowtype;
+begin
+  select * into escalation from public.campus_safety_escalations where id=target_escalation_id for update;
+  if escalation.id is null or not ruckus_private.has_campus_admin_role(escalation.campus_id,actor_id,
+    array['moderator','administrator']::public.campus_admin_role[])
+    or char_length(trim(resolution_note)) not between 10 and 1000 then
+    raise exception using errcode='42501',message='CAMPUS_MODERATOR_REQUIRED';
+  end if;
+  if escalation.resolved_at is not null then
+    raise exception using errcode='22023',message='ESCALATION_ALREADY_RESOLVED';
+  end if;
+  update public.campus_safety_escalations set resolved_by=actor_id, resolved_at=now() where id=target_escalation_id;
+  insert into public.campus_admin_audit_log(campus_id,actor_id,action,target_type,target_id,metadata)
+  values(escalation.campus_id,actor_id,'moderation_escalation_resolved','moderation_case',
+    escalation.moderation_case_id,jsonb_build_object('note',trim(resolution_note)));
+end;
+$$;
+
+create or replace function public.get_campus_safety_escalations(target_campus_id uuid)
+returns jsonb language plpgsql security definer set search_path = '' as $$
+declare actor_id uuid := (select auth.uid()); result jsonb;
+begin
+  if not ruckus_private.has_campus_admin_role(target_campus_id,actor_id,
+    array['moderator','administrator']::public.campus_admin_role[]) then
+    raise exception using errcode='42501',message='CAMPUS_MODERATOR_REQUIRED';
+  end if;
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id',s.id,'moderationCaseId',s.moderation_case_id,'reason',s.reason,
+    'resolvedAt',s.resolved_at,'createdAt',s.created_at
+  ) order by s.created_at desc),'[]'::jsonb) into result
+  from public.campus_safety_escalations s where s.campus_id=target_campus_id;
+  return result;
+end;
+$$;
+
 do $$
 declare signature text;
 begin
   foreach signature in array array[
     'get_my_campus_admin_access()',
+    'list_campus_announcements(uuid,integer)',
+    'get_campus_announcements()',
+    'resolve_campus_safety_escalation(uuid,text)',
+    'get_campus_safety_escalations(uuid)',
     'assign_campus_admin_role(uuid,uuid,public.campus_admin_role)',
     'revoke_campus_admin_role(uuid)',
     'get_campus_admin_overview(uuid,date,date)',
