@@ -64,7 +64,7 @@ create table public.campus_announcements (
   constraint campus_announcement_title check (char_length(title) between 3 and 120),
   constraint campus_announcement_body check (char_length(body) between 10 and 3000),
   constraint campus_announcement_deep_link check (
-    deep_link is null or deep_link ~ '^ruckus://[a-zA-Z0-9/_?=&.-]{1,500}$'
+    deep_link is null or deep_link ~ '^ruckus://[a-zA-Z0-9/_?=&.-]{1,255}$'
   ),
   constraint campus_announcement_schedule check (
     (scheduled_for is null and expires_at is null)

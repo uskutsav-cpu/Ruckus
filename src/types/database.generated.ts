@@ -504,6 +504,99 @@ export type Database = {
           }
         ];
       };
+      campaign_assets: {
+        Row: {
+          campaign_id: string;
+          created_at: string;
+          deep_link: string;
+          id: string;
+          kind: Database['public']['Enums']['campaign_asset_kind'];
+          label: string;
+          token: string;
+        };
+        Insert: {
+          campaign_id: string;
+          created_at?: string;
+          deep_link: string;
+          id?: string;
+          kind: Database['public']['Enums']['campaign_asset_kind'];
+          label: string;
+          token: string;
+        };
+        Update: {
+          campaign_id?: string;
+          created_at?: string;
+          deep_link?: string;
+          id?: string;
+          kind?: Database['public']['Enums']['campaign_asset_kind'];
+          label?: string;
+          token?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'campaign_assets_campaign_id_fkey';
+            columns: ['campaign_id'];
+            isOneToOne: false;
+            referencedRelation: 'growth_campaigns';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      campaign_scan_daily: {
+        Row: {
+          asset_id: string;
+          id: string;
+          scan_count: number;
+          scan_date: string;
+        };
+        Insert: {
+          asset_id: string;
+          id?: string;
+          scan_count?: number;
+          scan_date: string;
+        };
+        Update: {
+          asset_id?: string;
+          id?: string;
+          scan_count?: number;
+          scan_date?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'campaign_scan_daily_asset_id_fkey';
+            columns: ['asset_id'];
+            isOneToOne: false;
+            referencedRelation: 'campaign_assets';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      campaign_scan_fingerprints: {
+        Row: {
+          asset_id: string;
+          fingerprint: string;
+          scan_date: string;
+        };
+        Insert: {
+          asset_id: string;
+          fingerprint: string;
+          scan_date: string;
+        };
+        Update: {
+          asset_id?: string;
+          fingerprint?: string;
+          scan_date?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'campaign_scan_fingerprints_asset_id_fkey';
+            columns: ['asset_id'];
+            isOneToOne: false;
+            referencedRelation: 'campaign_assets';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       campus_admin_assignments: {
         Row: {
           campus_id: string;
@@ -2570,6 +2663,60 @@ export type Database = {
           }
         ];
       };
+      growth_campaigns: {
+        Row: {
+          campus_id: string;
+          created_at: string;
+          created_by: string;
+          ends_at: string;
+          id: string;
+          kind: Database['public']['Enums']['growth_campaign_kind'];
+          name: string;
+          starts_at: string;
+          status: Database['public']['Enums']['growth_campaign_status'];
+          updated_at: string;
+        };
+        Insert: {
+          campus_id: string;
+          created_at?: string;
+          created_by: string;
+          ends_at: string;
+          id?: string;
+          kind: Database['public']['Enums']['growth_campaign_kind'];
+          name: string;
+          starts_at: string;
+          status?: Database['public']['Enums']['growth_campaign_status'];
+          updated_at?: string;
+        };
+        Update: {
+          campus_id?: string;
+          created_at?: string;
+          created_by?: string;
+          ends_at?: string;
+          id?: string;
+          kind?: Database['public']['Enums']['growth_campaign_kind'];
+          name?: string;
+          starts_at?: string;
+          status?: Database['public']['Enums']['growth_campaign_status'];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'growth_campaigns_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: false;
+            referencedRelation: 'campuses';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'growth_campaigns_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       interests: {
         Row: {
           campus_id: string;
@@ -2982,6 +3129,54 @@ export type Database = {
           {
             foreignKeyName: 'organization_audit_log_target_profile_id_fkey';
             columns: ['target_profile_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      organization_competitions: {
+        Row: {
+          campus_id: string;
+          created_at: string;
+          created_by: string;
+          ends_on: string;
+          id: string;
+          metric: Database['public']['Enums']['competition_metric'];
+          name: string;
+          starts_on: string;
+        };
+        Insert: {
+          campus_id: string;
+          created_at?: string;
+          created_by: string;
+          ends_on: string;
+          id?: string;
+          metric: Database['public']['Enums']['competition_metric'];
+          name: string;
+          starts_on: string;
+        };
+        Update: {
+          campus_id?: string;
+          created_at?: string;
+          created_by?: string;
+          ends_on?: string;
+          id?: string;
+          metric?: Database['public']['Enums']['competition_metric'];
+          name?: string;
+          starts_on?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'organization_competitions_campus_id_fkey';
+            columns: ['campus_id'];
+            isOneToOne: false;
+            referencedRelation: 'campuses';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'organization_competitions_created_by_fkey';
+            columns: ['created_by'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
@@ -4599,6 +4794,15 @@ export type Database = {
         };
       };
       confirm_attendance: { Args: { target_group_id: string }; Returns: Json };
+      create_campaign_asset: {
+        Args: {
+          asset_kind: Database['public']['Enums']['campaign_asset_kind'];
+          asset_label: string;
+          target_campaign_id: string;
+          target_deep_link: string;
+        };
+        Returns: Json;
+      };
       create_campus_announcement: {
         Args: {
           announcement_body: string;
@@ -4640,6 +4844,26 @@ export type Database = {
           target_digest: string;
           target_event_id: string;
           ttl_seconds?: number;
+        };
+        Returns: string;
+      };
+      create_growth_campaign: {
+        Args: {
+          campaign_kind: Database['public']['Enums']['growth_campaign_kind'];
+          campaign_name: string;
+          ends_at: string;
+          starts_at: string;
+          target_campus_id: string;
+        };
+        Returns: string;
+      };
+      create_organization_competition: {
+        Args: {
+          competition_metric: Database['public']['Enums']['competition_metric'];
+          competition_name: string;
+          ends_on: string;
+          starts_on: string;
+          target_campus_id: string;
         };
         Returns: string;
       };
@@ -4694,12 +4918,32 @@ export type Database = {
         Returns: Json;
       };
       get_campus_announcements: { Args: never; Returns: Json };
+      get_campus_campaigns: {
+        Args: { target_campus_id: string };
+        Returns: Json;
+      };
+      get_campus_competitions: {
+        Args: { target_campus_id: string };
+        Returns: Json;
+      };
+      get_campus_growth_analytics: {
+        Args: {
+          range_end?: string;
+          range_start?: string;
+          target_campus_id: string;
+        };
+        Returns: Json;
+      };
       get_campus_safety_escalations: {
         Args: { target_campus_id: string };
         Returns: Json;
       };
       get_campus_verification_queue: {
         Args: { target_campus_id: string };
+        Returns: Json;
+      };
+      get_competition_standings: {
+        Args: { target_competition_id: string };
         Returns: Json;
       };
       get_event_analytics: {
@@ -4851,6 +5095,10 @@ export type Database = {
       recompute_ambassador_tiers: { Args: never; Returns: number };
       record_activity_pass: {
         Args: { target_session_id: string };
+        Returns: Json;
+      };
+      record_campaign_scan: {
+        Args: { asset_token: string; scan_fingerprint: string };
         Returns: Json;
       };
       record_event_attribution_visit: {
@@ -5079,6 +5327,7 @@ export type Database = {
       ambassador_status: 'active' | 'paused' | 'retired';
       ambassador_tier: 'rookie' | 'builder' | 'leader';
       attendance_visibility: 'friends' | 'confirmed_attendees' | 'private';
+      campaign_asset_kind: 'qr_poster' | 'short_link' | 'table_card';
       campus_admin_role:
         | 'viewer'
         | 'analyst'
@@ -5096,6 +5345,7 @@ export type Database = {
         | 'expired'
         | 'rejected'
         | 'cancelled';
+      competition_metric: 'verified_checkins' | 'events_hosted' | 'qualified_referrals';
       confirmation_status: 'pending' | 'confirmed' | 'declined' | 'expired';
       data_request_status: 'requested' | 'processing' | 'ready' | 'expired' | 'cancelled';
       event_attribution_source:
@@ -5121,6 +5371,9 @@ export type Database = {
       group_member_status: 'invited' | 'active' | 'left' | 'removed';
       group_status:
         'forming' | 'pending_confirmation' | 'confirmed' | 'cancelled' | 'completed';
+      growth_campaign_kind: 'welcome_week' | 'orientation' | 'club_fair' | 'custom';
+      growth_campaign_status:
+        'draft' | 'scheduled' | 'active' | 'completed' | 'cancelled';
       message_kind: 'text' | 'system';
       moderation_action_kind:
         | 'warn_user'
@@ -5309,6 +5562,7 @@ export const Constants = {
       ambassador_status: ['active', 'paused', 'retired'],
       ambassador_tier: ['rookie', 'builder', 'leader'],
       attendance_visibility: ['friends', 'confirmed_attendees', 'private'],
+      campaign_asset_kind: ['qr_poster', 'short_link', 'table_card'],
       campus_admin_role: [
         'viewer',
         'analyst',
@@ -5328,6 +5582,7 @@ export const Constants = {
         'rejected',
         'cancelled'
       ],
+      competition_metric: ['verified_checkins', 'events_hosted', 'qualified_referrals'],
       confirmation_status: ['pending', 'confirmed', 'declined', 'expired'],
       data_request_status: ['requested', 'processing', 'ready', 'expired', 'cancelled'],
       event_attribution_source: [
@@ -5365,6 +5620,8 @@ export const Constants = {
         'cancelled',
         'completed'
       ],
+      growth_campaign_kind: ['welcome_week', 'orientation', 'club_fair', 'custom'],
+      growth_campaign_status: ['draft', 'scheduled', 'active', 'completed', 'cancelled'],
       message_kind: ['text', 'system'],
       moderation_action_kind: [
         'warn_user',
