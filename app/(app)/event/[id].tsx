@@ -24,7 +24,9 @@ import {
 import {
   useCancelEventRsvp,
   useEventDetail,
-  useJoinEvent
+  useJoinEvent,
+  useOrganizationFollow,
+  useRecordEventInteraction
 } from '@/features/events/use-events';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
@@ -59,6 +61,10 @@ export default function EventDetailScreen() {
   const eventQuery = useEventDetail(eventId ?? '');
   const join = useJoinEvent(eventId ?? '');
   const cancel = useCancelEventRsvp(eventId ?? '');
+  const organizationFollow = useOrganizationFollow(
+    eventQuery.data?.organizationId ?? null
+  );
+  const interaction = useRecordEventInteraction(eventId ?? '');
   const [notice, setNotice] = useState<string | null>(null);
   const [showQr, setShowQr] = useState(false);
 
@@ -123,6 +129,18 @@ export default function EventDetailScreen() {
       );
     } catch {
       setNotice('The system calendar could not be opened on this device.');
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const result = await Share.share({
+        message: `${summarizeEventForShare(event)}\n${link}`,
+        url: link
+      });
+      if (result.action === Share.sharedAction) interaction.mutate('shared');
+    } catch {
+      setNotice('The system share sheet could not be opened on this device.');
     }
   };
 
@@ -289,14 +307,19 @@ export default function EventDetailScreen() {
         <SecondaryButton
           label="Share"
           leadingIcon="share"
-          onPress={() =>
-            void Share.share({
-              message: `${summarizeEventForShare(event)}\n${link}`,
-              url: link
-            })
-          }
+          onPress={() => void handleShare()}
           style={styles.utility}
         />
+        {event.organizationId ? (
+          <SecondaryButton
+            label={organizationFollow.data ? 'Following organizer' : 'Follow organizer'}
+            leadingIcon={organizationFollow.data ? 'check' : 'add'}
+            loading={organizationFollow.mutation.isPending}
+            disabled={organizationFollow.isLoading || organizationFollow.isError}
+            onPress={() => organizationFollow.mutation.mutate(!organizationFollow.data)}
+            style={styles.utility}
+          />
+        ) : null}
         <SecondaryButton
           label="Calendar"
           leadingIcon="calendar"

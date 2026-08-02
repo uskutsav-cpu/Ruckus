@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(13);
+select plan(17);
 
 create function pg_temp.set_actor(actor_id uuid)
 returns void
@@ -233,6 +233,52 @@ select is(
   ),
   'resolved',
   'an enforcement action resolves the moderation case'
+);
+
+select pg_temp.set_actor('10000000-0000-4000-8000-000000000002');
+select set_config(
+  'test.moderation.event_report_id',
+  public.report_event(
+    '70000000-0000-4000-8000-000000000001',
+    'Unsafe event operation',
+    'Fixture for event cancellation enforcement.'
+  )::text,
+  true
+);
+select pg_temp.set_actor('10000000-0000-4000-8000-000000000008');
+
+select lives_ok(
+  format(
+    'select public.apply_moderation_action(%L, %L, %L, null)',
+    (
+      select id from public.moderation_cases
+      where report_id = current_setting('test.moderation.event_report_id')::uuid
+    ),
+    'cancel_event',
+    'Cancelled after verified safety review'
+  ),
+  'an admin can cancel a reported event without a schema error'
+);
+select is(
+  (select status::text from public.events
+    where id = '70000000-0000-4000-8000-000000000001'),
+  'cancelled',
+  'moderation cancellation moves the event into the cancelled lifecycle state'
+);
+select ok(
+  not exists (
+    select 1 from public.event_chat_members
+    where event_id = '70000000-0000-4000-8000-000000000001' and is_active
+  ),
+  'moderation cancellation revokes event chat without violating membership constraints'
+);
+select is(
+  (select count(*) from public.event_rsvps
+    where event_id = '70000000-0000-4000-8000-000000000001'
+      and status = 'cancelled'
+      and status_reason = 'Cancelled after verified safety review'),
+  2::bigint,
+  'moderation cancellation records its reason in the RSVP status-reason field'
 );
 
 select * from finish();

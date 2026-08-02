@@ -1,0 +1,37 @@
+# Ruckus is a single-page application, so crawlers reach every route through the
+# same document. Only the public marketing, legal, and share surfaces should be
+# indexed; everything behind authentication is disallowed explicitly.
+
+User-agent: *
+Allow: /$
+Allow: /public/
+Disallow: /discover
+Disallow: /deck
+Disallow: /my-events
+Disallow: /chats
+Disallow: /groups
+Disallow: /group/
+Disallow: /event/
+Disallow: /organization/
+Disallow: /organizations
+Disallow: /profile
+Disallow: /settings
+Disallow: /social
+Disallow: /social-privacy
+Disallow: /privacy-and-growth
+Disallow: /leaderboard
+Disallow: /competitions
+Disallow: /ambassador
+Disallow: /admin/
+Disallow: /activity/
+Disallow: /check-in/
+Disallow: /rate/
+Disallow: /report
+Disallow: /report-result
+Disallow: /pending
+Disallow: /account-deletion
+Disallow: /safety/
+Disallow: /auth/
+Disallow: /create-event
+
+Sitemap: https://ruckus-iota.vercel.app/sitemap.xml

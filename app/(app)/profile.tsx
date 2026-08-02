@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -10,6 +10,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { ListCardSkeleton } from '@/components/ui/loading-skeleton';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { StatusPill } from '@/components/ui/status-pill';
+import { useCampusAdminAccess } from '@/features/campus-admin/use-campus-admin';
 import { useProfileDashboard } from '@/features/profile/use-profile';
 import { getXpLevelProgress } from '@/domain/xp-level';
 import { useAuth } from '@/providers/auth-provider';
@@ -45,6 +46,7 @@ const reasonMarks: Record<XpReason, AppIconName> = {
 
 export default function ProfileScreen() {
   const { profile } = useAuth();
+  const campusAdminAccess = useCampusAdminAccess();
   const { theme } = useTheme();
   const dashboard = useProfileDashboard();
 
@@ -232,6 +234,11 @@ export default function ProfileScreen() {
 
           <View style={styles.quickActions}>
             <ProfileAction
+              mark="people"
+              label="Connections"
+              onPress={() => router.push('/social' as Href)}
+            />
+            <ProfileAction
               mark="trophy"
               label="Leaderboard"
               onPress={() => router.push('/leaderboard')}
@@ -256,6 +263,34 @@ export default function ProfileScreen() {
                 mark="safety"
                 label="Moderation queue"
                 onPress={() => router.push('/admin/moderation')}
+              />
+            ) : null}
+            <ProfileAction
+              mark="star"
+              label="Ambassador programme"
+              onPress={() => router.push('/ambassador')}
+            />
+            <ProfileAction
+              mark="people"
+              label="Club competitions"
+              onPress={() => router.push('/competitions')}
+            />
+            {campusAdminAccess.data &&
+            (campusAdminAccess.data.platformAdministrator ||
+              campusAdminAccess.data.campuses.length > 0) ? (
+              <ProfileAction
+                mark="safety"
+                label="Campus administration"
+                onPress={() => router.push('/admin/campus')}
+              />
+            ) : null}
+            {campusAdminAccess.data &&
+            (campusAdminAccess.data.platformAdministrator ||
+              campusAdminAccess.data.campuses.length > 0) ? (
+              <ProfileAction
+                mark="star"
+                label="Campus campaigns"
+                onPress={() => router.push('/admin/campaigns')}
               />
             ) : null}
           </View>

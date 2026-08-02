@@ -1,0 +1,119 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npx expo export --platform web --output-dir dist/web",
+  "outputDirectory": "dist/web",
+  "rewrites": [
+    {
+      "source": "/public/event/:slug",
+      "destination": "/public/event/[slug]"
+    },
+    {
+      "source": "/public/organization/:slug",
+      "destination": "/public/organization/[slug]"
+    },
+    {
+      "source": "/public/referral/:code",
+      "destination": "/public/referral/[code]"
+    },
+    {
+      "source": "/event/:id",
+      "destination": "/event/[id]"
+    },
+    {
+      "source": "/organization/:id",
+      "destination": "/organization/[id]"
+    },
+    {
+      "source": "/group/:id",
+      "destination": "/group/[id]"
+    },
+    {
+      "source": "/activity/:id",
+      "destination": "/activity/[id]"
+    },
+    {
+      "source": "/social/:id",
+      "destination": "/social/[id]"
+    },
+    {
+      "source": "/rate/:sessionId",
+      "destination": "/rate/[sessionId]"
+    },
+    {
+      "source": "/check-in/:groupId",
+      "destination": "/check-in/[groupId]"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/+not-found"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in; media-src 'self' blob: https://*.supabase.co; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "accelerometer=(), autoplay=(), camera=(self), display-capture=(), encrypted-media=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "off"
+        }
+      ]
+    },
+    {
+      "source": "/_expo/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
+}

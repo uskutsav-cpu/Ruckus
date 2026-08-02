@@ -92,6 +92,8 @@ npm run db:reset
 npm run test:db
 npm run test:event-capacity
 npm run test:matching
+npm run test:social-concurrency
+npm run test:recommendations
 npx expo export --platform web --output-dir dist/web
 npx expo export --platform ios --output-dir dist/ios
 npx expo export --platform android --output-dir dist/android
@@ -104,6 +106,9 @@ provided. CI repeats application verification, a clean database reset, pgTAP,
 concurrency checks, Edge Function validation, exports, audit, and secret scanning.
 Manual device/email/push/store checks are intentionally separate in
 [`docs/DEVICE_QA.md`](docs/DEVICE_QA.md).
+
+The recommendation architecture, privacy boundary, and offline metrics are documented
+in [`docs/RECOMMENDATIONS.md`](docs/RECOMMENDATIONS.md).
 
 ## Edge Functions and deployment
 

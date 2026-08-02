@@ -62,7 +62,11 @@ export default function AppLayout() {
           <Stack.Screen name="organization/create" />
           <Stack.Screen name="organization/[id]" />
           <Stack.Screen name="admin/moderation" />
+          <Stack.Screen name="admin/campus" />
+          <Stack.Screen name="admin/campaigns" />
           <Stack.Screen name="leaderboard" />
+          <Stack.Screen name="ambassador" />
+          <Stack.Screen name="competitions" />
           <Stack.Screen name="settings" />
           <Stack.Screen name="privacy-and-growth" />
           <Stack.Screen name="legal" />

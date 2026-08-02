@@ -15,9 +15,10 @@ import type {
   MyEvent,
   RsvpResult
 } from '@/features/events/event-types';
+import { logger } from '@/lib/logger';
 import { requireSupabase } from '@/lib/supabase';
 
-const eventSummarySchema = z.object({
+const eventCoreSchema = z.object({
   id: z.string().uuid(),
   slug: z.string(),
   title: z.string(),
@@ -36,24 +37,27 @@ const eventSummarySchema = z.object({
   locationDescription: z.string(),
   capacity: z.number().int(),
   confirmedCount: z.number().int(),
-  availability: z.enum(['available', 'waitlist', 'full']),
   waitlistEnabled: z.boolean(),
   approvalRequired: z.boolean(),
   visibility: z.enum(['campus', 'public', 'private']),
   accessibilityInformation: z.string().nullable(),
   costInformation: z.string().nullable(),
-  cancellationPolicy: z.string().nullable(),
-  recommendationScore: z.number().int()
+  cancellationPolicy: z.string().nullable()
+});
+
+const eventSummarySchema = eventCoreSchema.extend({
+  availability: z.enum(['available', 'waitlist', 'full']),
+  organizationFollowed: z.boolean(),
+  friendsAttendingCount: z.number().int().nonnegative(),
+  recommendationReasons: z.array(z.string())
 });
 
 const feedPageSchema = z.object({
   items: z.array(eventSummarySchema),
-  nextCursor: z
-    .object({ score: z.number().int(), startsAt: z.string(), id: z.string().uuid() })
-    .nullable()
+  nextCursor: z.string().nullable()
 });
 
-const detailSchema = eventSummarySchema.extend({
+const detailSchema = eventCoreSchema.extend({
   minAge: z.number().int(),
   eligibilityRequirements: z.string().nullable(),
   safetyRules: z.string().nullable(),
@@ -170,17 +174,25 @@ export async function fetchEventFeed(
     ...(filters.category ? { category_filter: filters.category } : {}),
     ...(filters.startsAfter ? { starts_after: filters.startsAfter } : {}),
     ...(filters.endsBefore ? { ends_before: filters.endsBefore } : {}),
-    ...(cursor
-      ? {
-          cursor_score: cursor.score,
-          cursor_starts_at: cursor.startsAt,
-          cursor_id: cursor.id
-        }
-      : {})
+    ...(cursor ? { cursor_token: cursor } : {})
   };
   const { data, error } = await supabase.rpc('get_event_feed', args);
   if (error) throw error;
-  return feedPageSchema.parse(data) as EventFeedPage;
+  const page = feedPageSchema.parse(data) as EventFeedPage;
+  if (page.items.length) {
+    void recordEventImpressions(
+      page.items.map((event) => event.id),
+      false
+    ).catch((interactionError: unknown) => {
+      logger.warn('recommendations.impression_record_failed', {
+        message:
+          interactionError instanceof Error
+            ? interactionError.message
+            : 'Unknown interaction error'
+      });
+    });
+  }
+  return page;
 }
 
 export async function fetchEventDetail(
@@ -209,7 +221,82 @@ export async function fetchEventDetail(
     target_event_id: eventId
   });
   if (error) throw error;
-  return detailSchema.parse(data) as EventDetail;
+  const parsed = detailSchema.parse(data);
+  const detail: EventDetail = {
+    ...parsed,
+    availability:
+      parsed.confirmedCount < parsed.capacity
+        ? 'available'
+        : parsed.waitlistEnabled
+          ? 'waitlist'
+          : 'full'
+  };
+  void recordEventInteraction(eventId, 'details_opened', false).catch(
+    (interactionError: unknown) => {
+      logger.warn('recommendations.detail_record_failed', {
+        message:
+          interactionError instanceof Error
+            ? interactionError.message
+            : 'Unknown interaction error'
+      });
+    }
+  );
+  return detail;
+}
+
+export async function recordEventImpressions(
+  eventIds: string[],
+  isDemo: boolean
+): Promise<void> {
+  if (isDemo || !eventIds.length) return;
+  const { error } = await requireSupabase().rpc('record_event_impressions', {
+    target_event_ids: eventIds,
+    interaction_surface: 'discover'
+  });
+  if (error) throw error;
+}
+
+export async function recordEventInteraction(
+  eventId: string,
+  kind: 'shared' | 'invited_friend' | 'details_opened',
+  isDemo: boolean
+): Promise<void> {
+  if (isDemo) return;
+  const { error } = await requireSupabase().rpc('record_event_interaction', {
+    target_event_id: eventId,
+    interaction_kind: kind,
+    interaction_surface: 'event_detail'
+  });
+  if (error) throw error;
+}
+
+export async function fetchOrganizationFollowState(
+  organizationId: string,
+  isDemo: boolean
+): Promise<boolean> {
+  if (isDemo) return false;
+  const { data, error } = await requireSupabase().rpc('is_organization_followed', {
+    target_organization_id: organizationId
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function setOrganizationFollow(
+  organizationId: string,
+  follow: boolean,
+  isDemo: boolean
+): Promise<boolean> {
+  if (isDemo) return follow;
+  const { data, error } = follow
+    ? await requireSupabase().rpc('follow_organization', {
+        target_organization_id: organizationId
+      })
+    : await requireSupabase().rpc('unfollow_organization', {
+        target_organization_id: organizationId
+      });
+  if (error) throw error;
+  return follow ? data : false;
 }
 
 export async function joinEvent(eventId: string, isDemo: boolean): Promise<RsvpResult> {
@@ -614,6 +701,6 @@ export function eventErrorMessage(error: unknown): string {
   return 'Something changed while saving. Refresh and try again.';
 }
 
-export function summarizeEventForShare(event: EventSummary): string {
+export function summarizeEventForShare(event: EventSummary | EventDetail): string {
   return `${event.title}\n${new Date(event.startsAt).toLocaleString()}\n${event.venueName}`;
 }

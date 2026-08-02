@@ -292,7 +292,9 @@ declare
   actor_id uuid := (select auth.uid());
   next_status public.organization_membership_status;
 begin
-  next_status := case when accept_invitation then 'active' else 'removed' end;
+  next_status := case when accept_invitation
+    then 'active'::public.organization_membership_status
+    else 'removed'::public.organization_membership_status end;
   update public.organization_members
   set status = next_status,
       accepted_at = case when accept_invitation then now() else null end,
@@ -542,6 +544,7 @@ begin
       null;
     end;
   end loop;
+  raise exception using errcode = 'P0001', message = 'REFERRAL_CODE_GENERATION_FAILED';
 end;
 $$;
 
@@ -588,7 +591,7 @@ begin
   if existing_status is not null then return existing_status; end if;
   insert into public.referrals (referral_code_id, referred_profile_id)
   values (code_record.id, actor_id);
-  return 'attributed';
+  return 'attributed'::public.referral_status;
 end;
 $$;
 

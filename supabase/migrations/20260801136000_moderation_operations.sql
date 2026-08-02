@@ -357,10 +357,10 @@ begin
         cancellation_reason = 'Cancelled after moderation review'
     where id = target_id and status in ('draft', 'published');
     update public.event_rsvps
-    set status = 'cancelled', cancelled_at = now(), cancellation_reason = action_reason,
+    set status = 'cancelled', cancelled_at = now(), status_reason = action_reason,
         waitlist_position = null, updated_at = now()
     where event_id = target_id and status in ('confirmed', 'pending', 'waitlisted');
-    update public.event_chat_members set revoked_at = now()
+    update public.event_chat_members set is_active = false, revoked_at = now()
     where event_id = target_id and revoked_at is null;
   elsif action_value = 'restrict_organization' then
     target_id := report_record.target_organization_id;

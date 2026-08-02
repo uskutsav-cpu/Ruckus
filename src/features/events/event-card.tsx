@@ -5,12 +5,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AppIcon } from '@/components/ui/app-icon';
 import { CapacityMeter } from '@/components/ui/capacity-meter';
 import { StatusPill } from '@/components/ui/status-pill';
-import type { EventSummary } from '@/features/events/event-types';
+import type { EventDetail, EventSummary } from '@/features/events/event-types';
 import { useTheme } from '@/providers/theme-provider';
 import { tokens } from '@/theme/tokens';
 
 type EventCardProps = {
-  event: EventSummary;
+  event: EventSummary | EventDetail;
   onPress: () => void;
   relationship?: string;
 };
@@ -27,6 +27,8 @@ const gradients: Record<string, readonly [string, string]> = {
 export function EventCard({ event, onPress, relationship }: EventCardProps) {
   const { theme } = useTheme();
   const gradient = gradients[event.category] ?? [tokens.color.violetDeep, theme.primary];
+  const recommendationReason =
+    'recommendationReasons' in event ? event.recommendationReasons[0] : undefined;
   return (
     <Pressable
       accessibilityRole="button"
@@ -69,6 +71,14 @@ export function EventCard({ event, onPress, relationship }: EventCardProps) {
             <AppIcon name="check" size={15} color={theme.success} />
           ) : null}
         </View>
+        {recommendationReason ? (
+          <View style={[styles.reason, { backgroundColor: theme.accentMuted }]}>
+            <AppIcon name="discover" size={15} color={theme.accent} />
+            <Text numberOfLines={1} style={[styles.reasonText, { color: theme.text }]}>
+              {recommendationReason}
+            </Text>
+          </View>
+        ) : null}
         <CapacityMeter
           confirmed={event.confirmedCount}
           capacity={event.capacity}
@@ -123,5 +133,19 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontSize: tokens.type.caption,
     lineHeight: tokens.lineHeight.caption
+  },
+  reason: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: tokens.space.xs,
+    borderRadius: tokens.radius.pill,
+    paddingHorizontal: tokens.space.sm,
+    paddingVertical: 6
+  },
+  reasonText: {
+    maxWidth: 250,
+    fontSize: tokens.type.caption,
+    fontWeight: tokens.weight.medium
   }
 });

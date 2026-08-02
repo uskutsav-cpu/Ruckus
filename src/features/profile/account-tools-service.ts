@@ -30,6 +30,11 @@ export async function fetchAccountTools(
         reduced_motion: false,
         accessibility_notes: null,
         discovery_preferences: {},
+        profile_visibility: 'friends',
+        attendance_visibility: 'friends',
+        allow_friend_requests: true,
+        follow_policy: 'approval',
+        show_in_social_suggestions: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       },

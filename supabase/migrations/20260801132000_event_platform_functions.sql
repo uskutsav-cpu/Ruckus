@@ -758,7 +758,7 @@ $$;
 
 create or replace function ruckus_private.cancel_event(
   target_event_id uuid,
-  cancellation_reason text
+  reason_text text
 )
 returns integer
 language plpgsql
@@ -792,7 +792,7 @@ begin
   update public.events
   set status = 'cancelled',
       cancelled_at = now(),
-      cancellation_reason = nullif(left(trim(coalesce(cancellation_reason, '')), 1000), '')
+      cancellation_reason = nullif(left(trim(coalesce(reason_text, '')), 1000), '')
   where id = target_event_id;
 
   update public.event_chat_members
@@ -815,7 +815,7 @@ begin
     target_event_id,
     'event_cancelled',
     'event-cancelled:' || target_event_id::text || ':' || profile_id::text,
-    jsonb_build_object('reason', left(coalesce(cancellation_reason, ''), 500))
+    jsonb_build_object('reason', left(coalesce(reason_text, ''), 500))
   from public.event_rsvps
   where event_id = target_event_id
     and status in ('confirmed', 'waitlisted', 'pending')
