@@ -45,7 +45,7 @@ export default function CompetitionsScreen() {
       <AppScreen>
         <BackButton />
         <ErrorState
-          icon="alert"
+          icon="warning"
           title="Competitions unavailable"
           message="Campus competitions could not be loaded. Try again shortly."
         />
@@ -123,7 +123,7 @@ export default function CompetitionsScreen() {
       {standings.isPending ? <ListCardSkeleton /> : null}
       {standings.isError ? (
         <ErrorState
-          icon="alert"
+          icon="warning"
           title="Standings unavailable"
           message="The standings for this competition could not be loaded."
         />
@@ -162,7 +162,7 @@ export default function CompetitionsScreen() {
 
       <InlineNotice
         tone="info"
-        icon="shield"
+        icon="safety"
         message="Competitions rank organizations, never individual students. Ties share a rank."
       />
 

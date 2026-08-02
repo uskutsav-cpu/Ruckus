@@ -134,7 +134,7 @@ export default function CampusAdministrationScreen() {
       <AppScreen>
         <BackButton />
         <ErrorState
-          icon="alert"
+          icon="warning"
           title="Campus administration unavailable"
           message="We could not confirm your campus administration access. Try again shortly."
         />
@@ -236,7 +236,7 @@ function OverviewPanel({
   if (overview.isError || !overview.data) {
     return (
       <ErrorState
-        icon="alert"
+        icon="warning"
         title="Overview unavailable"
         message="The campus overview could not be loaded."
       />
@@ -294,7 +294,7 @@ function OverviewPanel({
 
       <InlineNotice
         tone="info"
-        icon="shield"
+        icon="safety"
         message={`Counts below ${privacy.minimumCohort} people are withheld so no individual can be identified.`}
       />
 
@@ -352,7 +352,7 @@ function VerificationPanel({ campusId }: { campusId: string | null }) {
   if (queue.isError) {
     return (
       <ErrorState
-        icon="alert"
+        icon="warning"
         title="Queue unavailable"
         message="The organization verification queue could not be loaded."
       />
@@ -501,7 +501,7 @@ function AnnouncementsPanel({ campusId }: { campusId: string | null }) {
 
       <InlineNotice
         tone="info"
-        icon="shield"
+        icon="safety"
         message="Announcements require a second approver. You cannot approve an announcement you wrote."
       />
 
@@ -593,7 +593,7 @@ function SafetyPanel({ campusId }: { campusId: string | null }) {
   if (escalations.isError) {
     return (
       <ErrorState
-        icon="alert"
+        icon="warning"
         title="Escalations unavailable"
         message="Campus safety escalations could not be loaded."
       />
@@ -666,7 +666,7 @@ function AmbassadorReviewPanel({ campusId }: { campusId: string | null }) {
   if (applications.isError) {
     return (
       <ErrorState
-        icon="alert"
+        icon="warning"
         title="Applications unavailable"
         message="Ambassador applications could not be loaded."
       />
@@ -732,7 +732,7 @@ function AmbassadorReviewPanel({ campusId }: { campusId: string | null }) {
             {isOwnApplication ? (
               <InlineNotice
                 tone="info"
-                icon="shield"
+                icon="safety"
                 message="This is your own application. Another campus administrator must decide it."
               />
             ) : (
@@ -805,7 +805,7 @@ function AuditPanel({ campusId }: { campusId: string | null }) {
   if (audit.isError) {
     return (
       <ErrorState
-        icon="alert"
+        icon="warning"
         title="Audit log unavailable"
         message="The campus audit log could not be loaded."
       />

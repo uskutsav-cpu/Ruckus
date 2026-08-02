@@ -75,7 +75,7 @@ export default function CampusCampaignsScreen() {
       <AppScreen>
         <BackButton />
         <ErrorState
-          icon="alert"
+          icon="warning"
           title="Campaigns unavailable"
           message="We could not confirm your campus access. Try again shortly."
         />
@@ -187,7 +187,7 @@ function CampaignsPanel({ campusId }: { campusId: string | null }) {
       {campaigns.isPending ? <ListCardSkeleton /> : null}
       {campaigns.isError ? (
         <ErrorState
-          icon="alert"
+          icon="warning"
           title="Campaigns unavailable"
           message="Campus campaigns could not be loaded."
         />
@@ -310,7 +310,7 @@ function GrowthPanel({ campusId }: { campusId: string | null }) {
   if (analytics.isError || !analytics.data) {
     return (
       <ErrorState
-        icon="alert"
+        icon="warning"
         title="Growth analytics unavailable"
         message="Campus growth analytics could not be loaded."
       />
@@ -377,7 +377,7 @@ function GrowthPanel({ campusId }: { campusId: string | null }) {
 
       <InlineNotice
         tone="info"
-        icon="shield"
+        icon="safety"
         message={`Cohorts below ${privacy.minimumCohort} people are withheld so no individual can be identified.`}
       />
     </View>

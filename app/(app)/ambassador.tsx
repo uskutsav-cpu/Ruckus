@@ -43,7 +43,7 @@ export default function AmbassadorScreen() {
       <AppScreen>
         <BackButton />
         <ErrorState
-          icon="alert"
+          icon="warning"
           title="Ambassador programme unavailable"
           message="We could not load the ambassador programme. Try again shortly."
         />
@@ -101,7 +101,7 @@ export default function AmbassadorScreen() {
         />
         <InlineNotice
           tone="info"
-          icon="shield"
+          icon="safety"
           message="Being an ambassador does not give you moderation or administration access."
         />
         {semester && viewer ? (
@@ -151,7 +151,7 @@ export default function AmbassadorScreen() {
           <PrimaryButton
             label="Copy code"
             variant="secondary"
-            leadingIcon="link"
+            leadingIcon="copy"
             onPress={() => {
               void Clipboard.setStringAsync(referralCode);
               Alert.alert('Copied', 'Your ambassador code is on the clipboard.');
