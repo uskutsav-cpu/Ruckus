@@ -1,0 +1,26 @@
+{
+  "name": "Ruckus",
+  "short_name": "Ruckus",
+  "description": "Discover what is happening on your campus, RSVP before events fill, and check in when you arrive.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F1113",
+  "theme_color": "#0F1113",
+  "categories": ["education", "events", "social"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

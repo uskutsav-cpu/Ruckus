@@ -4,8 +4,48 @@
   "outputDirectory": "dist/web",
   "rewrites": [
     {
+      "source": "/public/event/:slug",
+      "destination": "/public/event/[slug]"
+    },
+    {
+      "source": "/public/organization/:slug",
+      "destination": "/public/organization/[slug]"
+    },
+    {
+      "source": "/public/referral/:code",
+      "destination": "/public/referral/[code]"
+    },
+    {
+      "source": "/event/:id",
+      "destination": "/event/[id]"
+    },
+    {
+      "source": "/organization/:id",
+      "destination": "/organization/[id]"
+    },
+    {
+      "source": "/group/:id",
+      "destination": "/group/[id]"
+    },
+    {
+      "source": "/activity/:id",
+      "destination": "/activity/[id]"
+    },
+    {
+      "source": "/social/:id",
+      "destination": "/social/[id]"
+    },
+    {
+      "source": "/rate/:sessionId",
+      "destination": "/rate/[sessionId]"
+    },
+    {
+      "source": "/check-in/:groupId",
+      "destination": "/check-in/[groupId]"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/+not-found"
     }
   ],
   "headers": [
@@ -73,5 +113,7 @@
         }
       ]
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }

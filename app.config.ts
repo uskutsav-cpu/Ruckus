@@ -80,6 +80,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: 'automatic',
     icon: './assets/brand/icon.png',
     assetBundlePatterns: ['assets/**/*'],
+    // Static output renders an HTML document per known route, which is what makes
+    // the titles, descriptions, and share cards in app/+html.tsx reachable by
+    // crawlers and social scrapers. Dynamic share routes still fall back to the
+    // single-page document through the Vercel rewrite.
+    web: {
+      output: 'static',
+      favicon: './assets/brand/icon.png'
+    },
     ios: {
       bundleIdentifier,
       supportsTablet: false,
